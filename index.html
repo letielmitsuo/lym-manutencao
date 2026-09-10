@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LYM Eletrônicos - Sistema de Manutenção</title>
     
-    <!-- Bibliotecas Externas -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (Excel Export) -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- HTML2PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
     
     <!-- FIREBASE SDKS -->
@@ -24,7 +27,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
-    <!-- Notificações -->
+    <!-- Notificações (Toast) -->
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
     <!-- TELA DE LOGIN -->
@@ -37,13 +40,13 @@
             <form id="loginForm" onsubmit="window.handleLogin(event)" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Usuário</label>
-                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none">
+                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Senha</label>
-                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none">
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg">Entrar</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors">Entrar</button>
             </form>
         </div>
     </div>
@@ -60,142 +63,145 @@
                         <span id="userBadge" class="text-xs bg-blue-500 px-2 py-1 rounded-full uppercase tracking-wide"></span>
                     </div>
                 </div>
-                <button onclick="window.logout()" class="text-blue-100 hover:text-white p-2"><i class="fas fa-sign-out-alt text-xl"></i></button>
+                <button onclick="window.logout()" class="text-blue-100 hover:text-white p-2" title="Sair"><i class="fas fa-sign-out-alt text-xl"></i></button>
             </div>
         </header>
 
         <main class="flex-grow container mx-auto p-4 max-w-6xl">
-            <!-- ÁREA DO ADMINISTRADOR -->
+            
+            <!-- ====== ÁREA DO ADMINISTRADOR ====== -->
             <div id="adminPanel" class="hidden space-y-6 animate-fade-in">
                 <!-- Abas Admin -->
                 <div class="flex overflow-x-auto bg-white rounded-lg border p-1 mb-4 gap-1">
-                    <button onclick="window.switchAdminTab('reports')" id="tabBtn_reports" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap">Serviços</button>
-                    <button onclick="window.switchAdminTab('quotes')" id="tabBtn_quotes" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Orçamentos</button>
-                    <button onclick="window.switchAdminTab('thirdParty')" id="tabBtn_thirdParty" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Terceiros</button>
-                    <button onclick="window.switchAdminTab('config')" id="tabBtn_config" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Ajustes</button>
-                    <button onclick="window.switchAdminTab('audit')" id="tabBtn_audit" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Auditoria</button>
+                    <button onclick="window.switchAdminTab('reports')" id="tabBtn_reports" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap transition-colors"><i class="fas fa-tools mr-2"></i>Serviços</button>
+                    <button onclick="window.switchAdminTab('quotes')" id="tabBtn_quotes" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-file-invoice-dollar mr-2"></i>Orçamentos</button>
+                    <button onclick="window.switchAdminTab('thirdParty')" id="tabBtn_thirdParty" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-hard-hat mr-2"></i>Terceiros</button>
+                    <button onclick="window.switchAdminTab('config')" id="tabBtn_config" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-cog mr-2"></i>Ajustes</button>
+                    <button onclick="window.switchAdminTab('audit')" id="tabBtn_audit" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-history mr-2"></i>Auditoria</button>
                 </div>
 
-                <!-- Filtros Admin -->
+                <!-- Filtros -->
                 <div id="filterBar" class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-end">
-                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Buscar texto</label><input type="text" id="filterSearch" onkeyup="window.applyFilters()" class="w-full px-3 py-2 rounded border" placeholder="Digite para buscar..."></div>
-                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Creche</label><select id="filterCei" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border"><option value="">Todas</option></select></div>
-                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Ini</label><input type="date" id="filterDateStart" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border"></div>
-                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Fim</label><input type="date" id="filterDateEnd" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border"></div>
-                    <button onclick="window.exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded whitespace-nowrap"><i class="fas fa-file-excel mr-2"></i>Gerar Excel</button>
+                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Buscar texto</label><input type="text" id="filterSearch" onkeyup="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500" placeholder="Digite para buscar..."></div>
+                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Creche (CEI)</label><select id="filterCei" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500"><option value="">Todas as Creches</option></select></div>
+                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Início</label><input type="date" id="filterDateStart" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500"></div>
+                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Fim</label><input type="date" id="filterDateEnd" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500"></div>
+                    <button onclick="window.exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded whitespace-nowrap transition-colors"><i class="fas fa-file-excel mr-2"></i>Gerar Excel</button>
                 </div>
 
-                <!-- Conteúdo Abas Admin -->
-                <div id="tabContent_reports" class="admin-tab-content block"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminReportsTable" class="divide-y text-sm"></tbody></table></div></div>
-                <div id="tabContent_quotes" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Orçamento</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminQuotesTable" class="divide-y text-sm"></tbody></table></div></div>
-                <div id="tabContent_thirdParty" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Resp.</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminThirdPartyTable" class="divide-y text-sm"></tbody></table></div></div>
-                <div id="tabContent_audit" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data/Hora</th><th class="p-3 text-sm">Usuário</th><th class="p-3 text-sm">Ação</th></tr></thead><tbody id="adminAuditTable" class="divide-y text-sm"></tbody></table></div></div>
+                <!-- Tabelas Admin -->
+                <div id="tabContent_reports" class="admin-tab-content block"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminReportsTable" class="divide-y text-sm"></tbody></table></div></div>
+                <div id="tabContent_quotes" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Orçamento</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminQuotesTable" class="divide-y text-sm"></tbody></table></div></div>
+                <div id="tabContent_thirdParty" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Técnico Resp.</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminThirdPartyTable" class="divide-y text-sm"></tbody></table></div></div>
+                <div id="tabContent_audit" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data/Hora</th><th class="p-3 text-sm">Usuário</th><th class="p-3 text-sm">Ação Registrada</th></tr></thead><tbody id="adminAuditTable" class="divide-y text-sm"></tbody></table></div></div>
                 
                 <div id="tabContent_config" class="admin-tab-content hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-white p-5 rounded-lg border">
-                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Creches (CEIs)</h3><button onclick="window.showModal('modalCei')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">+ Nova</button></div>
+                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Creches (CEIs)</h3><button onclick="window.showModal('modalCei')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"><i class="fas fa-plus mr-1"></i> Nova</button></div>
                             <ul id="adminCeiList" class="divide-y text-sm"></ul>
                         </div>
                         <div class="bg-white p-5 rounded-lg border">
-                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Usuários</h3><button onclick="window.showModal('modalUser')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">+ Novo</button></div>
+                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Usuários do Sistema</h3><button onclick="window.showModal('modalUser')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"><i class="fas fa-plus mr-1"></i> Novo</button></div>
                             <ul id="adminUserList" class="divide-y text-sm"></ul>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ÁREA DO FUNCIONÁRIO -->
+            <!-- ====== ÁREA DO FUNCIONÁRIO ====== -->
             <div id="employeePanel" class="hidden space-y-6 animate-fade-in">
                 <!-- Abas Func -->
                 <div class="flex overflow-x-auto bg-white rounded-lg border p-1 gap-1">
-                    <button onclick="window.switchEmpTab('reports')" id="empTabBtn_reports" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap">Execução</button>
-                    <button onclick="window.switchEmpTab('quotes')" id="empTabBtn_quotes" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Orçamento</button>
-                    <button onclick="window.switchEmpTab('thirdParty')" id="empTabBtn_thirdParty" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Terceiros</button>
+                    <button onclick="window.switchEmpTab('reports')" id="empTabBtn_reports" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap transition-colors"><i class="fas fa-tools mr-2"></i>Execução</button>
+                    <button onclick="window.switchEmpTab('quotes')" id="empTabBtn_quotes" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-file-invoice-dollar mr-2"></i>Orçamento</button>
+                    <button onclick="window.switchEmpTab('thirdParty')" id="empTabBtn_thirdParty" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-hard-hat mr-2"></i>Terceiros</button>
                 </div>
                 
-                <div id="cancelEditBtn" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded flex justify-between items-center shadow-sm">
-                    <p class="font-bold">Editando Registro Existente.</p>
-                    <button onclick="window.cancelEdit()" class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-medium">Cancelar Edição</button>
+                <div id="cancelEditBtn" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded flex justify-between items-center shadow-sm">
+                    <p class="font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Editando Registro Existente.</p>
+                    <button onclick="window.cancelEdit()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">Cancelar Edição</button>
                 </div>
 
-                <!-- Formulários Func -->
+                <!-- Formulário: Manutenção -->
                 <div id="empTabContent_reports" class="emp-tab-content block">
                     <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleReports" class="text-xl font-bold mb-6 border-b pb-2">Registrar Manutenção</h2>
+                        <h2 id="formTitleReports" class="text-xl font-bold mb-6 border-b pb-2 text-slate-800">Registrar Manutenção</h2>
                         <form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI *</label><select id="repCei" required class="w-full px-4 py-3 rounded-lg border"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="repDate" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Início *</label><input type="time" id="repStart" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Término *</label><input type="time" id="repEnd" required class="w-full px-4 py-3 rounded-lg border"></div>
+                                <div><label class="block text-sm font-bold mb-1">CEI (Creche) *</label><select id="repCei" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></select></div>
+                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="repDate" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
+                                <div><label class="block text-sm font-bold mb-1">Horário Início *</label><input type="time" id="repStart" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
+                                <div><label class="block text-sm font-bold mb-1">Horário Término *</label><input type="time" id="repEnd" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
                             </div>
-                            <div><label class="block text-sm font-bold mb-1">Dificuldade</label><select id="repDifficulty" class="w-full px-4 py-3 rounded-lg border"><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
-                            <div><label class="block text-sm font-bold mb-1">O que foi feito? *</label><textarea id="repDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div>
+                            <div><label class="block text-sm font-bold mb-1">Dificuldade</label><select id="repDifficulty" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
+                            <div><label class="block text-sm font-bold mb-1">O que foi feito? *</label><textarea id="repDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></textarea></div>
                             
-                            <div class="bg-slate-50 p-4 rounded-lg border">
+                            <div class="bg-slate-100 p-4 rounded-lg border border-slate-200">
                                 <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold">Materiais Utilizados</h3>
-                                    <button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold">+ Add Material</button>
+                                    <h3 class="font-bold text-slate-700"><i class="fas fa-boxes mr-2"></i>Materiais Utilizados</h3>
+                                    <button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors"><i class="fas fa-plus mr-1"></i> Add Material</button>
                                 </div>
-                                <div id="materialsContainer" class="space-y-2"><p class="text-sm text-slate-500 italic">Nenhum material.</p></div>
+                                <div id="materialsContainer" class="space-y-3"><p class="text-sm text-slate-500 italic">Nenhum material adicionado.</p></div>
                             </div>
 
                             <div><label class="block text-sm font-bold mb-1">Fotos do Reparo</label>
-                                <input type="file" id="repPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')" class="w-full text-sm">
-                                <div id="repPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div>
+                                <input type="file" id="repPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <div id="repPhotoPreview" class="flex flex-wrap gap-2 mt-3"></div>
                             </div>
-                            <div><label class="block text-sm font-bold mb-1">Obs (Opcional)</label><input type="text" id="repObs" class="w-full px-4 py-3 rounded-lg border"></div>
-                            <button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-lg">Salvar Serviço</button>
+                            <div><label class="block text-sm font-bold mb-1">Observação (Opcional)</label><input type="text" id="repObs" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
+                            <button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg shadow-md transition-colors mt-4">Salvar Serviço</button>
                         </form>
                     </div>
                 </div>
 
+                <!-- Formulário: Orçamento -->
                 <div id="empTabContent_quotes" class="emp-tab-content hidden">
                     <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleQuotes" class="text-xl font-bold mb-6 border-b pb-2">Novo Orçamento</h2>
+                        <h2 id="formTitleQuotes" class="text-xl font-bold mb-6 border-b pb-2 text-slate-800">Novo Orçamento</h2>
                         <form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI *</label><select id="quoCei" required class="w-full px-4 py-3 rounded-lg border"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="quoDate" required class="w-full px-4 py-3 rounded-lg border"></div>
+                                <div><label class="block text-sm font-bold mb-1">CEI (Creche) *</label><select id="quoCei" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></select></div>
+                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="quoDate" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
                             </div>
-                            <div><label class="block text-sm font-bold mb-1">Descrição do Orçamento *</label><textarea id="quoDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div>
+                            <div><label class="block text-sm font-bold mb-1">Descrição do Orçamento *</label><textarea id="quoDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></textarea></div>
                             
-                            <div class="bg-slate-50 p-4 rounded-lg border">
+                            <div class="bg-slate-100 p-4 rounded-lg border border-slate-200">
                                 <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold">Lista de Materiais</h3>
-                                    <button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold">+ Add Material</button>
+                                    <h3 class="font-bold text-slate-700"><i class="fas fa-boxes mr-2"></i>Lista de Materiais</h3>
+                                    <button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors"><i class="fas fa-plus mr-1"></i> Add Material</button>
                                 </div>
-                                <div id="quoMaterialsContainer" class="space-y-2"><p class="text-sm text-slate-500 italic">Nenhum material listado.</p></div>
+                                <div id="quoMaterialsContainer" class="space-y-3"><p class="text-sm text-slate-500 italic">Nenhum material listado.</p></div>
                             </div>
 
                             <div><label class="block text-sm font-bold mb-1">Fotos do Problema</label>
-                                <input type="file" id="quoPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')" class="w-full text-sm">
-                                <div id="quoPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div>
+                                <input type="file" id="quoPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <div id="quoPhotoPreview" class="flex flex-wrap gap-2 mt-3"></div>
                             </div>
-                            <button type="submit" id="btnSubmitQuote" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-lg">Salvar Orçamento</button>
+                            <button type="submit" id="btnSubmitQuote" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg shadow-md transition-colors mt-4">Salvar Orçamento</button>
                         </form>
                     </div>
                 </div>
 
+                <!-- Formulário: Terceiros -->
                 <div id="empTabContent_thirdParty" class="emp-tab-content hidden">
                     <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleThirdParty" class="text-xl font-bold mb-6 border-b pb-2">Acompanhamento de Terceiros</h2>
+                        <h2 id="formTitleThirdParty" class="text-xl font-bold mb-6 border-b pb-2 text-slate-800">Acompanhamento de Terceiros</h2>
                         <form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI *</label><select id="tpCei" required class="w-full px-4 py-3 rounded-lg border"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Empresa Terceira *</label><input type="text" id="tpCompany" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="tpDate" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Início *</label><input type="time" id="tpStart" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Término *</label><input type="time" id="tpEnd" required class="w-full px-4 py-3 rounded-lg border"></div>
+                                <div><label class="block text-sm font-bold mb-1">CEI (Creche) *</label><select id="tpCei" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></select></div>
+                                <div><label class="block text-sm font-bold mb-1">Empresa Terceira *</label><input type="text" id="tpCompany" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
+                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="tpDate" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
+                                <div><label class="block text-sm font-bold mb-1">Horário Início *</label><input type="time" id="tpStart" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
+                                <div><label class="block text-sm font-bold mb-1">Horário Término *</label><input type="time" id="tpEnd" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
                             </div>
-                            <div><label class="block text-sm font-bold mb-1">Serviço Realizado *</label><textarea id="tpDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div>
+                            <div><label class="block text-sm font-bold mb-1">Serviço Realizado *</label><textarea id="tpDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></textarea></div>
                             <div><label class="block text-sm font-bold mb-1">Fotos</label>
-                                <input type="file" id="tpPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')" class="w-full text-sm">
-                                <div id="tpPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div>
+                                <input type="file" id="tpPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <div id="tpPhotoPreview" class="flex flex-wrap gap-2 mt-3"></div>
                             </div>
-                            <div><label class="block text-sm font-bold mb-1">Obs / Problemas</label><input type="text" id="tpObs" class="w-full px-4 py-3 rounded-lg border"></div>
-                            <button type="submit" id="btnSubmitThirdParty" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-lg">Salvar Acompanhamento</button>
+                            <div><label class="block text-sm font-bold mb-1">Obs / Problemas</label><input type="text" id="tpObs" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
+                            <button type="submit" id="btnSubmitThirdParty" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg shadow-md transition-colors mt-4">Salvar Acompanhamento</button>
                         </form>
                     </div>
                 </div>
@@ -203,15 +209,15 @@
                 <!-- Históricos do Funcionário -->
                 <div class="mt-8">
                     <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Manutenções)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryReports" class="divide-y text-sm"></tbody></table></div>
+                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryReports" class="divide-y text-sm"></tbody></table></div>
                 </div>
                 <div class="mt-8">
                     <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Orçamentos)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryQuotes" class="divide-y text-sm"></tbody></table></div>
+                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryQuotes" class="divide-y text-sm"></tbody></table></div>
                 </div>
                 <div class="mt-8">
                     <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Terceiros)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryThirdParty" class="divide-y text-sm"></tbody></table></div>
+                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryThirdParty" class="divide-y text-sm"></tbody></table></div>
                 </div>
             </div>
         </main>
@@ -226,7 +232,7 @@
             </div>
             <div id="modalDetailsContent" class="p-5 overflow-y-auto flex-grow space-y-4"></div>
             <div class="p-4 border-t bg-slate-50 flex justify-end">
-                <button onclick="window.hideElement('modalDetails')" class="bg-slate-200 px-4 py-2 rounded font-medium">Fechar</button>
+                <button onclick="window.hideElement('modalDetails')" class="bg-slate-200 px-4 py-2 rounded font-medium hover:bg-slate-300 transition-colors">Fechar</button>
             </div>
         </div>
     </div>
@@ -235,15 +241,15 @@
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div class="flex justify-between items-center p-4 border-b">
                 <h2 id="modalTitleCei" class="text-xl font-bold">Nova Creche</h2>
-                <button onclick="window.hideElement('modalCei')" class="text-slate-500"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="window.hideElement('modalCei')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
             </div>
             <form onsubmit="window.saveCei(event)" class="p-5 space-y-4">
-                <div><label class="block text-sm font-medium mb-1">Nome da Creche (CEI) *</label><input type="text" id="ceiName" required class="w-full px-3 py-2 border rounded"></div>
-                <div><label class="block text-sm font-medium mb-1">ID Grupo Telegram</label><input type="text" id="ceiTelegramId" class="w-full px-3 py-2 border rounded"></div>
-                <div><label class="block text-sm font-medium mb-1">ID Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full px-3 py-2 border rounded"></div>
+                <div><label class="block text-sm font-medium mb-1">Nome da Creche (CEI) *</label><input type="text" id="ceiName" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
+                <div><label class="block text-sm font-medium mb-1">ID Grupo Telegram</label><input type="text" id="ceiTelegramId" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500" placeholder="Ex: -100123456789"></div>
+                <div><label class="block text-sm font-medium mb-1">ID Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500" placeholder="Ex: 45"></div>
                 <div class="flex justify-end gap-2 pt-4 border-t">
-                    <button type="button" onclick="window.hideElement('modalCei')" class="bg-slate-200 px-4 py-2 rounded">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white">Salvar</button>
+                    <button type="button" onclick="window.hideElement('modalCei')" class="bg-slate-200 px-4 py-2 rounded hover:bg-slate-300">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700">Salvar</button>
                 </div>
             </form>
         </div>
@@ -253,25 +259,26 @@
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div class="flex justify-between items-center p-4 border-b">
                 <h2 id="modalTitleUser" class="text-xl font-bold">Novo Usuário</h2>
-                <button onclick="window.hideElement('modalUser')" class="text-slate-500"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="window.hideElement('modalUser')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
             </div>
             <form onsubmit="window.saveUser(event)" class="p-5 space-y-4">
-                <div><label class="block text-sm font-medium mb-1">Login *</label><input type="text" id="userName" required class="w-full px-3 py-2 border rounded"></div>
-                <div><label class="block text-sm font-medium mb-1">Senha *</label><input type="password" id="userPass" required class="w-full px-3 py-2 border rounded"></div>
+                <div><label class="block text-sm font-medium mb-1">Login *</label><input type="text" id="userName" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
+                <div><label class="block text-sm font-medium mb-1">Senha *</label><input type="password" id="userPass" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Perfil</label>
-                    <select id="userRole" class="w-full px-3 py-2 border rounded">
+                    <select id="userRole" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500">
                         <option value="func">Funcionário</option>
                         <option value="admin">Administrador</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-2 pt-4 border-t">
-                    <button type="button" onclick="window.hideElement('modalUser')" class="bg-slate-200 px-4 py-2 rounded">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white">Salvar</button>
+                    <button type="button" onclick="window.hideElement('modalUser')" class="bg-slate-200 px-4 py-2 rounded hover:bg-slate-300">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
+
     <!-- SCRIPT PRINCIPAL (FIREBASE E LÓGICA) -->
     <script>
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
@@ -335,7 +342,7 @@
             const toast = document.createElement('div');
             const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
             toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg font-medium animate-fade-in flex items-center justify-between min-w-[250px]`;
-            toast.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()" class="ml-4 opacity-75"><i class="fas fa-times"></i></button>`;
+            toast.innerHTML = `<span>${msg}</span><button type="button" onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 4000);
         };
@@ -407,13 +414,13 @@
             const id = `mat_${window.materialCount}`;
             const div = document.createElement('div'); 
             div.id = id; 
-            div.className = "mat-row flex flex-col sm:flex-row gap-2 bg-white p-2 rounded border";
+            div.className = "mat-row flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm animate-fade-in";
             div.innerHTML = `
-                <input type="text" placeholder="Material" class="flex-1 w-full p-2 border rounded" required>
-                <input type="text" placeholder="Marca" class="w-full sm:w-28 p-2 border rounded" required>
-                <input type="number" placeholder="Qtd" class="w-full sm:w-20 p-2 border rounded" required>
-                <input type="number" step="0.01" placeholder="R$ Un." class="w-full sm:w-24 p-2 border rounded">
-                <button type="button" onclick="document.getElementById('${id}').remove()" class="bg-red-100 text-red-600 px-3 py-2 rounded">Remover</button>
+                <input type="text" placeholder="Material" class="flex-1 w-full p-2 border border-slate-300 rounded outline-none focus:border-blue-500" required>
+                <input type="text" placeholder="Marca" class="w-full sm:w-32 p-2 border border-slate-300 rounded outline-none focus:border-blue-500" required>
+                <input type="number" placeholder="Qtd" class="w-full sm:w-20 p-2 border border-slate-300 rounded outline-none focus:border-blue-500" required>
+                <input type="number" step="0.01" placeholder="R$ Un." class="w-full sm:w-28 p-2 border border-slate-300 rounded outline-none focus:border-blue-500">
+                <button type="button" onclick="document.getElementById('${id}').remove()" class="w-full sm:w-auto bg-red-100 hover:bg-red-200 text-red-600 px-3 py-2 rounded font-bold transition-colors"><i class="fas fa-trash"></i> Remover</button>
             `;
             container.appendChild(div);
         };
@@ -445,7 +452,7 @@
                 if(file.type.startsWith('image/')) {
                     const reader = new FileReader(); 
                     reader.onload = (ev) => {
-                        container.innerHTML += `<div class="w-20 h-20 bg-cover bg-center rounded border" style="background-image: url('${ev.target.result}')"></div>`;
+                        container.innerHTML += `<div class="w-24 h-24 bg-cover bg-center rounded-lg border border-slate-300 shadow-sm" style="background-image: url('${ev.target.result}')"></div>`;
                     };
                     reader.readAsDataURL(file);
                 }
@@ -493,7 +500,7 @@
             document.getElementById('formTitleQuotes').textContent = "Novo Orçamento"; 
             document.getElementById('btnSubmitQuote').innerHTML = "Salvar Orçamento";
             
-            document.getElementById('formTitleThirdParty').textContent = "Acompanhamento Terceiros"; 
+            document.getElementById('formTitleThirdParty').textContent = "Acompanhamento de Terceiros"; 
             document.getElementById('btnSubmitThirdParty').innerHTML = "Salvar Acompanhamento";
             
             document.getElementById('materialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>';
@@ -516,17 +523,28 @@
                 dataObj.materials.forEach(m => { 
                     let v = parseFloat(m.value || 0); 
                     totalValue += (v * m.qtd); 
-                    materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * m.qtd).toFixed(2)}\n`; 
+                    materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * m.qtd).toFixed(2)}
+`; 
                 });
             }
 
-            let headerTag = isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>\n" : `🛠 <b>NOVO: ${typeLabel}</b>\n`;
-            let textMsg = `${headerTag}<b>Creche:</b> ${cei.name}\n<b>Data:</b> ${window.formatDateBR(dataObj.date)}\n<b>Técnico:</b> ${window.currentSystemUser.login}\n`;
+            let headerTag = isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>
+" : `🛠 <b>NOVO: ${typeLabel}</b>
+`;
+            let textMsg = `${headerTag}<b>Creche:</b> ${cei.name}
+<b>Data:</b> ${window.formatDateBR(dataObj.date)}
+<b>Técnico:</b> ${window.currentSystemUser.login}
+`;
             
-            if (dataObj.desc) textMsg += `<b>Descrição:</b> ${dataObj.desc}\n`;
-            if (dataObj.tpDesc) textMsg += `<b>Serviço:</b> ${dataObj.tpDesc}\n`;
+            if (dataObj.desc) textMsg += `<b>Descrição:</b> ${dataObj.desc}
+`;
+            if (dataObj.tpDesc) textMsg += `<b>Serviço:</b> ${dataObj.tpDesc}
+`;
             if (dataObj.materials && dataObj.materials.length > 0) {
-                textMsg += `\n<b>Materiais:</b>\n${materialText}<b>TOTAL MATERIAIS: R$ ${totalValue.toFixed(2)}</b>\n`;
+                textMsg += `
+<b>Materiais:</b>
+${materialText}<b>TOTAL MATERIAIS: R$ ${totalValue.toFixed(2)}</b>
+`;
             }
 
             try {
@@ -552,25 +570,36 @@
                 
                 let matsHtml = '';
                 if(dataObj.materials && dataObj.materials.length > 0) {
-                    matsHtml = `<table style="width:100%; border-collapse:collapse; margin-top:20px;">
+                    matsHtml = `<table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;">
                         <tr style="background:#e2e8f0;"><th style="padding:10px; border:1px solid #cbd5e1; text-align:left;">Material</th><th style="padding:10px; border:1px solid #cbd5e1;">Qtd</th><th style="padding:10px; border:1px solid #cbd5e1; text-align:right;">Total (R$)</th></tr>
                         ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #cbd5e1;">${m.name}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:center;">${m.qtd}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right;">${(parseFloat(m.value||0)*m.qtd).toFixed(2)}</td></tr>`).join('')}
+                        <tr style="background:#f1f5f9;"><td colspan="2" style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">TOTAL:</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">R$ ${totalValue.toFixed(2)}</td></tr>
                         </table>`;
                 }
 
                 let imgsHtml = '';
                 if(base64Photos && base64Photos.length > 0) {
                     imgsHtml = `<div style="display:flex; flex-wrap:wrap; gap:15px; margin-top:20px;">
-                        ${base64Photos.map(i => `<img src="${i}" style="height:250px; border-radius:5px;">`).join('')}
+                        ${base64Photos.map(i => `<img src="${i}" style="height:220px; border-radius:5px; border:1px solid #cbd5e1;">`).join('')}
                     </div>`;
                 }
 
                 pdfDiv.innerHTML = `
-                    <div style="padding:40px; font-family:sans-serif;">
-                        <h1 style="color:#1e3a8a; border-bottom:2px solid #1e3a8a;">LYM - ${typeLabel}</h1>
+                    <div style="padding:40px; font-family:sans-serif; color:#334155;">
+                        <h1 style="color:#1d4ed8; border-bottom:3px solid #1d4ed8; padding-bottom:10px;">LYM Eletrônicos - ${typeLabel}</h1>
                         ${isEdit ? '<h2 style="color:#eab308;">[CORREÇÃO DE SERVIÇO]</h2>' : ''}
-                        <p><strong>Creche:</strong> ${cei.name}<br><strong>Data:</strong> ${window.formatDateBR(dataObj.date)}<br><strong>Técnico:</strong> ${window.currentSystemUser.login}</p>
-                        <div style="background:#f1f5f9; padding:20px; border-radius:5px;"><p>${dataObj.desc || dataObj.tpDesc || ''}</p></div>
+                        
+                        <table style="width:100%; margin:20px 0; font-size:16px;">
+                            <tr><td style="padding:5px 0;"><strong>Creche (CEI):</strong> ${cei.name}</td>
+                                <td style="padding:5px 0;"><strong>Data:</strong> ${window.formatDateBR(dataObj.date)}</td></tr>
+                            <tr><td style="padding:5px 0;"><strong>Técnico:</strong> ${window.currentSystemUser.login}</td>
+                                <td style="padding:5px 0;"><strong>Horário:</strong> ${dataObj.startTime || '--:--'} às ${dataObj.endTime || '--:--'}</td></tr>
+                        </table>
+                        
+                        <div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0;">
+                            <h3 style="margin-top:0; color:#0f172a;">Descrição / Serviço Realizado</h3>
+                            <p style="margin-bottom:0; line-height:1.5;">${dataObj.desc || dataObj.tpDesc || 'Sem descrição detalhada.'}</p>
+                        </div>
                         ${matsHtml}
                         ${imgsHtml}
                     </div>
@@ -615,7 +644,7 @@
             
             const btn = document.getElementById(btnMap[type][0]); 
             const originalHTML = btn.innerHTML;
-            btn.innerHTML = 'Processando...'; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...'; 
             btn.disabled = true;
 
             try {
@@ -700,7 +729,7 @@
             const uid = window.currentSystemUser.id; 
             const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
             
-            const buildRow = (type, r, extra) => `<tr class="border-b"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${extra}</td><td class="p-3 flex gap-2"><button onclick="window.editRecord('${r.id}', '${type}')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Editar</button><button onclick="window.deleteRecord('${r.id}', '${type}')" class="bg-red-100 text-red-700 px-3 py-1 rounded">Apagar</button></td></tr>`;
+            const buildRow = (type, r, extra) => `<tr class="border-b hover:bg-slate-50"><td class="p-3 whitespace-nowrap">${window.formatDateBR(r.date)}</td><td class="p-3">${extra}</td><td class="p-3 flex gap-2"><button onclick="window.editRecord('${r.id}', '${type}')" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-edit"></i></button><button onclick="window.deleteRecord('${r.id}', '${type}')" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-trash"></i></button></td></tr>`;
             
             document.getElementById('emphistoryReports').innerHTML = window.localData.reports.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('reports', r, ceisMap[r.ceiId] || 'Excluída')).join('');
             document.getElementById('emphistoryQuotes').innerHTML = window.localData.quotes.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('quotes', r, ceisMap[r.ceiId] || 'Excluída')).join('');
@@ -768,7 +797,7 @@
         window.deleteRecord = function(id, type) { 
             if(confirm("Apagar este registro permanentemente?")) { 
                 db.collection(type).doc(id).delete();
-                window.showToast("Apagado.", "success"); 
+                window.showToast("Apagado com sucesso.", "success"); 
                 window.logAudit(`Registro apagado (${type}): ${id}`);
             } 
         };
@@ -799,24 +828,24 @@
             };
             
             if(document.getElementById('adminReportsTable')) {
-                document.getElementById('adminReportsTable').innerHTML = window.localData.reports.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'reports')" class="text-blue-600 bg-blue-50 px-2 rounded">Ver</button></td></tr>`).join('');
+                document.getElementById('adminReportsTable').innerHTML = window.localData.reports.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-[200px]" title="${r.desc}">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'reports')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
             }
             if(document.getElementById('adminQuotesTable')) {
-                document.getElementById('adminQuotesTable').innerHTML = window.localData.quotes.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'quotes')" class="text-blue-600 bg-blue-50 px-2 rounded">Ver</button></td></tr>`).join('');
+                document.getElementById('adminQuotesTable').innerHTML = window.localData.quotes.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-[200px]" title="${r.desc}">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'quotes')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
             }
             if(document.getElementById('adminThirdPartyTable')) {
-                document.getElementById('adminThirdPartyTable').innerHTML = window.localData.thirdParty.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${r.companyName}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3">${r.tpDesc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'thirdParty')" class="text-blue-600 bg-blue-50 px-2 rounded">Ver</button></td></tr>`).join('');
+                document.getElementById('adminThirdPartyTable').innerHTML = window.localData.thirdParty.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-bold">${r.companyName}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-[200px]" title="${r.tpDesc}">${r.tpDesc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'thirdParty')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
             }
         };
         
         window.renderAuditTable = function() {
             const sortedAudit = [...window.localData.audit].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-            document.getElementById('adminAuditTable').innerHTML = sortedAudit.map(a => `<tr class="border-b"><td class="p-3 text-xs text-slate-500">${a.date}</td><td class="p-3 font-semibold">${a.user}</td><td class="p-3">${a.action}</td></tr>`).join('');
+            document.getElementById('adminAuditTable').innerHTML = sortedAudit.map(a => `<tr class="border-b hover:bg-slate-50"><td class="p-3 text-xs text-slate-500">${a.date}</td><td class="p-3 font-semibold capitalize">${a.user}</td><td class="p-3 text-slate-700">${a.action}</td></tr>`).join('');
         };
         
         window.renderConfigLists = function() {
-            document.getElementById('adminCeiList').innerHTML = window.localData.ceis.map(c => `<li class="py-3 flex justify-between items-center border-b"><span class="font-bold">${c.name} (Tópico: ${c.telegramTopicId||'-'})</span><div><button onclick="window.editCei('${c.id}')" class="text-blue-500 mr-3">Editar</button><button onclick="window.deleteCei('${c.id}')" class="text-red-500">Apagar</button></div></li>`).join('');
-            document.getElementById('adminUserList').innerHTML = window.localData.users.map(u => `<li class="py-3 flex justify-between items-center border-b"><span class="font-bold capitalize">${u.login} (${u.role})</span><div><button onclick="window.editUser('${u.id}')" class="text-blue-500 mr-3">Editar</button><button onclick="window.deleteUser('${u.id}')" class="text-red-500">Apagar</button></div></li>`).join('');
+            document.getElementById('adminCeiList').innerHTML = window.localData.ceis.map(c => `<li class="py-4 flex justify-between items-center border-b"><span class="font-bold text-slate-700">${c.name} <span class="text-xs font-normal text-slate-500 block mt-1"><i class="fab fa-telegram text-blue-400 mr-1"></i>Grupo ID: ${c.telegramGroupId||'-'} | Tópico: ${c.telegramTopicId||'-'}</span></span><div><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 mr-3 p-2 bg-blue-50 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded"><i class="fas fa-trash"></i></button></div></li>`).join('');
+            document.getElementById('adminUserList').innerHTML = window.localData.users.map(u => `<li class="py-4 flex justify-between items-center border-b"><span class="font-bold capitalize text-slate-700">${u.login} <span class="text-xs bg-slate-200 px-2 py-1 rounded ml-2 font-normal">${u.role}</span></span><div><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 mr-3 p-2 bg-blue-50 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded"><i class="fas fa-trash"></i></button></div></li>`).join('');
         };
 
         window.viewDetails = function(id, type) { 
@@ -824,14 +853,35 @@
             const cei = window.localData.ceis.find(c => c.id === r.ceiId); 
             
             let html = `<div class="grid grid-cols-2 gap-4 border-b pb-4">
-                <div><b>Creche:</b> ${cei?cei.name:'-'}</div>
-                <div><b>Data:</b> ${window.formatDateBR(r.date)}</div>
-            </div><br><div><b>Info:</b> ${r.desc||r.tpDesc||''}</div>`; 
+                <div><p class="text-sm text-slate-500 mb-1">Creche (CEI)</p><p class="font-bold text-lg">${cei?cei.name:'Excluída'}</p></div>
+                <div><p class="text-sm text-slate-500 mb-1">Data</p><p class="font-bold text-lg">${window.formatDateBR(r.date)}</p></div>
+                <div><p class="text-sm text-slate-500 mb-1">Lançado por</p><p class="font-bold capitalize">${r.userLogin}</p></div>
+                ${r.startTime ? `<div><p class="text-sm text-slate-500 mb-1">Horário</p><p class="font-bold">${r.startTime} às ${r.endTime}</p></div>` : ''}
+            </div>`;
             
+            if(type === 'reports' || type === 'quotes') {
+                html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-1">Descrição do Serviço</p><div class="bg-slate-50 p-4 rounded-lg border border-slate-200">${r.desc}</div></div>`;
+                if(r.materials && r.materials.length > 0) {
+                    html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-2">Materiais Listados</p>
+                    <div class="overflow-x-auto"><table class="w-full text-sm border-collapse border border-slate-200">
+                    <tr class="bg-slate-100"><th class="border p-2 text-left">Qtd</th><th class="border p-2 text-left">Material/Marca</th><th class="border p-2 text-right">R$ Un.</th><th class="border p-2 text-right">R$ Total</th></tr>`;
+                    let sum = 0;
+                    r.materials.forEach(m => {
+                        let total = (parseFloat(m.value || 0) * m.qtd);
+                        sum += total;
+                        html += `<tr><td class="border p-2">${m.qtd}</td><td class="border p-2">${m.name} (${m.brand})</td><td class="border p-2 text-right">${parseFloat(m.value||0).toFixed(2)}</td><td class="border p-2 text-right font-bold">${total.toFixed(2)}</td></tr>`;
+                    });
+                    html += `<tr class="bg-blue-50"><td colspan="3" class="border p-2 text-right font-bold">Total Geral:</td><td class="border p-2 text-right font-bold text-blue-700">R$ ${sum.toFixed(2)}</td></tr></table></div></div>`;
+                }
+            } else if (type === 'thirdParty') {
+                html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-1">Empresa Terceira</p><p class="font-bold text-lg">${r.companyName}</p></div>`;
+                html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-1">Serviço Realizado</p><div class="bg-slate-50 p-4 rounded-lg border border-slate-200">${r.tpDesc}</div></div>`;
+            }
+
             if(r.telegramSent) {
-                html += `<div class="mt-4 p-3 bg-green-50 text-green-700 rounded border border-green-200">✅ Relatório/Fotos já enviados ao Telegram.</div>`; 
+                html += `<div class="mt-6 p-4 bg-green-50 text-green-700 rounded-lg border border-green-200 flex items-center"><i class="fas fa-check-circle text-2xl mr-3"></i><div><p class="font-bold">Enviado ao Telegram</p><p class="text-sm">O relatório em PDF e as fotos já foram anexados no grupo da creche.</p></div></div>`; 
             } else if(r.photos && r.photos.length > 0) {
-                html += `<div class="mt-4"><b>Fotos (Banco Local):</b><div class="flex gap-2">${r.photos.map(p => `<img src="${p}" class="h-20 border">`).join('')}</div></div>`;
+                html += `<div class="mt-6"><p class="text-sm text-slate-500 mb-2">Fotos (Salvas no Banco Local)</p><div class="flex flex-wrap gap-2">${r.photos.map(p => `<a href="${p}" target="_blank"><img src="${p}" class="h-24 rounded border border-slate-300 shadow-sm hover:opacity-80 transition-opacity"></a>`).join('')}</div></div>`;
             }
             
             document.getElementById('modalDetailsContent').innerHTML = html; 
@@ -840,7 +890,7 @@
 
         // Geração do Relatório Excel
         window.exportToExcel = function() {
-            window.showToast("Gerando Excel..."); 
+            window.showToast("Gerando Excel...", "info"); 
             const wb = XLSX.utils.book_new();
             
             const txt = (document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : ''); 
@@ -858,11 +908,11 @@
                 return m; 
             };
             
-            const sheetR = [["Data", "Creche", "Técnico", "Serviço", "Custo Mat."]]; 
+            const sheetR = [["Data", "Creche", "Técnico", "Serviço", "Dificuldade", "Custo Mat."]]; 
             window.localData.reports.filter(fFn).forEach(r => { 
                 let sum=0; 
                 if(r.materials) r.materials.forEach(m => sum += (parseFloat(m.value||0)*m.qtd)); 
-                sheetR.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, sum]); 
+                sheetR.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, r.difficulty, sum]); 
             }); 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetR), "Manutenções");
             
@@ -874,6 +924,12 @@
             }); 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetQ), "Orçamentos");
             
+            const sheetT = [["Data", "Creche", "Empresa", "Técnico Acomp.", "Serviço Terceiro"]]; 
+            window.localData.thirdParty.filter(fFn).forEach(r => { 
+                sheetT.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.companyName, r.userLogin, r.tpDesc]); 
+            }); 
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetT), "Terceiros");
+
             XLSX.writeFile(wb, "Relatorio_LYM.xlsx"); 
             window.logAudit(`Gerou Relatório Excel Filtrado`);
         };
@@ -881,14 +937,16 @@
         // Salvar as configurações do Administrador
         window.saveCei = function(e) { 
             e.preventDefault(); 
-            const n = document.getElementById('ceiName').value; 
-            const g = document.getElementById('ceiTelegramId').value; 
-            const t = document.getElementById('ceiTelegramTopicId').value; 
+            const n = document.getElementById('ceiName').value.trim(); 
+            const g = document.getElementById('ceiTelegramId').value.trim(); 
+            const t = document.getElementById('ceiTelegramTopicId').value.trim(); 
             
             if(window.editingItemId) { 
                 db.collection('ceis').doc(window.editingItemId).set({name:n, telegramGroupId:g, telegramTopicId:t}, {merge:true}); 
+                window.showToast("Creche atualizada!", "success");
             } else {
                 db.collection('ceis').add({name:n, telegramGroupId:g, telegramTopicId:t}); 
+                window.showToast("Creche criada!", "success");
             }
             window.hideElement('modalCei'); 
         };
@@ -899,23 +957,29 @@
             document.getElementById('ceiName').value = c.name; 
             document.getElementById('ceiTelegramId').value = c.telegramGroupId||''; 
             document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId||''; 
+            document.getElementById('modalTitleCei').textContent = "Editar Creche (CEI)";
             window.showElement('modalCei'); 
         };
 
         window.deleteCei = function(id) { 
-            if(confirm("Apagar Creche permanentemente?")) db.collection('ceis').doc(id).delete(); 
+            if(confirm("Apagar Creche permanentemente?")) {
+                db.collection('ceis').doc(id).delete();
+                window.showToast("Creche apagada.", "success");
+            }
         };
 
         window.saveUser = function(e) { 
             e.preventDefault(); 
-            const l = document.getElementById('userName').value; 
-            const p = document.getElementById('userPass').value; 
+            const l = document.getElementById('userName').value.trim(); 
+            const p = document.getElementById('userPass').value.trim(); 
             const r = document.getElementById('userRole').value; 
             
             if(window.editingItemId) { 
                 db.collection('users').doc(window.editingItemId).set({login:l, pass:p, role:r}, {merge:true}); 
+                window.showToast("Usuário atualizado!", "success");
             } else {
                 db.collection('users').add({login:l, pass:p, role:r}); 
+                window.showToast("Usuário criado!", "success");
             }
             window.hideElement('modalUser'); 
         };
@@ -926,11 +990,15 @@
             document.getElementById('userName').value = u.login; 
             document.getElementById('userPass').value = u.pass; 
             document.getElementById('userRole').value = u.role; 
+            document.getElementById('modalTitleUser').textContent = "Editar Usuário";
             window.showElement('modalUser'); 
         };
 
         window.deleteUser = function(id) { 
-            if(confirm("Apagar Usuário permanentemente?")) db.collection('users').doc(id).delete(); 
+            if(confirm("Apagar Usuário permanentemente?")) {
+                db.collection('users').doc(id).delete();
+                window.showToast("Usuário apagado.", "success");
+            }
         };
 
         // Resetar Variáveis nos Modais
@@ -939,6 +1007,9 @@
         });
         document.getElementById('modalUser').addEventListener('click', (e) => { 
             if(e.target.id==='modalUser'){ window.hideElement('modalUser'); window.editingItemId = null; } 
+        });
+        document.getElementById('modalDetails').addEventListener('click', (e) => { 
+            if(e.target.id==='modalDetails'){ window.hideElement('modalDetails'); } 
         });
 
         // INICIAR APLICAÇÃO
