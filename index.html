@@ -6,16 +6,26 @@
     <title>LYM Eletrônicos - Gestão</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: {} } }
+    </script>
+    <script>
+        if (localStorage.getItem('lym_theme') === 'dark' || (!('lym_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Biblioteca de Gráficos -->
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; }
         
         button, input, select { touch-action: manipulation; }
         input, select, textarea { font-size: 16px !important; }
@@ -24,41 +34,38 @@
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Correção Definitiva da Impressão */
         @media print {
-            body { background: white !important; }
+            body { background: white !important; color: black !important;}
             body * { visibility: hidden; }
             #printArea, #printArea * { visibility: visible; }
-            #printArea { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; display: block !important; margin: 0 !important; padding: 0 !important; }
+            #printArea { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; display: block !important; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important;}
             #appLayout, #loginScreen, #toastContainer, #modalViewRecord { display: none !important; }
         }
     </style>
 </head>
-<body class="text-slate-800 antialiased h-screen flex overflow-hidden">
+<body class="text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 antialiased h-screen flex overflow-hidden transition-colors duration-300">
 
-    <!-- Área Exclusiva de Impressão -->
     <div id="printArea" class="hidden bg-white absolute w-full min-h-screen z-50 p-8"></div>
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
-    <!-- TELA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
-        <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
+        <div class="bg-white dark:bg-slate-800 p-8 sm:p-10 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-8">
                 <div class="bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"><i class="fas fa-bolt text-2xl"></i></div>
-                <h1 class="text-2xl font-bold text-slate-800">LYM Eletrônicos</h1>
-                <p class="text-slate-500">Sistema de Gestão e Manutenção</p>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">LYM Eletrônicos</h1>
+                <p class="text-slate-500 dark:text-slate-400">Sistema de Gestão e Manutenção</p>
             </div>
             
             <form id="loginForm" onsubmit="window.handleLogin(event)" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
-                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none transition" placeholder="Digite seu usuário">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Usuário</label>
+                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition" placeholder="Digite seu usuário">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Senha</label>
                     <div class="relative">
-                        <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none transition pr-12" placeholder="••••••••">
-                        <button type="button" onclick="window.togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 outline-none"><i id="eyeIcon" class="fas fa-eye text-lg"></i></button>
+                        <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition pr-12" placeholder="••••••••">
+                        <button type="button" onclick="window.togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 dark:text-slate-300 outline-none"><i id="eyeIcon" class="fas fa-eye text-lg"></i></button>
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md text-lg mt-2">Entrar no Sistema</button>
@@ -66,36 +73,38 @@
         </div>
     </div>
 
-    <!-- APLICATIVO PRINCIPAL -->
     <div id="appLayout" class="hidden w-full h-full flex flex-col md:flex-row">
-        
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
             <div class="p-4 sm:p-6 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-bolt text-blue-400 text-xl"></i>
-                    <h2 class="text-xl font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-full font-bold">v3.8</span></h2>
+                    <h2 class="text-xl font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-full font-bold">v5.0</span></h2>
                 </div>
-                <button id="mobileMenuBtn" class="md:hidden text-white p-2"><i class="fas fa-bars text-2xl"></i></button>
+                <div class="flex items-center gap-3 md:hidden">
+                    <button onclick="window.toggleDarkMode()" class="outline-none p-2"><i id="darkModeIconMobile" class="fas fa-moon text-slate-300 text-xl transition-colors"></i></button>
+                    <button id="mobileMenuBtn" class="text-white p-2"><i class="fas fa-bars text-2xl"></i></button>
+                </div>
             </div>
-            
             <div id="navLinks" class="hidden md:flex flex-col flex-grow overflow-y-auto py-4"></div>
-
             <div class="p-4 border-t border-slate-700 hidden md:block" id="navFooter">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-blue-400 font-bold" id="userInitial">A</div>
-                    <div class="overflow-hidden">
-                        <p class="font-medium truncate" id="userNameDisplay">Admin</p>
-                        <p class="text-xs text-slate-400 capitalize" id="userRoleDisplay">Administrador</p>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center text-blue-400 font-bold" id="userInitial">A</div>
+                        <div class="overflow-hidden">
+                            <p class="font-medium truncate" id="userNameDisplay">Admin</p>
+                            <p class="text-xs text-slate-400 capitalize" id="userRoleDisplay">Administrador</p>
+                        </div>
                     </div>
+                    <button onclick="window.toggleDarkMode()" class="outline-none p-2 hover:bg-slate-800 rounded-full transition"><i id="darkModeIconDesktop" class="fas fa-moon text-slate-300 text-lg"></i></button>
                 </div>
                 <button onclick="window.logout()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 rounded-lg transition"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </nav>
 
-        <main class="flex-grow flex flex-col h-full bg-slate-50 relative overflow-hidden">
-            <header class="bg-white shadow-sm px-6 py-4 flex md:hidden items-center justify-between border-b">
-                <h1 class="text-lg font-bold text-slate-800" id="mobilePageTitle">Painel</h1>
-                <button onclick="window.logout()" class="text-red-500"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        <main class="flex-grow flex flex-col h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
+            <header class="bg-white dark:bg-slate-800 shadow-sm px-6 py-4 flex md:hidden items-center justify-between border-b dark:border-slate-700 transition-colors">
+                <h1 class="text-lg font-bold text-slate-800 dark:text-slate-100" id="mobilePageTitle">Painel</h1>
+                <button onclick="window.logout()" class="text-red-500 font-medium"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </header>
             <div id="mainContent" class="flex-grow overflow-y-auto p-4 sm:p-8"></div>
         </main>
@@ -103,42 +112,41 @@
 
     <!-- Modais -->
     <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div class="bg-slate-100 px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg" id="modalTitleCei">Nova Creche</h3><button onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button></div>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-slate-100 dark:bg-slate-700 px-6 py-4 border-b dark:border-slate-600 flex justify-between items-center"><h3 class="font-bold text-lg dark:text-white" id="modalTitleCei">Nova Creche</h3><button onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fas fa-times text-xl"></i></button></div>
             <form id="ceiForm" class="p-6 space-y-4">
-                <div><label class="block text-sm font-semibold text-slate-700 mb-1">Nome da Creche</label><input type="text" id="ceiName" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                <div class="p-4 bg-blue-50 rounded-lg border border-blue-100"><p class="text-xs font-bold text-blue-800 mb-3"><i class="fab fa-telegram"></i> Integração Telegram</p><div class="space-y-3"><div><label class="block text-xs font-semibold text-slate-700 mb-1">ID do Grupo</label><input type="text" id="ceiTelegramId" class="w-full p-2 text-sm border rounded bg-white outline-none"></div><div><label class="block text-xs font-semibold text-slate-700 mb-1">ID do Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full p-2 text-sm border rounded bg-white outline-none"></div></div></div>
-                <div class="flex justify-end gap-2 pt-4"><button type="button" onclick="window.hideElement('modalCei')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Salvar</button></div>
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Nome da Creche</label><input type="text" id="ceiName" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"></div>
+                <div class="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800"><p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-3"><i class="fab fa-telegram"></i> Integração Telegram</p><div class="space-y-3"><div><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ID do Grupo</label><input type="text" id="ceiTelegramId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none"></div><div><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ID do Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none"></div></div></div>
+                <div class="flex justify-end gap-2 pt-4"><button type="button" onclick="window.hideElement('modalCei')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Salvar</button></div>
             </form>
         </div>
     </div>
 
     <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div class="bg-slate-100 px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg" id="modalTitleUser">Novo Usuário</h3><button onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button></div>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-slate-100 dark:bg-slate-700 px-6 py-4 border-b dark:border-slate-600 flex justify-between items-center"><h3 class="font-bold text-lg dark:text-white" id="modalTitleUser">Novo Usuário</h3><button onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fas fa-times text-xl"></i></button></div>
             <form id="userForm" class="p-6 space-y-4">
-                <div><label class="block text-sm font-semibold text-slate-700 mb-1">Login</label><input type="text" id="newUsername" required class="w-full p-3 border rounded-lg outline-none"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-1">Senha</label><input type="text" id="newPassword" required class="w-full p-3 border rounded-lg outline-none"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-1">Permissão</label><select id="newRole" class="w-full p-3 border rounded-lg outline-none bg-white"><option value="funcionario">Funcionário (Apenas Registra)</option><option value="admin">Administrador (Total Acesso)</option></select></div>
-                <div class="flex justify-end gap-2 pt-4"><button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Salvar</button></div>
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Login</label><input type="text" id="newUsername" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"></div>
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Senha</label><input type="text" id="newPassword" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"></div>
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Permissão</label><select id="newRole" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"><option value="funcionario">Funcionário (Apenas Registra)</option><option value="admin">Administrador (Total Acesso)</option></select></div>
+                <div class="flex justify-end gap-2 pt-4"><button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Salvar</button></div>
             </form>
         </div>
     </div>
 
     <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8">
-            <div class="bg-slate-100 px-6 py-4 border-b flex justify-between items-center sticky top-0 z-10"><h3 class="font-bold text-lg" id="viewRecordTitle">Detalhes</h3><div class="flex gap-2"><button id="btnPrintRecord" class="px-4 py-2 bg-slate-800 text-white text-sm font-bold rounded-lg hover:bg-slate-700 shadow-sm"><i class="fas fa-print mr-1"></i> Imprimir DOC</button><button onclick="window.hideElement('modalViewRecord')" class="text-slate-500 hover:text-slate-800 ml-2"><i class="fas fa-times text-xl"></i></button></div></div>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8">
+            <div class="bg-slate-100 dark:bg-slate-700 px-6 py-4 border-b dark:border-slate-600 flex justify-between items-center sticky top-0 z-10"><h3 class="font-bold text-lg dark:text-white" id="viewRecordTitle">Detalhes</h3><div class="flex gap-2"><button id="btnPrintRecord" class="px-4 py-2 bg-slate-800 dark:bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-slate-700 shadow-sm"><i class="fas fa-print mr-1"></i> Imprimir DOC</button><button onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white ml-2"><i class="fas fa-times text-xl"></i></button></div></div>
             <div id="viewRecordContent" class="p-6"></div>
         </div>
     </div>
 
     <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-6"><div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fas fa-exclamation-triangle"></i></div><h3 class="font-bold text-lg mb-2">Tem certeza?</h3><p class="text-slate-500 mb-6 text-sm">Esta ação não pode ser desfeita.</p><div class="flex justify-center gap-3"><button onclick="window.hideElement('modalConfirm')" class="px-5 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium">Cancelar</button><button id="btnConfirmAction" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">Sim, Excluir</button></div></div>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-6"><div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fas fa-exclamation-triangle"></i></div><h3 class="font-bold text-lg dark:text-white mb-2">Tem certeza?</h3><p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">Esta ação não pode ser desfeita.</p><div class="flex justify-center gap-3"><button onclick="window.hideElement('modalConfirm')" class="px-5 py-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg font-medium">Cancelar</button><button id="btnConfirmAction" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">Sim, Excluir</button></div></div>
     </div>
 
     <script>
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
-
         const firebaseConfig = {
             apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM",
             authDomain: "lym-manutencao.firebaseapp.com",
@@ -150,11 +158,17 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // ATIVAÇÃO DO MODO OFFLINE BLINDADO NO FIREBASE
+        db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
+            console.log("Firebase Offline falhou: ", err);
+        });
+
         window.localData = { ceis: [], users: [], reports: [], quotes: [], thirdParty: [], audit: [] };
         window.currentSystemUser = null; 
         window.activeTab = 'dashboard';
         window.editingItemId = null; 
         window.materialCount = 0;
+        window.lymCharts = {}; // Para guardar a memória dos Gráficos Dashboard
 
         window.showElement = (id) => document.getElementById(id)?.classList.remove('hidden');
         window.hideElement = (id) => document.getElementById(id)?.classList.add('hidden');
@@ -164,12 +178,30 @@
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const colorClass = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
+            const colorClass = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : (type === 'info' ? 'bg-blue-500' : 'bg-blue-600'));
             toast.className = `${colorClass} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300 animate-fade-in z-50`;
-            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> <span class="font-medium">${msg}</span><button type="button" onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : (type === 'info' ? 'fa-info-circle' : 'fa-exclamation-triangle')}"></i> <span class="font-medium">${msg}</span><button type="button" onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
             container.appendChild(toast);
             setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10);
             setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 6000); }, 6000);
+        };
+
+        // Monitores de Conexão de Internet
+        window.addEventListener('online', () => window.showToast('Conexão restabelecida. Sincronizando dados...', 'success'));
+        window.addEventListener('offline', () => window.showToast('Sem internet! Modo Offline ativado. Você ainda pode salvar seus serviços.', 'error'));
+
+        window.toggleDarkMode = () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('lym_theme', isDark ? 'dark' : 'light');
+            window.updateDarkModeIcons(isDark);
+            if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100);
+        };
+        window.updateDarkModeIcons = (isDark) => {
+            ['darkModeIconDesktop', 'darkModeIconMobile'].forEach(id => {
+                const icon = document.getElementById(id);
+                if(icon) icon.className = isDark ? 'fas fa-sun text-yellow-400 text-xl transition-colors' : 'fas fa-moon text-slate-300 text-xl transition-colors';
+            });
         };
 
         let confirmActionCallback = null;
@@ -262,7 +294,7 @@
             }
             
             document.getElementById('mobilePageTitle').textContent = title;
-            document.getElementById('mainContent').innerHTML = html.includes('flex justify-between') ? html : `<h2 class="text-2xl font-bold text-slate-800 mb-6 hidden md:block">${title}</h2>${html}`;
+            document.getElementById('mainContent').innerHTML = html.includes('flex justify-between') ? html : `<h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6 hidden md:block">${title}</h2>${html}`;
             
             if(['func-reports', 'func-quotes', 'func-thirdParty'].includes(window.activeTab)) {
                 const sffx = window.activeTab === 'func-reports' ? 'Rep' : (window.activeTab === 'func-quotes' ? 'Quote' : 'ThirdParty');
@@ -278,74 +310,84 @@
             
             if(window.activeTab === 'func-history') window.renderEmployeeHistory();
             if(['admin-reports', 'admin-quotes', 'admin-thirdParty'].includes(window.activeTab)) window.setupAdminFilters();
+            if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100);
         };
-
-        window.saveDraft = (type) => {
-            if(window.editingItemId) return;
-            const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-            const draft = { cei: document.getElementById(`ceiSelect${sffx}`)?.value || "", date: document.getElementById(`date${sffx}`)?.value || "", workDone: document.getElementById(`workDone${sffx}`)?.value || "", obs: document.getElementById(`obs${sffx}`)?.value || "" };
-            if(type === 'reports' || type === 'thirdParty') { draft.timeStart = document.getElementById(`timeStart${sffx}`)?.value || ""; draft.timeEnd = document.getElementById(`timeEnd${sffx}`)?.value || ""; }
-            if(type === 'thirdParty') draft.companyName = document.getElementById('companyNameThirdParty')?.value || "";
-            if(type === 'reports') draft.difficulty = document.getElementById('diffRep')?.value || "Médio";
-
-            if(type === 'reports' || type === 'quotes') {
-                const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
-                const mats = [];
-                document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => { mats.push({ name: row.querySelector('.mat-name')?.value || "", brand: row.querySelector('.mat-brand')?.value || "", qtd: row.querySelector('.mat-qtd')?.value || "1", price: row.querySelector('.mat-price')?.value || "" }); });
-                draft.materials = mats;
-            }
-            localStorage.setItem(`lym_draft_${type}`, JSON.stringify(draft));
-        };
-
-        window.loadDraft = (type) => {
-            if(window.editingItemId) return; 
-            const draftStr = localStorage.getItem(`lym_draft_${type}`); if(!draftStr) return;
-            try {
-                const draft = JSON.parse(draftStr); const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                setTimeout(() => {
-                    if(draft.cei) document.getElementById(`ceiSelect${sffx}`).value = draft.cei;
-                    if(draft.date) document.getElementById(`date${sffx}`).value = draft.date;
-                    if(draft.workDone) document.getElementById(`workDone${sffx}`).value = draft.workDone;
-                    if(draft.obs) document.getElementById(`obs${sffx}`).value = draft.obs;
-                    if(type === 'reports' || type === 'thirdParty') { if(draft.timeStart) document.getElementById(`timeStart${sffx}`).value = draft.timeStart; if(draft.timeEnd) document.getElementById(`timeEnd${sffx}`).value = draft.timeEnd; }
-                    if(type === 'thirdParty' && draft.companyName) document.getElementById('companyNameThirdParty').value = draft.companyName;
-                    if(type === 'reports' && draft.difficulty) document.getElementById('diffRep').value = draft.difficulty;
-
-                    if((type === 'reports' || type === 'quotes') && draft.materials) {
-                        const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; document.getElementById(contId).innerHTML = '';
-                        if(draft.materials.length === 0) { document.getElementById(contId).innerHTML = '<p class="text-sm text-slate-400 italic">Nenhum material listado.</p>'; } 
-                        else { draft.materials.forEach(m => { window.addMaterialRow(contId, false); const lastRow = document.getElementById(`mat_${window.materialCount}`); lastRow.querySelector('.mat-name').value = m.name; lastRow.querySelector('.mat-brand').value = m.brand; lastRow.querySelector('.mat-qtd').value = m.qtd; lastRow.querySelector('.mat-price').value = m.price; }); }
-                    }
-                }, 100);
-            } catch(e) { console.error("Erro rascunho", e); }
-        };
-
-        window.clearDraft = (type) => { localStorage.removeItem(`lym_draft_${type}`); };
 
         const populateCeiSelect = (id) => { const sel = document.getElementById(id); if(!sel) return; sel.innerHTML = '<option value="">Selecione a Creche...</option>' + window.localData.ceis.sort((a,b)=>a.name.localeCompare(b.name)).map(c => `<option value="${c.name}" data-id="${c.id}">${c.name}</option>`).join(''); };
 
-        // ADMIN TEMPLATES
-        const renderAdminDashboard = () => `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in"><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 text-sm font-medium">Serviços</p><p class="text-2xl font-bold text-slate-800">${window.localData.reports.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 text-sm font-medium">Orçamentos</p><p class="text-2xl font-bold text-slate-800">${window.localData.quotes.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 text-sm font-medium">Terceiros</p><p class="text-2xl font-bold text-slate-800">${window.localData.thirdParty.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-2xl"><i class="fas fa-school"></i></div><div><p class="text-slate-500 text-sm font-medium">Creches</p><p class="text-2xl font-bold text-slate-800">${window.localData.ceis.length}</p></div></div></div>`;
-        const renderAdminCeis = () => { let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${c.name}</td><td class="p-4 text-sm text-slate-500">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="p-4 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Nome</th><th class="p-4 font-semibold">Telegram (Grupo/Tópico)</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-8 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
-        const renderAdminUsers = () => { let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${u.login || u.username}</td><td class="p-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}">${u.role.toUpperCase()}</span></td><td class="p-4 text-right space-x-2"><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Login</th><th class="p-4 font-semibold">Nível</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
-        const renderFilterBar = (type) => `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 animate-fade-in"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end"><div><label class="block text-xs font-semibold text-slate-500 mb-1">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border rounded-lg text-sm" placeholder="Nome, CEI..."></div><div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border rounded-lg text-sm"></div><div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-900"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div></div></div>`;
-        const renderAdminReports = () => renderFilterBar('reports') + `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Técnico</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
-        const renderAdminQuotes = () => renderFilterBar('quotes') + `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Total Orçado</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
-        const renderAdminThirdParty = () => renderFilterBar('thirdParty') + `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Empresa</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
+        // ADMIN TEMPLATES & GRÁFICOS
+        const renderAdminDashboard = () => `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in mb-8">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Serviços</p><p class="text-2xl font-bold text-slate-800 dark:text-white">${window.localData.reports.length}</p></div></div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center text-2xl"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Orçamentos</p><p class="text-2xl font-bold text-slate-800 dark:text-white">${window.localData.quotes.length}</p></div></div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-2xl"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Terceiros</p><p class="text-2xl font-bold text-slate-800 dark:text-white">${window.localData.thirdParty.length}</p></div></div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-2xl"><i class="fas fa-school"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Creches</p><p class="text-2xl font-bold text-slate-800 dark:text-white">${window.localData.ceis.length}</p></div></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1">
+                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-white">Serviços por Dificuldade</h3>
+                    <div style="position: relative; height: 250px;"><canvas id="chartDifficulty"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2">
+                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-white">Volume (Serviços x Orçamentos) por Mês</h3>
+                    <div style="position: relative; height: 250px;"><canvas id="chartMonths"></canvas></div>
+                </div>
+            </div>`;
+
+        window.initCharts = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const fontColor = isDark ? '#cbd5e1' : '#475569';
+            
+            // Gráfico Dificuldade (Rosca)
+            if(document.getElementById('chartDifficulty')) {
+                const diffCounts = {'Fácil': 0, 'Médio': 0, 'Difícil': 0};
+                window.localData.reports.forEach(r => { if(r.difficulty && diffCounts[r.difficulty] !== undefined) diffCounts[r.difficulty]++; });
+                if(window.lymCharts.diff) window.lymCharts.diff.destroy();
+                window.lymCharts.diff = new Chart(document.getElementById('chartDifficulty'), {
+                    type: 'doughnut',
+                    data: { labels: ['Fácil', 'Médio', 'Difícil'], datasets: [{ data: [diffCounts['Fácil'], diffCounts['Médio'], diffCounts['Difícil']], backgroundColor: ['#22c55e', '#eab308', '#ef4444'], borderWidth: isDark ? 0 : 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: fontColor } } } }
+                });
+            }
+
+            // Gráfico de Linha (Meses)
+            if(document.getElementById('chartMonths')) {
+                const monthsMap = {};
+                const addMonth = (dateStr, type) => { if(!dateStr) return; const ym = dateStr.substring(0, 7); if(!monthsMap[ym]) monthsMap[ym] = {rep: 0, quo: 0}; monthsMap[ym][type]++; };
+                window.localData.reports.forEach(r => addMonth(r.date, 'rep'));
+                window.localData.quotes.forEach(r => addMonth(r.date, 'quo'));
+                const sortedMonths = Object.keys(monthsMap).sort();
+                const repData = sortedMonths.map(m => monthsMap[m].rep);
+                const quoData = sortedMonths.map(m => monthsMap[m].quo);
+                if(window.lymCharts.months) window.lymCharts.months.destroy();
+                window.lymCharts.months = new Chart(document.getElementById('chartMonths'), {
+                    type: 'line',
+                    data: { labels: sortedMonths.map(m => m.split('-').reverse().join('/')), datasets: [{ label: 'Serviços Concluídos', data: repData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }, { label: 'Orçamentos Realizados', data: quoData, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.2)', fill: true, tension: 0.3 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: fontColor }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }, y: { ticks: { color: fontColor, stepSize: 1 }, grid: { color: isDark ? '#334155' : '#e2e8f0' } } }, plugins: { legend: { position: 'bottom', labels: { color: fontColor } } } }
+                });
+            }
+        };
+
+        const renderAdminCeis = () => { let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-4 font-medium">${c.name}</td><td class="p-4 text-sm text-slate-500 dark:text-slate-400">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="p-4 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-4 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex justify-between items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="p-4 font-semibold">Nome</th><th class="p-4 font-semibold">Telegram (Grupo/Tópico)</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-8 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
+        const renderAdminUsers = () => { let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-4 font-medium">${u.login || u.username}</td><td class="p-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}">${u.role.toUpperCase()}</span></td><td class="p-4 text-right space-x-2"><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-4 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex justify-between items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="p-4 font-semibold">Login</th><th class="p-4 font-semibold">Nível</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
+        const renderFilterBar = (type) => `<div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-6 animate-fade-in"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end"><div><label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none" placeholder="Nome, CEI..."></div><div><label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none"></div><div><label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none"></div><div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-500"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div></div></div>`;
+        const renderAdminReports = () => renderFilterBar('reports') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Técnico</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
+        const renderAdminQuotes = () => renderFilterBar('quotes') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Total Orçado</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
+        const renderAdminThirdParty = () => renderFilterBar('thirdParty') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Empresa</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
         
         window.clearAuditLogs = () => { window.confirmAction(async () => { try { for(let a of window.localData.audit) { await window.dbDelete('audit', a.id); } window.showToast("Logs de auditoria foram limpos!"); } catch(e) { window.showToast("Erro ao limpar logs", "error"); } }); };
-        const renderAdminAudit = () => `<div class="bg-white rounded-xl shadow-sm border overflow-hidden animate-fade-in"><div class="p-4 bg-slate-50 flex justify-between items-center border-b"><h3 class="font-bold text-slate-700">Logs de Auditoria</h3><button onclick="window.clearAuditLogs()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-sm font-medium"><i class="fas fa-trash-alt mr-1"></i> Limpar Logs</button></div><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data/Hora</th><th class="p-4">Usuário</th><th class="p-4">Ação Realizada</th></tr></thead><tbody>${[...window.localData.audit].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 100).map(a => `<tr class="border-b hover:bg-slate-50 text-sm"><td class="p-4">${a.date}</td><td class="p-4 font-medium capitalize text-slate-700">${a.user}</td><td class="p-4 text-slate-600">${a.action}</td></tr>`).join("")}</tbody></table></div></div>`;
+        const renderAdminAudit = () => `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-4 bg-slate-50 dark:bg-slate-800 flex justify-between items-center border-b dark:border-slate-700"><h3 class="font-bold text-slate-700 dark:text-slate-200">Logs de Auditoria</h3><button onclick="window.clearAuditLogs()" class="bg-red-100 dark:bg-red-900/30 hover:bg-red-200 text-red-700 dark:text-red-400 px-3 py-1 rounded text-sm font-medium"><i class="fas fa-trash-alt mr-1"></i> Limpar Logs</button></div><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="p-4">Data/Hora</th><th class="p-4">Usuário</th><th class="p-4">Ação Realizada</th></tr></thead><tbody>${[...window.localData.audit].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 100).map(a => `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm"><td class="p-4">${a.date}</td><td class="p-4 font-medium capitalize text-slate-700 dark:text-slate-300">${a.user}</td><td class="p-4 text-slate-600 dark:text-slate-400">${a.action}</td></tr>`).join("")}</tbody></table></div></div>`;
 
         // FUNCIONÁRIO TEMPLATES
-        const renderFormFieldsCommon = (typeId) => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">CEI (Creche) *</label><select id="ceiSelect${typeId}" required class="w-full p-3 border rounded-lg bg-white outline-none"></select></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Data *</label><input type="date" id="date${typeId}" required class="w-full p-3 border rounded-lg bg-white outline-none" value="${new Date().toISOString().split('T')[0]}"></div></div>`;
-        const renderTimeFields = (typeId) => `<div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-3 border rounded-lg bg-white outline-none"></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-3 border rounded-lg bg-white outline-none"></div></div>`;
-        const renderMaterialInputs = (containerId) => `<div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('${containerId}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Material</button></div><div id="${containerId}" class="space-y-3"><p class="text-sm text-slate-400 italic">Nenhum material listado.</p></div></div>`;
+        const renderFormFieldsCommon = (typeId) => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">CEI (Creche) *</label><select id="ceiSelect${typeId}" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"></select></div><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Data *</label><input type="date" id="date${typeId}" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none" value="${new Date().toISOString().split('T')[0]}"></div></div>`;
+        const renderTimeFields = (typeId) => `<div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"></div><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"></div></div>`;
+        const renderMaterialInputs = (containerId) => `<div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mt-4"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 dark:text-slate-200">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('${containerId}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Material</button></div><div id="${containerId}" class="space-y-3"><p class="text-sm text-slate-400 italic">Nenhum material listado.</p></div></div>`;
         
-        const renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-sm bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded">Cancelar Edição</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-5"><input type="hidden" id="editIdreports">${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none outline-none"></textarea></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Dificuldade *</label><select id="diffRep" class="w-full p-3 border rounded-lg bg-white outline-none focus:border-blue-500"><option value="Fácil">Fácil</option><option value="Médio" selected>Médio</option><option value="Difícil">Difícil</option></select></div>${renderMaterialInputs('materialsContainer')}<div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Serviço (Telegram/PDF)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Serviço</button></form></div>`;
-        const renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in"><h3 class="text-xl font-bold text-green-700 mb-6"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-5"><input type="hidden" id="editIdquotes">${renderFormFieldsCommon('Quote')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none outline-none"></textarea></div>${renderMaterialInputs('quoMaterialsContainer')}<div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Problema (Telegram/PDF)</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Orçamento</button></form></div>`;
-        const renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in"><h3 class="text-xl font-bold text-purple-700 mb-6"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-5"><input type="hidden" id="editIdthirdParty">${renderFormFieldsCommon('ThirdParty')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-3 border rounded-lg bg-white outline-none"></div>${renderTimeFields('ThirdParty')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none outline-none"></textarea></div><div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos (Telegram/PDF)</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Acompanhamento</button></form></div>`;
+        const renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-6 mb-8 animate-fade-in"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-blue-800 dark:text-blue-400"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-sm bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded">Cancelar Edição</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-5"><input type="hidden" id="editIdreports">${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}<div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="3" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Dificuldade *</label><select id="diffRep" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-blue-500"><option value="Fácil">Fácil</option><option value="Médio" selected>Médio</option><option value="Difícil">Difícil</option></select></div>${renderMaterialInputs('materialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border dark:border-slate-700 mt-4"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Fotos do Serviço (Telegram/PDF)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-sm dark:text-slate-400" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Serviço</button></form></div>`;
+        const renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-6 mb-8 animate-fade-in"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-green-700 dark:text-green-400"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-sm bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded">Cancelar Edição</button></div><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-5"><input type="hidden" id="editIdquotes">${renderFormFieldsCommon('Quote')}<div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="3" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div>${renderMaterialInputs('quoMaterialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border dark:border-slate-700 mt-4"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Fotos do Problema (Telegram/PDF)</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-sm dark:text-slate-400" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Orçamento</button></form></div>`;
+        const renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-6 mb-8 animate-fade-in"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-purple-700 dark:text-purple-400"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-sm bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded">Cancelar Edição</button></div><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-5"><input type="hidden" id="editIdthirdParty">${renderFormFieldsCommon('ThirdParty')}<div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none"></div>${renderTimeFields('ThirdParty')}<div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="3" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border dark:border-slate-700 mt-4"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Fotos (Telegram/PDF)</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-sm dark:text-slate-400" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Acompanhamento</button></form></div>`;
         
-        const renderFuncHistory = () => `<div class="flex items-center mb-6 hidden md:flex"><h2 class="text-2xl font-bold text-slate-800">Meus Registros</h2></div><div class="max-w-4xl mx-auto animate-fade-in space-y-8"><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-blue-50 font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> Minhas Manutenções</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-green-50 font-bold text-green-800"><i class="fas fa-file-invoice mr-2"></i> Meus Orçamentos</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-purple-50 font-bold text-purple-800"><i class="fas fa-handshake mr-2"></i> Meus Terceiros</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div></div>`;
+        const renderFuncHistory = () => `<div class="max-w-4xl mx-auto animate-fade-in space-y-8"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-4 bg-blue-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-blue-800 dark:text-blue-300"><i class="fas fa-wrench mr-2"></i> Minhas Manutenções</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-4 bg-green-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-green-800 dark:text-green-300"><i class="fas fa-file-invoice mr-2"></i> Meus Orçamentos</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-4 bg-purple-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-purple-800 dark:text-purple-300"><i class="fas fa-handshake mr-2"></i> Meus Terceiros</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div></div>`;
 
         // ==========================================
         // LÓGICA DE DADOS E EVENTOS
@@ -354,8 +396,8 @@
             const container = document.getElementById(containerId);
             if(container.querySelector('.italic')) container.innerHTML = "";
             window.materialCount++; const id = `mat_${window.materialCount}`; const div = document.createElement('div');
-            div.id = id; div.className = "flex flex-col sm:flex-row gap-2 bg-white p-3 rounded border animate-fade-in";
-            div.innerHTML = `<input type="text" class="mat-name flex-grow p-2 border rounded text-sm outline-none" placeholder="Material" required><input type="text" class="mat-brand w-full sm:w-24 p-2 border rounded text-sm outline-none" placeholder="Marca"><input type="number" class="mat-qtd w-full sm:w-20 p-2 border rounded text-sm outline-none" placeholder="Qtd" value="1" min="0.1" step="0.1" required><input type="number" class="mat-price w-full sm:w-28 p-2 border rounded text-sm outline-none" placeholder="R$ Un." step="0.01"><button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 text-red-600 px-3 py-2 rounded font-bold hover:bg-red-200">X</button>`;
+            div.id = id; div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-3 rounded border dark:border-slate-600 animate-fade-in";
+            div.innerHTML = `<input type="text" class="mat-name flex-grow p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" placeholder="Material" required><input type="text" class="mat-brand w-full sm:w-24 p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" placeholder="Marca"><input type="number" class="mat-qtd w-full sm:w-20 p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" placeholder="Qtd" value="1" min="0.1" step="0.1" required><input type="number" class="mat-price w-full sm:w-28 p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" placeholder="R$ Un." step="0.01"><button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-2 rounded font-bold hover:bg-red-200">X</button>`;
             container.appendChild(div);
             if(triggerSave) window.saveDraft(window.activeTab.split('-')[1]);
         };
@@ -382,14 +424,13 @@
             Array.from(e.target.files).forEach(file => {
                 if(file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = (ev) => { c.innerHTML += `<img src="${ev.target.result}" class="h-16 w-16 object-cover rounded shadow border">`; };
+                    reader.onload = (ev) => { c.innerHTML += `<img src="${ev.target.result}" class="h-16 w-16 object-cover rounded shadow border dark:border-slate-600">`; };
                     reader.readAsDataURL(file);
                 }
             });
         };
 
         const escapeHtml = (text) => { return (text || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
-        
         const dataURItoBlob = (dataURI) => {
             let byteString = atob(dataURI.split(',')[1]); let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
             let ab = new ArrayBuffer(byteString.length); let ia = new Uint8Array(ab);
@@ -444,11 +485,11 @@
                 <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Materiais / Custos</h4>
                 <table style="width:100%; text-align:left; border-collapse:collapse; font-size:14px; margin-bottom:20px; border:1px solid #e2e8f0;">
                     <thead style="background-color:#f1f5f9;">
-                        <tr><th style="padding:10px; border:1px solid #e2e8f0;">Qtd</th><th style="padding:10px; border:1px solid #e2e8f0;">Material</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right;">R$ Un.</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right;">Total</th></tr>
+                        <tr><th style="padding:10px; border:1px solid #e2e8f0; color:#334155;">Qtd</th><th style="padding:10px; border:1px solid #e2e8f0; color:#334155;">Material</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">R$ Un.</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">Total</th></tr>
                     </thead>
                     <tbody>
-                        ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #e2e8f0;">${m.qtd}</td><td style="padding:10px; border:1px solid #e2e8f0;">${escapeHtml(m.name)} (${escapeHtml(m.brand) || '-'})</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right;">${window.formatMoney(m.price)}</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right;">${window.formatMoney(m.qtd * m.price)}</td></tr>`).join('')}
-                        <tr style="background-color:#eff6ff;"><td colspan="3" style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold;">TOTAL:</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#1d4ed8;">${window.formatMoney(totalValue)}</td></tr>
+                        ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #e2e8f0; color:#334155;">${m.qtd}</td><td style="padding:10px; border:1px solid #e2e8f0; color:#334155;">${escapeHtml(m.name)} (${escapeHtml(m.brand) || '-'})</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.price)}</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.qtd * m.price)}</td></tr>`).join('')}
+                        <tr style="background-color:#eff6ff;"><td colspan="3" style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#334155;">TOTAL:</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#1d4ed8;">${window.formatMoney(totalValue)}</td></tr>
                     </tbody>
                 </table>`;
             }
@@ -458,8 +499,11 @@
                 imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`;
             }
 
-            // CORREÇÃO: ENVIAR TEXTO HTML DIRETAMENTE PARA O GERADOR DE PDF PARA NÃO FALHAR NO BACKGROUND
-            const pdfContent = `
+            const pdfDiv = document.createElement('div');
+            pdfDiv.style.position = 'absolute'; pdfDiv.style.top = '0'; pdfDiv.style.left = '0'; pdfDiv.style.width = '800px'; pdfDiv.style.zIndex = '-9999'; pdfDiv.style.background = '#ffffff';
+            document.body.appendChild(pdfDiv);
+
+            pdfDiv.innerHTML = `
             <div style="padding:30px; font-family:Arial, sans-serif; color:#334155; background:#ffffff;">
                 <div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;">
                     <h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p>
@@ -467,29 +511,28 @@
                 ${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
                     <div style="width:48%;">
-                        <p style="margin:0 0 8px 0;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p>
-                        <p style="margin:0 0 8px 0;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${escapeHtml(uName)}</span></p>
-                        ${dataObj.difficulty ? `<p style="margin:0;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p>
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${escapeHtml(uName)}</span></p>
+                        ${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}
                     </div>
                     <div style="width:48%;">
-                        <p style="margin:0 0 8px 0;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${escapeHtml(cei.name)}</p>
-                        ${dataObj.timeStart ? `<p style="margin:0 0 8px 0;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}
-                        ${dataObj.companyName ? `<p style="margin:0;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${escapeHtml(dataObj.companyName)}</p>` : ''}
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${escapeHtml(cei.name)}</p>
+                        ${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}
+                        ${dataObj.companyName ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${escapeHtml(dataObj.companyName)}</p>` : ''}
                     </div>
                 </div>
                 <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4>
                 <div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
-                    <p style="margin:0; line-height:1.5;">${wDone ? escapeHtml(wDone).replace(/\n/g, '<br>') : 'Sem descrição.'}</p>
+                    <p style="margin:0; line-height:1.5; color:#334155;">${wDone ? escapeHtml(wDone).replace(/\n/g, '<br>') : 'Sem descrição.'}</p>
                 </div>
                 ${matsHtml}
-                ${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5;">${escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}
+                ${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; color:#334155;">${escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}
                 ${imgsHtml}
             </div>`;
 
             const opt = { margin: 10, filename: `Relatorio.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            
-            // html2pdf can take a string directly which guarantees no render bugs from negative z-index CSS!
-            let pdfBlob = await html2pdf().set(opt).from(pdfContent).output('blob');
+            let pdfBlob = await html2pdf().set(opt).from(pdfDiv).output('blob');
+            document.body.removeChild(pdfDiv); 
 
             const fData = new FormData();
             fData.append('chat_id', chatId);
@@ -547,8 +590,19 @@
                 }
                 
                 if (ceiId !== "") {
-                    await window.sendToTelegram(ceiId, recordData, base64Photos, isEdit, typeLabel);
-                    recordData.telegramSent = true;
+                    if (navigator.onLine) {
+                        try {
+                            await window.sendToTelegram(ceiId, recordData, base64Photos, isEdit, typeLabel);
+                            recordData.telegramSent = true;
+                        } catch(errTg) {
+                            console.error("Erro no envio do Telegram (mas vai salvar no banco):", errTg);
+                            recordData.telegramSent = false;
+                            window.showToast("Falha no Telegram. O registro foi salvo apenas no sistema.", "error");
+                        }
+                    } else {
+                        recordData.telegramSent = false;
+                        window.showToast("Modo Offline ativado: Registro salvo localmente. Não foi enviado ao Telegram.", "info");
+                    }
                 } else { 
                     throw new Error("Selecione uma Creche (CEI) com o Telegram configurado."); 
                 }
@@ -557,7 +611,7 @@
 
                 await window.dbSave(type, recordId, recordData);
                 window.logAudit(`${isEdit ? 'Editou' : 'Registrou'} ${typeLabel} ID: ${recordId}`);
-                window.showToast("Salvo e Enviado!", "success");
+                if(navigator.onLine && recordData.telegramSent) window.showToast("Salvo e Enviado!", "success");
                 
                 window.clearDraft(type);
 
@@ -579,13 +633,13 @@
             const renderRows = (type, tbodyId) => {
                 const tbody = document.getElementById(tbodyId); if(!tbody) return;
                 const myData = window.localData[type].filter(r => r.userId === uid).sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
-                tbody.innerHTML = myData.map(r => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${r.cei || r.ceiId || ''}</td><td class="p-3 text-right space-x-1"><button type="button" onclick="window.editFuncRecord('${type}','${r.id}')" class="bg-blue-100 text-blue-700 p-2 rounded hover:bg-blue-200 shadow-sm"><i class="fas fa-edit"></i></button><button type="button" onclick="window.deleteFuncRecord('${type}','${r.id}')" class="bg-red-100 text-red-700 p-2 rounded hover:bg-red-200 shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`).join("") || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = myData.map(r => `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${r.cei || r.ceiId || ''}</td><td class="p-3 text-right flex justify-end gap-1"><button type="button" onclick="window.editFuncRecord('${type}','${r.id}')" class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 p-2 rounded hover:bg-blue-200 dark:hover:bg-blue-800 shadow-sm"><i class="fas fa-edit"></i></button></td></tr>`).join("") || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
             };
             renderRows('reports', 'empHistoryReports'); renderRows('quotes', 'empHistoryQuotes'); renderRows('thirdParty', 'empHistoryThirdParty');
         };
 
         window.cancelEdit = () => { 
-            const type = window.activeTab.split('-')[1]; // reports, quotes, thirdParty
+            const type = window.activeTab.split('-')[1];
             window.editingItemId = null; 
             window.activeTab = window.currentSystemUser.role === 'admin' ? `admin-${type}` : 'func-history';
             window.renderActiveTab(); 
@@ -652,6 +706,7 @@
 
         let currentFilteredData = [];
         window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
+        
         window.applyFilters = (type) => {
             const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
             const start = document.getElementById('filterDateStart')?.value || "";
@@ -679,7 +734,16 @@
             tbody.innerHTML = data.map(item => {
                 let uName = item.userName || item.userLogin || "Usuário";
                 let col3 = type === 'reports' ? uName : (type === 'quotes' ? window.formatMoney(item.materials?.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0)) : (item.companyName || ""));
-                return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4">${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${item.cei || item.ceiId || ''}</td><td class="p-4 text-slate-600 capitalize">${col3}</td><td class="p-4 text-right flex justify-end gap-1"><button onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button><button onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button><button onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 hover:bg-red-100 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`;
+                return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td class="p-4">${window.formatDateBR(item.date)}</td>
+                    <td class="p-4 font-medium">${item.cei || item.ceiId || ''}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-400 capitalize">${col3}</td>
+                    <td class="p-4 text-right flex justify-end gap-1">
+                        <button onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button>
+                        <button onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button>
+                        <button onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
             }).join("") || `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
         };
 
@@ -694,7 +758,7 @@
                 exportData = currentFilteredData.map(r => ({ 'Data': window.formatDateBR(r.date), 'Creche (CEI)': r.cei || r.ceiId, 'Técnico': r.userName || r.userLogin, 'Diagnóstico/Escopo': (r.workDone || r.desc || "").replace(/\\n/g, '\n'), 'Materiais Necessários': r.materials ? r.materials.map(m => `${m.qtd}x ${m.name} R$${m.price}`).join("\n") : "", 'Total Orçado (R$)': r.materials ? r.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0) : 0, 'Observação': (r.obs || "").replace(/\\n/g, '\n') }));
                 colWidths = [{wch:12}, {wch:25}, {wch:20}, {wch:50}, {wch:40}, {wch:18}, {wch:40}];
             } else if (type === 'thirdParty') {
-                exportData = currentFilteredData.map(r => ({ 'Data': window.formatDateBR(r.date), 'Creche (CEI)': r.cei || r.ceiId, 'Técnico Acompanhante': r.userName || r.userLogin, 'Empresa Terceirizada': r.companyName, 'Início': r.timeStart, 'Término': r.timeEnd, 'Servico Realizado': (r.workDone || r.tpDesc || "").replace(/\\n/g, '\n'), 'Observação': (r.obs || "").replace(/\\n/g, '\n') }));
+                exportData = currentFilteredData.map(r => ({ 'Data': window.formatDateBR(r.date), 'Creche (CEI)': r.cei || r.ceiId, 'Técnico Acompanhante': r.userName || r.userLogin, 'Empresa Terceirizada': r.companyName, 'Início': r.timeStart, 'Término': r.timeEnd, 'Serviço Realizado': (r.workDone || r.tpDesc || "").replace(/\\n/g, '\n'), 'Observação': (r.obs || "").replace(/\\n/g, '\n') }));
                 colWidths = [{wch:12}, {wch:25}, {wch:25}, {wch:25}, {wch:10}, {wch:10}, {wch:50}, {wch:40}];
             }
             
@@ -766,32 +830,32 @@
             const uName = record.userName || record.userLogin || "Usuário";
             const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
 
-            let html = `<div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 p-4 rounded border"><div><span class="font-bold text-slate-500">Data:</span> ${window.formatDateBR(record.date)}</div><div><span class="font-bold text-slate-500">CEI:</span> ${record.cei || record.ceiId || ''}</div><div><span class="font-bold text-slate-500">Registro por:</span> <span class="capitalize">${uName}</span></div>`;
-            if(type === 'reports' || type === 'thirdParty') html += `<div><span class="font-bold text-slate-500">Horário:</span> ${record.timeStart || '--'} às ${record.timeEnd || '--'}</div>`;
-            if(type === 'thirdParty') html += `<div class="col-span-2"><span class="font-bold text-slate-500">Empresa:</span> ${record.companyName || ''}</div>`;
-            if(type === 'reports') html += `<div><span class="font-bold text-slate-500">Dificuldade:</span> ${record.difficulty || '-'}</div>`;
+            let html = `<div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 dark:bg-slate-700/50 p-4 rounded border dark:border-slate-600"><div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Data:</span> ${window.formatDateBR(record.date)}</div><div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">CEI:</span> ${record.cei || record.ceiId || ''}</div><div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Registro por:</span> <span class="capitalize">${uName}</span></div>`;
+            if(type === 'reports' || type === 'thirdParty') html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Horário:</span> ${record.timeStart || '--'} às ${record.timeEnd || '--'}</div>`;
+            if(type === 'thirdParty') html += `<div class="col-span-2 dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Empresa:</span> ${record.companyName || ''}</div>`;
+            if(type === 'reports') html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Dificuldade:</span> ${record.difficulty || '-'}</div>`;
             html += `</div>`;
 
-            html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Serviço Realizado / Descrição</h4><p class="text-slate-600 text-sm whitespace-pre-wrap mb-6 bg-slate-50 p-3 rounded border">${desc}</p>`;
+            html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Serviço Realizado / Descrição</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded border dark:border-slate-600">${desc}</p>`;
 
             if(record.materials && record.materials.length > 0) {
-                html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Materiais / Custos</h4><table class="w-full text-sm text-left mb-6 border"><thead class="bg-slate-100"><tr><th class="p-2 border">Qtd</th><th class="p-2 border">Material</th><th class="p-2 border text-right">R$ Un.</th><th class="p-2 border text-right">Total</th></tr></thead><tbody>`;
+                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Materiais / Custos</h4><table class="w-full text-sm text-left mb-6 border dark:border-slate-600"><thead class="bg-slate-100 dark:bg-slate-700"><tr><th class="p-2 border dark:border-slate-600 dark:text-slate-200">Qtd</th><th class="p-2 border dark:border-slate-600 dark:text-slate-200">Material</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200">R$ Un.</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200">Total</th></tr></thead><tbody>`;
                 let totalGeral = 0;
                 record.materials.forEach(m => {
                     const price = parseFloat(m.price || 0); const q = parseFloat(m.qtd || 1); const total = price * q; totalGeral += total;
-                    html += `<tr><td class="p-2 border">${m.qtd || q}</td><td class="p-2 border">${m.name} (${m.brand||'-'})</td><td class="p-2 border text-right">${window.formatMoney(price)}</td><td class="p-2 border font-medium text-right">${window.formatMoney(total)}</td></tr>`;
+                    html += `<tr><td class="p-2 border dark:border-slate-600 dark:text-slate-300">${m.qtd || q}</td><td class="p-2 border dark:border-slate-600 dark:text-slate-300">${m.name} (${m.brand||'-'})</td><td class="p-2 border dark:border-slate-600 text-right dark:text-slate-300">${window.formatMoney(price)}</td><td class="p-2 border dark:border-slate-600 font-medium text-right dark:text-slate-300">${window.formatMoney(total)}</td></tr>`;
                 });
-                if(type === 'reports' || type === 'quotes') html += `<tr class="bg-blue-50"><td colspan="3" class="p-2 border text-right font-bold">TOTAL:</td><td class="p-2 border font-bold text-blue-700 text-right text-lg">${window.formatMoney(totalGeral)}</td></tr>`;
+                if(type === 'reports' || type === 'quotes') html += `<tr class="bg-blue-50 dark:bg-blue-900/30"><td colspan="3" class="p-2 border dark:border-slate-600 text-right font-bold dark:text-slate-200">TOTAL:</td><td class="p-2 border dark:border-slate-600 font-bold text-blue-700 dark:text-blue-400 text-right text-lg">${window.formatMoney(totalGeral)}</td></tr>`;
                 html += `</tbody></table>`;
             }
 
-            if(record.obs) html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Observações</h4><p class="text-slate-600 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 p-3 border border-yellow-200 rounded">${record.obs}</p>`;
+            if(record.obs) html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Observações</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 dark:bg-yellow-900/20 p-3 border border-yellow-200 dark:border-yellow-700/50 rounded">${record.obs}</p>`;
             
             if(record.telegramSent) {
-                html += `<div class="bg-green-50 text-green-700 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 font-medium"><i class="fab fa-telegram text-xl"></i> PDF e Fotos enviados com sucesso para o Telegram da creche.</div>`;
+                html += `<div class="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 dark:border-green-800 font-medium"><i class="fab fa-telegram text-xl"></i> PDF e Fotos enviados com sucesso para o Telegram da creche.</div>`;
             } else if(record.photos && record.photos.length > 0) {
-                html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`;
-                record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; });
+                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`;
+                record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border dark:border-slate-600 rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; });
                 html += `</div>`;
             }
 
