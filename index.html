@@ -36,7 +36,8 @@
 </head>
 <body class="text-slate-800 antialiased h-screen flex overflow-hidden">
 
-    <div id="printArea" class="hidden bg-white p-8 absolute w-full min-h-screen z-50"></div>
+    <!-- Área Exclusiva de Impressão -->
+    <div id="printArea" class="hidden bg-white absolute w-full min-h-screen z-50 p-8"></div>
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
     <!-- TELA DE LOGIN -->
@@ -263,13 +264,10 @@
             document.getElementById('mobilePageTitle').textContent = title;
             document.getElementById('mainContent').innerHTML = html.includes('flex justify-between') ? html : `<h2 class="text-2xl font-bold text-slate-800 mb-6 hidden md:block">${title}</h2>${html}`;
             
-            // TRIGGERS E RECARGA DE DADOS AO TROCAR DE ABA
             if(['func-reports', 'func-quotes', 'func-thirdParty'].includes(window.activeTab)) {
                 const sffx = window.activeTab === 'func-reports' ? 'Rep' : (window.activeTab === 'func-quotes' ? 'Quote' : 'ThirdParty');
                 populateCeiSelect(`ceiSelect${sffx}`);
-                
-                // SISTEMA DE RASCUNHO AUTOMÁTICO (AUTO-SAVE)
-                if(!window.editingItemId) { window.loadDraft(window.activeTab.split('-')[1]); }
+                if(!window.editingItemId) window.loadDraft(window.activeTab.split('-')[1]);
                 
                 const formObj = document.getElementById(window.activeTab === 'func-reports' ? 'reportForm' : (window.activeTab === 'func-quotes' ? 'quoteForm' : 'thirdPartyForm'));
                 if(formObj) {
@@ -282,17 +280,10 @@
             if(['admin-reports', 'admin-quotes', 'admin-thirdParty'].includes(window.activeTab)) window.setupAdminFilters();
         };
 
-        // SISTEMA DE RASCUNHO (DRAFTS) PARA FUNCIONÁRIO NÃO PERDER DADOS
         window.saveDraft = (type) => {
-            if(window.editingItemId) return; // Não salva rascunho se estiver editando algo que já existe
+            if(window.editingItemId) return;
             const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-            const draft = {
-                cei: document.getElementById(`ceiSelect${sffx}`)?.value || "",
-                date: document.getElementById(`date${sffx}`)?.value || "",
-                workDone: document.getElementById(`workDone${sffx}`)?.value || "",
-                obs: document.getElementById(`obs${sffx}`)?.value || ""
-            };
-
+            const draft = { cei: document.getElementById(`ceiSelect${sffx}`)?.value || "", date: document.getElementById(`date${sffx}`)?.value || "", workDone: document.getElementById(`workDone${sffx}`)?.value || "", obs: document.getElementById(`obs${sffx}`)?.value || "" };
             if(type === 'reports' || type === 'thirdParty') { draft.timeStart = document.getElementById(`timeStart${sffx}`)?.value || ""; draft.timeEnd = document.getElementById(`timeEnd${sffx}`)?.value || ""; }
             if(type === 'thirdParty') draft.companyName = document.getElementById('companyNameThirdParty')?.value || "";
             if(type === 'reports') draft.difficulty = document.getElementById('diffRep')?.value || "Médio";
@@ -300,9 +291,7 @@
             if(type === 'reports' || type === 'quotes') {
                 const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
                 const mats = [];
-                document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => {
-                    mats.push({ name: row.querySelector('.mat-name')?.value || "", brand: row.querySelector('.mat-brand')?.value || "", qtd: row.querySelector('.mat-qtd')?.value || "1", price: row.querySelector('.mat-price')?.value || "" });
-                });
+                document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => { mats.push({ name: row.querySelector('.mat-name')?.value || "", brand: row.querySelector('.mat-brand')?.value || "", qtd: row.querySelector('.mat-qtd')?.value || "1", price: row.querySelector('.mat-price')?.value || "" }); });
                 draft.materials = mats;
             }
             localStorage.setItem(`lym_draft_${type}`, JSON.stringify(draft));
@@ -310,42 +299,25 @@
 
         window.loadDraft = (type) => {
             if(window.editingItemId) return; 
-            const draftStr = localStorage.getItem(`lym_draft_${type}`);
-            if(!draftStr) return;
-            
+            const draftStr = localStorage.getItem(`lym_draft_${type}`); if(!draftStr) return;
             try {
-                const draft = JSON.parse(draftStr);
-                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                
+                const draft = JSON.parse(draftStr); const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
                 setTimeout(() => {
                     if(draft.cei) document.getElementById(`ceiSelect${sffx}`).value = draft.cei;
                     if(draft.date) document.getElementById(`date${sffx}`).value = draft.date;
                     if(draft.workDone) document.getElementById(`workDone${sffx}`).value = draft.workDone;
                     if(draft.obs) document.getElementById(`obs${sffx}`).value = draft.obs;
-                    
-                    if(type === 'reports' || type === 'thirdParty') {
-                        if(draft.timeStart) document.getElementById(`timeStart${sffx}`).value = draft.timeStart;
-                        if(draft.timeEnd) document.getElementById(`timeEnd${sffx}`).value = draft.timeEnd;
-                    }
+                    if(type === 'reports' || type === 'thirdParty') { if(draft.timeStart) document.getElementById(`timeStart${sffx}`).value = draft.timeStart; if(draft.timeEnd) document.getElementById(`timeEnd${sffx}`).value = draft.timeEnd; }
                     if(type === 'thirdParty' && draft.companyName) document.getElementById('companyNameThirdParty').value = draft.companyName;
                     if(type === 'reports' && draft.difficulty) document.getElementById('diffRep').value = draft.difficulty;
 
                     if((type === 'reports' || type === 'quotes') && draft.materials) {
-                        const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
-                        document.getElementById(contId).innerHTML = '';
-                        if(draft.materials.length === 0) {
-                            document.getElementById(contId).innerHTML = '<p class="text-sm text-slate-400 italic">Nenhum material listado.</p>';
-                        } else {
-                            draft.materials.forEach(m => {
-                                window.addMaterialRow(contId, false);
-                                const lastRow = document.getElementById(`mat_${window.materialCount}`);
-                                lastRow.querySelector('.mat-name').value = m.name; lastRow.querySelector('.mat-brand').value = m.brand;
-                                lastRow.querySelector('.mat-qtd').value = m.qtd; lastRow.querySelector('.mat-price').value = m.price;
-                            });
-                        }
+                        const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; document.getElementById(contId).innerHTML = '';
+                        if(draft.materials.length === 0) { document.getElementById(contId).innerHTML = '<p class="text-sm text-slate-400 italic">Nenhum material listado.</p>'; } 
+                        else { draft.materials.forEach(m => { window.addMaterialRow(contId, false); const lastRow = document.getElementById(`mat_${window.materialCount}`); lastRow.querySelector('.mat-name').value = m.name; lastRow.querySelector('.mat-brand').value = m.brand; lastRow.querySelector('.mat-qtd').value = m.qtd; lastRow.querySelector('.mat-price').value = m.price; }); }
                     }
                 }, 100);
-            } catch(e) { console.error("Erro carregando rascunho", e); }
+            } catch(e) { console.error("Erro rascunho", e); }
         };
 
         window.clearDraft = (type) => { localStorage.removeItem(`lym_draft_${type}`); };
@@ -376,7 +348,7 @@
         const renderFuncHistory = () => `<div class="flex items-center mb-6 hidden md:flex"><h2 class="text-2xl font-bold text-slate-800">Meus Registros</h2></div><div class="max-w-4xl mx-auto animate-fade-in space-y-8"><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-blue-50 font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> Minhas Manutenções</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-green-50 font-bold text-green-800"><i class="fas fa-file-invoice mr-2"></i> Meus Orçamentos</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-purple-50 font-bold text-purple-800"><i class="fas fa-handshake mr-2"></i> Meus Terceiros</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div></div>`;
 
         // ==========================================
-        // LÓGICA DE DADOS, EVENTOS E TELEGRAM
+        // LÓGICA DE DADOS E EVENTOS
         // ==========================================
         window.addMaterialRow = (containerId, triggerSave = true) => {
             const container = document.getElementById(containerId);
@@ -417,6 +389,7 @@
         };
 
         const escapeHtml = (text) => { return (text || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
+        
         const dataURItoBlob = (dataURI) => {
             let byteString = atob(dataURI.split(',')[1]); let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
             let ab = new ArrayBuffer(byteString.length); let ia = new Uint8Array(ab);
@@ -441,7 +414,6 @@
             let uName = dataObj.userName || dataObj.userLogin || "Usuário";
             let wDone = dataObj.workDone || dataObj.desc || dataObj.tpDesc || "Sem descrição";
 
-            // Correção definitiva da tag: uName maiúsculo puramente em JS, sem tags span.
             let tgText = `${isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>\n" : `🛠 <b>NOVO: ${typeLabel}</b>\n`}🏫 <b>CEI:</b> ${escapeHtml(cei.name)}\n👨‍🔧 <b>Técnico:</b> ${escapeHtml(uName).toUpperCase()}\n📅 <b>Data:</b> ${window.formatDateBR(dataObj.date)}\n`;
             if (dataObj.timeStart) tgText += `🕒 <b>Horário:</b> ${dataObj.timeStart} às ${dataObj.timeEnd}\n`;
             if (wDone) tgText += `\n🛠 <b>Descrição/Serviço:</b>\n${escapeHtml(wDone)}\n`;
@@ -486,11 +458,8 @@
                 imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`;
             }
 
-            const pdfDiv = document.createElement('div');
-            pdfDiv.style.position = 'absolute'; pdfDiv.style.top = '0'; pdfDiv.style.left = '0'; pdfDiv.style.width = '800px'; pdfDiv.style.zIndex = '-9999'; pdfDiv.style.background = '#ffffff';
-            document.body.appendChild(pdfDiv);
-
-            pdfDiv.innerHTML = `
+            // CORREÇÃO: ENVIAR TEXTO HTML DIRETAMENTE PARA O GERADOR DE PDF PARA NÃO FALHAR NO BACKGROUND
+            const pdfContent = `
             <div style="padding:30px; font-family:Arial, sans-serif; color:#334155; background:#ffffff;">
                 <div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;">
                     <h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p>
@@ -518,8 +487,9 @@
             </div>`;
 
             const opt = { margin: 10, filename: `Relatorio.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            let pdfBlob = await html2pdf().set(opt).from(pdfDiv).output('blob');
-            document.body.removeChild(pdfDiv); 
+            
+            // html2pdf can take a string directly which guarantees no render bugs from negative z-index CSS!
+            let pdfBlob = await html2pdf().set(opt).from(pdfContent).output('blob');
 
             const fData = new FormData();
             fData.append('chat_id', chatId);
@@ -574,8 +544,6 @@
                 const fileInput = document.getElementById(type === 'reports' ? 'photosRep' : (type === 'quotes' ? 'photosQuote' : 'photosThirdParty'));
                 if (fileInput && fileInput.files && fileInput.files.length > 0) {
                     for(let file of fileInput.files) { if (file.type.startsWith('image/')) base64Photos.push(await window.compressImage(file)); }
-                } else if (isEdit) {
-                    base64Photos = [];
                 }
                 
                 if (ceiId !== "") {
@@ -670,6 +638,164 @@
                 if (window.currentSystemUser.role === 'admin') { window.setupAdminFilters(); } 
                 else { window.renderEmployeeHistory(); }
             }); 
+        };
+
+        window.openCeiModal = () => { window.editingItemId = null; document.getElementById('ceiForm').reset(); document.getElementById('modalTitleCei').textContent = "Nova Creche (CEI)"; window.showElement('modalCei'); };
+        window.editCei = (id) => { const c = window.localData.ceis.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('ceiName').value = c.name; document.getElementById('ceiTelegramId').value = c.telegramGroupId || ""; document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId || ""; document.getElementById('modalTitleCei').textContent = "Editar Creche (CEI)"; window.showElement('modalCei'); } };
+        window.saveCei = async (e) => { e.preventDefault(); const n = document.getElementById('ceiName').value.trim(); const tg = document.getElementById('ceiTelegramId').value.trim(); const tp = document.getElementById('ceiTelegramTopicId').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('ceis', id, { id: String(id), name: n, telegramGroupId: tg, telegramTopicId: tp }); window.logAudit(window.editingItemId ? `CEI Editado: ${n}` : `CEI Criado: ${n}`); window.showToast("CEI salvo!"); window.hideElement('modalCei'); };
+        window.deleteCei = (id) => { window.confirmAction(async () => { await window.dbDelete('ceis', id); window.logAudit(`CEI Excluído ID: ${id}`); window.showToast("CEI excluído!"); }); };
+
+        window.openUserModal = () => { window.editingItemId = null; document.getElementById('userForm').reset(); document.getElementById('modalTitleUser').textContent = "Novo Usuário"; window.showElement('modalUser'); };
+        window.editUser = (id) => { const u = window.localData.users.find(x => x.id === id); if(u) { window.editingItemId = id; document.getElementById('newUsername').value = u.login || u.username; document.getElementById('newPassword').value = u.pass || u.password; document.getElementById('newRole').value = u.role; document.getElementById('modalTitleUser').textContent = "Editar Usuário"; window.showElement('modalUser'); } };
+        window.saveUser = async (e) => { e.preventDefault(); const u = document.getElementById('newUsername').value.trim(); const p = document.getElementById('newPassword').value.trim(); const r = document.getElementById('newRole').value; if(!u || !p) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { id: String(id), login: u, pass: p, role: r }); window.logAudit(window.editingItemId ? `Usuário Editado: ${u}` : `Usuário Criado: ${u}`); window.showToast("Usuário salvo!"); window.hideElement('modalUser'); };
+        window.deleteUser = (id) => { if(id === window.currentSystemUser.id) return window.showToast("Não pode excluir a si mesmo", "error"); window.confirmAction(async () => { await window.dbDelete('users', id); window.logAudit(`Usuário Excluído ID: ${id}`); window.showToast("Usuário excluído!"); }); };
+
+        let currentFilteredData = [];
+        window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
+        window.applyFilters = (type) => {
+            const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
+            const start = document.getElementById('filterDateStart')?.value || "";
+            const end = document.getElementById('filterDateEnd')?.value || "";
+            
+            let data = [...window.localData[type]];
+            if(search) {
+                data = data.filter(item => {
+                    const ceiStr = (item.cei || item.ceiId || "").toLowerCase();
+                    const userStr = (item.userName || item.userLogin || "").toLowerCase();
+                    const compStr = (item.companyName || "").toLowerCase();
+                    const workStr = (item.workDone || item.desc || item.tpDesc || "").toLowerCase();
+                    return ceiStr.includes(search) || userStr.includes(search) || compStr.includes(search) || workStr.includes(search);
+                });
+            }
+            if(start) data = data.filter(item => item.date >= start);
+            if(end) data = data.filter(item => item.date <= end);
+            
+            data.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
+            currentFilteredData = data; 
+            
+            const tbody = document.getElementById(`tableBody${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            if(!tbody) return;
+            
+            tbody.innerHTML = data.map(item => {
+                let uName = item.userName || item.userLogin || "Usuário";
+                let col3 = type === 'reports' ? uName : (type === 'quotes' ? window.formatMoney(item.materials?.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0)) : (item.companyName || ""));
+                return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4">${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${item.cei || item.ceiId || ''}</td><td class="p-4 text-slate-600 capitalize">${col3}</td><td class="p-4 text-right flex justify-end gap-1"><button onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button><button onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button><button onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 hover:bg-red-100 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`;
+            }).join("") || `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+        };
+
+        window.exportToExcel = (type) => {
+            if(currentFilteredData.length === 0) return window.showToast("Nenhum dado para exportar", "error");
+            let exportData = []; let colWidths = [];
+            
+            if(type === 'reports') {
+                exportData = currentFilteredData.map(r => ({ 'Data': window.formatDateBR(r.date), 'Creche (CEI)': r.cei || r.ceiId, 'Técnico': r.userName || r.userLogin, 'Início': r.timeStart, 'Término': r.timeEnd, 'Dificuldade': r.difficulty, 'Serviço Realizado': (r.workDone || r.desc || "").replace(/\\n/g, '\n'), 'Materiais Utilizados': r.materials ? r.materials.map(m => `${m.qtd}x ${m.name} (${m.brand}) R$${m.price}`).join("\n") : "", 'Total Gasto (R$)': r.materials ? r.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0) : 0, 'Observação': (r.obs || "").replace(/\\n/g, '\n'), 'Enviado Telegram': r.telegramSent ? "Sim" : "Não" }));
+                colWidths = [{wch:12}, {wch:25}, {wch:20}, {wch:10}, {wch:10}, {wch:12}, {wch:50}, {wch:40}, {wch:15}, {wch:40}, {wch:15}];
+            } else if (type === 'quotes') {
+                exportData = currentFilteredData.map(r => ({ 'Data': window.formatDateBR(r.date), 'Creche (CEI)': r.cei || r.ceiId, 'Técnico': r.userName || r.userLogin, 'Diagnóstico/Escopo': (r.workDone || r.desc || "").replace(/\\n/g, '\n'), 'Materiais Necessários': r.materials ? r.materials.map(m => `${m.qtd}x ${m.name} R$${m.price}`).join("\n") : "", 'Total Orçado (R$)': r.materials ? r.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0) : 0, 'Observação': (r.obs || "").replace(/\\n/g, '\n') }));
+                colWidths = [{wch:12}, {wch:25}, {wch:20}, {wch:50}, {wch:40}, {wch:18}, {wch:40}];
+            } else if (type === 'thirdParty') {
+                exportData = currentFilteredData.map(r => ({ 'Data': window.formatDateBR(r.date), 'Creche (CEI)': r.cei || r.ceiId, 'Técnico Acompanhante': r.userName || r.userLogin, 'Empresa Terceirizada': r.companyName, 'Início': r.timeStart, 'Término': r.timeEnd, 'Servico Realizado': (r.workDone || r.tpDesc || "").replace(/\\n/g, '\n'), 'Observação': (r.obs || "").replace(/\\n/g, '\n') }));
+                colWidths = [{wch:12}, {wch:25}, {wch:25}, {wch:25}, {wch:10}, {wch:10}, {wch:50}, {wch:40}];
+            }
+            
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            ws['!cols'] = colWidths;
+            
+            for (let cell in ws) {
+                if (cell[0] === '!') continue;
+                if (typeof ws[cell].v === 'string' && ws[cell].v.includes('\n')) {
+                    if(!ws[cell].s) ws[cell].s = {};
+                    if(!ws[cell].s.alignment) ws[cell].s.alignment = {};
+                    ws[cell].s.alignment.wrapText = true;
+                }
+            }
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Relatório LYM");
+            
+            const dateNow = new Date();
+            const mes = String(dateNow.getMonth() + 1).padStart(2, '0');
+            const ano = dateNow.getFullYear();
+            XLSX.writeFile(wb, `LYM_Manutencao_${mes}_${ano}.xlsx`);
+            window.logAudit(`Exportou Excel: ${type}`);
+        };
+
+        window.printRecord = (type, record) => {
+            const printArea = document.getElementById('printArea');
+            const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
+            const uName = record.userName || record.userLogin || "Usuário";
+            const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+            
+            let matsHtml = ''; let totalValue = 0;
+            if(record.materials && record.materials.length > 0) {
+                matsHtml = `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;"><thead><tr style="background: #1e293b; color: white; text-align: left;"><th style="padding: 10px;">Qtd</th><th style="padding: 10px;">Material</th><th style="padding: 10px; text-align:right;">R$ Un.</th><th style="padding: 10px; text-align:right;">Total</th></tr></thead><tbody>`;
+                record.materials.forEach(m => {
+                    const price = parseFloat(m.price || 0); const q = parseFloat(m.qtd || 1); const total = price * q; totalValue += total;
+                    matsHtml += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px;">${q}</td><td style="padding: 10px;">${m.name} (${m.brand||'-'})</td><td style="padding: 10px; text-align:right;">${window.formatMoney(price)}</td><td style="padding: 10px; text-align:right;">${window.formatMoney(total)}</td></tr>`;
+                });
+                matsHtml += `<tr style="background: #f1f5f9; font-weight: bold;"><td colspan="3" style="padding: 10px; text-align: right;">TOTAL:</td><td style="padding: 10px; text-align:right; color: #1d4ed8;">${window.formatMoney(totalValue)}</td></tr></tbody></table>`;
+            }
+
+            printArea.innerHTML = `
+                <div style="font-family: Arial, sans-serif; color: #334155; max-width: 800px; margin: 0 auto;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #1d4ed8; padding-bottom: 20px; margin-bottom: 20px;">
+                        <div><h1 style="margin:0; font-size: 24px; color:#1d4ed8;">LYM Eletrônicos</h1><p style="margin:5px 0 0; color:#64748b; font-size:14px;">Documento de ${typeLabel}</p></div>
+                        <div style="text-align: right; font-size:14px; color:#64748b;"><p style="margin:0;">Data: <strong>${window.formatDateBR(record.date)}</strong></p><p style="margin:0;">Ref: #LYM-${record.id.substring(record.id.length-6)}</p></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 14px;">
+                        <div style="width:48%;"><p style="margin:0 0 8px 0;"><strong>Técnico / Responsável:</strong> <span style="text-transform:capitalize;">${uName}</span></p>${record.difficulty ? `<p style="margin:0 0 8px 0;"><strong>Dificuldade:</strong> ${record.difficulty}</p>` : ''}</div>
+                        <div style="width:48%;"><p style="margin:0 0 8px 0;"><strong>Cliente / Local:</strong> ${record.cei || record.ceiId || ''}</p>${record.timeStart ? `<p style="margin:0 0 8px 0;"><strong>Horário:</strong> ${record.timeStart} às ${record.timeEnd}</p>` : ''}${record.companyName ? `<p style="margin:0;"><strong>Empresa Terceira:</strong> ${record.companyName}</p>` : ''}</div>
+                    </div>
+                    <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Descrição do Serviço</h4>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;"><p style="margin:0; line-height: 1.5;">${desc.replace(/\n/g, '<br>')}</p></div>
+                    ${matsHtml}
+                    ${record.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 20px;"><p style="margin:0; line-height:1.5;">${record.obs.replace(/\n/g, '<br>')}</p></div>` : ''}
+                    <div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div>
+                </div>`;
+            
+            document.getElementById('printArea').classList.remove('hidden');
+            window.print();
+            setTimeout(() => { document.getElementById('printArea').classList.add('hidden'); }, 1000);
+        };
+
+        window.viewRecord = (type, id) => {
+            const record = window.localData[type].find(r => r.id === id); if(!record) return;
+            const btnPrint = document.getElementById('btnPrintRecord');
+            btnPrint.onclick = () => window.printRecord(type, record);
+
+            const uName = record.userName || record.userLogin || "Usuário";
+            const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+
+            let html = `<div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 p-4 rounded border"><div><span class="font-bold text-slate-500">Data:</span> ${window.formatDateBR(record.date)}</div><div><span class="font-bold text-slate-500">CEI:</span> ${record.cei || record.ceiId || ''}</div><div><span class="font-bold text-slate-500">Registro por:</span> <span class="capitalize">${uName}</span></div>`;
+            if(type === 'reports' || type === 'thirdParty') html += `<div><span class="font-bold text-slate-500">Horário:</span> ${record.timeStart || '--'} às ${record.timeEnd || '--'}</div>`;
+            if(type === 'thirdParty') html += `<div class="col-span-2"><span class="font-bold text-slate-500">Empresa:</span> ${record.companyName || ''}</div>`;
+            if(type === 'reports') html += `<div><span class="font-bold text-slate-500">Dificuldade:</span> ${record.difficulty || '-'}</div>`;
+            html += `</div>`;
+
+            html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Serviço Realizado / Descrição</h4><p class="text-slate-600 text-sm whitespace-pre-wrap mb-6 bg-slate-50 p-3 rounded border">${desc}</p>`;
+
+            if(record.materials && record.materials.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Materiais / Custos</h4><table class="w-full text-sm text-left mb-6 border"><thead class="bg-slate-100"><tr><th class="p-2 border">Qtd</th><th class="p-2 border">Material</th><th class="p-2 border text-right">R$ Un.</th><th class="p-2 border text-right">Total</th></tr></thead><tbody>`;
+                let totalGeral = 0;
+                record.materials.forEach(m => {
+                    const price = parseFloat(m.price || 0); const q = parseFloat(m.qtd || 1); const total = price * q; totalGeral += total;
+                    html += `<tr><td class="p-2 border">${m.qtd || q}</td><td class="p-2 border">${m.name} (${m.brand||'-'})</td><td class="p-2 border text-right">${window.formatMoney(price)}</td><td class="p-2 border font-medium text-right">${window.formatMoney(total)}</td></tr>`;
+                });
+                if(type === 'reports' || type === 'quotes') html += `<tr class="bg-blue-50"><td colspan="3" class="p-2 border text-right font-bold">TOTAL:</td><td class="p-2 border font-bold text-blue-700 text-right text-lg">${window.formatMoney(totalGeral)}</td></tr>`;
+                html += `</tbody></table>`;
+            }
+
+            if(record.obs) html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Observações</h4><p class="text-slate-600 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 p-3 border border-yellow-200 rounded">${record.obs}</p>`;
+            
+            if(record.telegramSent) {
+                html += `<div class="bg-green-50 text-green-700 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 font-medium"><i class="fab fa-telegram text-xl"></i> PDF e Fotos enviados com sucesso para o Telegram da creche.</div>`;
+            } else if(record.photos && record.photos.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`;
+                record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; });
+                html += `</div>`;
+            }
+
+            document.getElementById('viewRecordContent').innerHTML = html; window.showElement('modalViewRecord');
         };
 
         window.onload = () => { window.initFirebaseSync(); };
