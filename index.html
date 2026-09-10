@@ -3,287 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LYM Eletrônicos - Sistema de Manutenção</title>
+    <title>LYM Eletrônicos - Gestão</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Bibliotecas Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS (Excel Export) -->
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <!-- HTML2PDF -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
     
-    <!-- FIREBASE SDKS -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
     <style>
-        input, select, textarea { font-size: 16px !important; } 
-        button { touch-action: manipulation; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        /* Otimizações para Touch no Celular */
+        button, input, select { touch-action: manipulation; }
+        input, select, textarea { font-size: 16px !important; } /* Evita zoom automático no iPhone */
+        
+        .toast { transition: all 0.3s ease-in-out; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.hide { transform: translateY(100%); opacity: 0; }
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Esconder tudo na hora de imprimir, exceto a área de impressão */
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+<body class="text-slate-800 antialiased h-screen flex overflow-hidden">
 
-    <!-- Notificações (Toast) -->
+    <div id="printArea" class="hidden bg-white p-8 absolute w-full min-h-screen z-50">
+        <!-- O conteúdo será injetado aqui via JS -->
+    </div>
+
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
     <!-- TELA DE LOGIN -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-slate-100">
-        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md animate-fade-in">
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
+        <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-8">
-                <div class="bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">LYM</div>
-                <h1 class="text-2xl font-bold text-slate-800">Acesso ao Sistema</h1>
+                <div class="bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-bolt text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800">LYM Eletrônicos</h1>
+                <p class="text-slate-500">Sistema de Gestão e Manutenção</p>
             </div>
-            <form id="loginForm" onsubmit="window.handleLogin(event)" class="space-y-6">
+            
+            <form id="loginForm" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Usuário</label>
-                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
+                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Digite seu usuário">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Senha</label>
-                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors">Entrar</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md text-lg">
+                    Entrar no Sistema
+                </button>
             </form>
         </div>
     </div>
 
     <!-- APLICATIVO PRINCIPAL -->
-    <div id="mainApp" class="hidden min-h-screen flex flex-col">
-        <!-- HEADER -->
-        <header class="bg-blue-700 text-white shadow-md sticky top-0 z-40">
-            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div id="appLayout" class="hidden w-full h-full flex flex-col md:flex-row">
+        
+        <!-- Sidebar (Menu Lateral) -->
+        <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
+            <div class="p-4 sm:p-6 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-3">
-                    <div class="bg-white text-blue-700 font-bold w-10 h-10 rounded-full flex items-center justify-center">LYM</div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">LYM Eletrônicos</h1>
-                        <span id="userBadge" class="text-xs bg-blue-500 px-2 py-1 rounded-full uppercase tracking-wide"></span>
-                    </div>
+                    <i class="fas fa-bolt text-blue-400 text-xl"></i>
+                    <h2 class="text-xl font-bold tracking-wider">LYM APP</h2>
                 </div>
-                <button onclick="window.logout()" class="text-blue-100 hover:text-white p-2" title="Sair"><i class="fas fa-sign-out-alt text-xl"></i></button>
+                <!-- Menu Mobile Toggle -->
+                <button id="mobileMenuBtn" class="md:hidden text-white p-2">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
             </div>
-        </header>
-
-        <main class="flex-grow container mx-auto p-4 max-w-6xl">
             
-            <!-- ====== ÁREA DO ADMINISTRADOR ====== -->
-            <div id="adminPanel" class="hidden space-y-6 animate-fade-in">
-                <!-- Abas Admin -->
-                <div class="flex overflow-x-auto bg-white rounded-lg border p-1 mb-4 gap-1">
-                    <button onclick="window.switchAdminTab('reports')" id="tabBtn_reports" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap transition-colors"><i class="fas fa-tools mr-2"></i>Serviços</button>
-                    <button onclick="window.switchAdminTab('quotes')" id="tabBtn_quotes" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-file-invoice-dollar mr-2"></i>Orçamentos</button>
-                    <button onclick="window.switchAdminTab('thirdParty')" id="tabBtn_thirdParty" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-hard-hat mr-2"></i>Terceiros</button>
-                    <button onclick="window.switchAdminTab('config')" id="tabBtn_config" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-cog mr-2"></i>Ajustes</button>
-                    <button onclick="window.switchAdminTab('audit')" id="tabBtn_audit" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-history mr-2"></i>Auditoria</button>
-                </div>
-
-                <!-- Filtros -->
-                <div id="filterBar" class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-end">
-                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Buscar texto</label><input type="text" id="filterSearch" onkeyup="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500" placeholder="Digite para buscar..."></div>
-                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Creche (CEI)</label><select id="filterCei" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500"><option value="">Todas as Creches</option></select></div>
-                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Início</label><input type="date" id="filterDateStart" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500"></div>
-                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Fim</label><input type="date" id="filterDateEnd" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border outline-none focus:border-blue-500"></div>
-                    <button onclick="window.exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded whitespace-nowrap transition-colors"><i class="fas fa-file-excel mr-2"></i>Gerar Excel</button>
-                </div>
-
-                <!-- Tabelas Admin -->
-                <div id="tabContent_reports" class="admin-tab-content block"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminReportsTable" class="divide-y text-sm"></tbody></table></div></div>
-                <div id="tabContent_quotes" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Orçamento</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminQuotesTable" class="divide-y text-sm"></tbody></table></div></div>
-                <div id="tabContent_thirdParty" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Técnico Resp.</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminThirdPartyTable" class="divide-y text-sm"></tbody></table></div></div>
-                <div id="tabContent_audit" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data/Hora</th><th class="p-3 text-sm">Usuário</th><th class="p-3 text-sm">Ação Registrada</th></tr></thead><tbody id="adminAuditTable" class="divide-y text-sm"></tbody></table></div></div>
-                
-                <div id="tabContent_config" class="admin-tab-content hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-5 rounded-lg border">
-                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Creches (CEIs)</h3><button onclick="window.showModal('modalCei')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"><i class="fas fa-plus mr-1"></i> Nova</button></div>
-                            <ul id="adminCeiList" class="divide-y text-sm"></ul>
-                        </div>
-                        <div class="bg-white p-5 rounded-lg border">
-                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Usuários do Sistema</h3><button onclick="window.showModal('modalUser')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"><i class="fas fa-plus mr-1"></i> Novo</button></div>
-                            <ul id="adminUserList" class="divide-y text-sm"></ul>
-                        </div>
-                    </div>
-                </div>
+            <div id="navLinks" class="hidden md:flex flex-col flex-grow overflow-y-auto py-4">
+                <!-- Links injetados via JS -->
             </div>
 
-            <!-- ====== ÁREA DO FUNCIONÁRIO ====== -->
-            <div id="employeePanel" class="hidden space-y-6 animate-fade-in">
-                <!-- Abas Func -->
-                <div class="flex overflow-x-auto bg-white rounded-lg border p-1 gap-1">
-                    <button onclick="window.switchEmpTab('reports')" id="empTabBtn_reports" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap transition-colors"><i class="fas fa-tools mr-2"></i>Execução</button>
-                    <button onclick="window.switchEmpTab('quotes')" id="empTabBtn_quotes" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-file-invoice-dollar mr-2"></i>Orçamento</button>
-                    <button onclick="window.switchEmpTab('thirdParty')" id="empTabBtn_thirdParty" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors"><i class="fas fa-hard-hat mr-2"></i>Terceiros</button>
-                </div>
-                
-                <div id="cancelEditBtn" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded flex justify-between items-center shadow-sm">
-                    <p class="font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Editando Registro Existente.</p>
-                    <button onclick="window.cancelEdit()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">Cancelar Edição</button>
-                </div>
-
-                <!-- Formulário: Manutenção -->
-                <div id="empTabContent_reports" class="emp-tab-content block">
-                    <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleReports" class="text-xl font-bold mb-6 border-b pb-2 text-slate-800">Registrar Manutenção</h2>
-                        <form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI (Creche) *</label><select id="repCei" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="repDate" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                                <div><label class="block text-sm font-bold mb-1">Horário Início *</label><input type="time" id="repStart" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                                <div><label class="block text-sm font-bold mb-1">Horário Término *</label><input type="time" id="repEnd" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Dificuldade</label><select id="repDifficulty" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
-                            <div><label class="block text-sm font-bold mb-1">O que foi feito? *</label><textarea id="repDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></textarea></div>
-                            
-                            <div class="bg-slate-100 p-4 rounded-lg border border-slate-200">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold text-slate-700"><i class="fas fa-boxes mr-2"></i>Materiais Utilizados</h3>
-                                    <button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors"><i class="fas fa-plus mr-1"></i> Add Material</button>
-                                </div>
-                                <div id="materialsContainer" class="space-y-3"><p class="text-sm text-slate-500 italic">Nenhum material adicionado.</p></div>
-                            </div>
-
-                            <div><label class="block text-sm font-bold mb-1">Fotos do Reparo</label>
-                                <input type="file" id="repPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                <div id="repPhotoPreview" class="flex flex-wrap gap-2 mt-3"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Observação (Opcional)</label><input type="text" id="repObs" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                            <button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg shadow-md transition-colors mt-4">Salvar Serviço</button>
-                        </form>
+            <div class="p-4 border-t border-slate-700 hidden md:block" id="navFooter">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-blue-400 font-bold" id="userInitial">A</div>
+                    <div class="overflow-hidden">
+                        <p class="font-medium truncate" id="userNameDisplay">Admin</p>
+                        <p class="text-xs text-slate-400 capitalize" id="userRoleDisplay">Administrador</p>
                     </div>
                 </div>
+                <button onclick="window.logout()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 rounded-lg transition">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </nav>
 
-                <!-- Formulário: Orçamento -->
-                <div id="empTabContent_quotes" class="emp-tab-content hidden">
-                    <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleQuotes" class="text-xl font-bold mb-6 border-b pb-2 text-slate-800">Novo Orçamento</h2>
-                        <form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI (Creche) *</label><select id="quoCei" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="quoDate" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Descrição do Orçamento *</label><textarea id="quoDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></textarea></div>
-                            
-                            <div class="bg-slate-100 p-4 rounded-lg border border-slate-200">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold text-slate-700"><i class="fas fa-boxes mr-2"></i>Lista de Materiais</h3>
-                                    <button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors"><i class="fas fa-plus mr-1"></i> Add Material</button>
-                                </div>
-                                <div id="quoMaterialsContainer" class="space-y-3"><p class="text-sm text-slate-500 italic">Nenhum material listado.</p></div>
-                            </div>
-
-                            <div><label class="block text-sm font-bold mb-1">Fotos do Problema</label>
-                                <input type="file" id="quoPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                <div id="quoPhotoPreview" class="flex flex-wrap gap-2 mt-3"></div>
-                            </div>
-                            <button type="submit" id="btnSubmitQuote" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg shadow-md transition-colors mt-4">Salvar Orçamento</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Formulário: Terceiros -->
-                <div id="empTabContent_thirdParty" class="emp-tab-content hidden">
-                    <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleThirdParty" class="text-xl font-bold mb-6 border-b pb-2 text-slate-800">Acompanhamento de Terceiros</h2>
-                        <form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI (Creche) *</label><select id="tpCei" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Empresa Terceira *</label><input type="text" id="tpCompany" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="tpDate" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                                <div><label class="block text-sm font-bold mb-1">Horário Início *</label><input type="time" id="tpStart" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                                <div><label class="block text-sm font-bold mb-1">Horário Término *</label><input type="time" id="tpEnd" required class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Serviço Realizado *</label><textarea id="tpDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></textarea></div>
-                            <div><label class="block text-sm font-bold mb-1">Fotos</label>
-                                <input type="file" id="tpPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                <div id="tpPhotoPreview" class="flex flex-wrap gap-2 mt-3"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Obs / Problemas</label><input type="text" id="tpObs" class="w-full px-4 py-3 rounded-lg border outline-none focus:border-blue-500 bg-slate-50"></div>
-                            <button type="submit" id="btnSubmitThirdParty" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg shadow-md transition-colors mt-4">Salvar Acompanhamento</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Históricos do Funcionário -->
-                <div class="mt-8">
-                    <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Manutenções)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryReports" class="divide-y text-sm"></tbody></table></div>
-                </div>
-                <div class="mt-8">
-                    <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Orçamentos)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryQuotes" class="divide-y text-sm"></tbody></table></div>
-                </div>
-                <div class="mt-8">
-                    <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Terceiros)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryThirdParty" class="divide-y text-sm"></tbody></table></div>
-                </div>
+        <!-- Área de Conteúdo Central -->
+        <main class="flex-grow flex flex-col h-full bg-slate-50 relative overflow-hidden">
+            <!-- Header Mobile Auxiliar -->
+            <header class="bg-white shadow-sm px-6 py-4 flex md:hidden items-center justify-between border-b">
+                <h1 class="text-lg font-bold text-slate-800" id="mobilePageTitle">Painel</h1>
+                <button onclick="window.logout()" class="text-red-500"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </header>
+            
+            <!-- Conteúdo Dinâmico das Abas -->
+            <div id="mainContent" class="flex-grow overflow-y-auto p-4 sm:p-8">
+                <!-- Telas renderizadas via JS -->
             </div>
         </main>
     </div>
 
-    <!-- MODAIS DO SISTEMA -->
-    <div id="modalDetails" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-xl font-bold">Detalhes do Registro</h2>
-                <button onclick="window.hideElement('modalDetails')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div id="modalDetailsContent" class="p-5 overflow-y-auto flex-grow space-y-4"></div>
-            <div class="p-4 border-t bg-slate-50 flex justify-end">
-                <button onclick="window.hideElement('modalDetails')" class="bg-slate-200 px-4 py-2 rounded font-medium hover:bg-slate-300 transition-colors">Fechar</button>
-            </div>
-        </div>
-    </div>
     
-    <div id="modalCei" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 id="modalTitleCei" class="text-xl font-bold">Nova Creche</h2>
-                <button onclick="window.hideElement('modalCei')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
+    <!-- Modal Cadastro CEI -->
+    <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-slate-100 px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="font-bold text-lg" id="modalTitleCei">Nova Creche (CEI)</h3>
+                <button onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <form onsubmit="window.saveCei(event)" class="p-5 space-y-4">
-                <div><label class="block text-sm font-medium mb-1">Nome da Creche (CEI) *</label><input type="text" id="ceiName" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
-                <div><label class="block text-sm font-medium mb-1">ID Grupo Telegram</label><input type="text" id="ceiTelegramId" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500" placeholder="Ex: -100123456789"></div>
-                <div><label class="block text-sm font-medium mb-1">ID Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500" placeholder="Ex: 45"></div>
-                <div class="flex justify-end gap-2 pt-4 border-t">
-                    <button type="button" onclick="window.hideElement('modalCei')" class="bg-slate-200 px-4 py-2 rounded hover:bg-slate-300">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <div id="modalUser" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 id="modalTitleUser" class="text-xl font-bold">Novo Usuário</h2>
-                <button onclick="window.hideElement('modalUser')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <form onsubmit="window.saveUser(event)" class="p-5 space-y-4">
-                <div><label class="block text-sm font-medium mb-1">Login *</label><input type="text" id="userName" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
-                <div><label class="block text-sm font-medium mb-1">Senha *</label><input type="password" id="userPass" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
+            <form id="ceiForm" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Perfil</label>
-                    <select id="userRole" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500">
-                        <option value="func">Funcionário</option>
-                        <option value="admin">Administrador</option>
-                    </select>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nome da Creche</label>
+                    <input type="text" id="ceiName" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: CEI Recanto Feliz">
                 </div>
-                <div class="flex justify-end gap-2 pt-4 border-t">
-                    <button type="button" onclick="window.hideElement('modalUser')" class="bg-slate-200 px-4 py-2 rounded hover:bg-slate-300">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700">Salvar</button>
+                <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <p class="text-xs font-bold text-blue-800 mb-3"><i class="fab fa-telegram"></i> Integração Telegram</p>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ID do Grupo</label>
+                            <input type="text" id="ceiTelegramId" class="w-full p-2 text-sm border rounded bg-white outline-none" placeholder="Ex: -100123456789">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">ID do Tópico (Opcional)</label>
+                            <input type="text" id="ceiTelegramTopicId" class="w-full p-2 text-sm border rounded bg-white outline-none" placeholder="Ex: 45">
+                            <p class="text-[10px] text-slate-500 mt-1">Pegue o último número do link do tópico da creche.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-4">
+                    <button type="button" onclick="window.hideElement('modalCei')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- SCRIPT PRINCIPAL (FIREBASE E LÓGICA) -->
-    <script>
-        const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
-        
-        // CONFIGURAÇÃO OFICIAL DO SEU FIREBASE
+    <!-- Modal Cadastro Usuário -->
+    <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-slate-100 px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="font-bold text-lg" id="modalTitleUser">Novo Usuário</h3>
+                <button onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="userForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Login (Nome de usuário)</label>
+                    <input type="text" id="newUsername" required class="w-full p-3 border rounded-lg outline-none" placeholder="joao_silva">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Senha</label>
+                    <input type="text" id="newPassword" required class="w-full p-3 border rounded-lg outline-none" placeholder="Senha do usuário">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Permissão</label>
+                    <select id="newRole" class="w-full p-3 border rounded-lg outline-none bg-white">
+                        <option value="funcionario">Funcionário (Apenas Registra)</option>
+                        <option value="admin">Administrador (Total Acesso)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-4">
+                    <button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Visualização de Registro (Admin) -->
+    <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8">
+            <div class="bg-slate-100 px-6 py-4 border-b flex justify-between items-center sticky top-0 z-10">
+                <h3 class="font-bold text-lg" id="viewRecordTitle">Detalhes</h3>
+                <div class="flex gap-2">
+                    <button id="btnPrintRecord" class="hidden px-3 py-1 bg-slate-800 text-white text-sm rounded hover:bg-slate-700"><i class="fas fa-print"></i> Imprimir</button>
+                    <button onclick="window.hideElement('modalViewRecord')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
+                </div>
+            </div>
+            <div id="viewRecordContent" class="p-6">
+                <!-- Conteúdo dinâmico preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação (Genérico) -->
+    <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-6">
+            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-2">Tem certeza?</h3>
+            <p class="text-slate-500 mb-6 text-sm">Esta ação não pode ser desfeita.</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="window.hideElement('modalConfirm')" class="px-5 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium">Cancelar</button>
+                <button id="btnConfirmAction" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT PRINCIPAL E FIREBASE (MÓDULOS) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuração do seu Banco de Dados Real no Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM",
             authDomain: "lym-manutencao.firebaseapp.com",
@@ -293,286 +233,135 @@
             appId: "1:172405408906:web:19ef22e87e8ecbe1d91973",
             measurementId: "G-BECF0MECZ7"
         };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
-        window.localData = { users: [], ceis: [], reports: [], quotes: [], thirdParty: [], audit: [] };
-        window.currentSystemUser = null;
-        window.materialCount = 0;
+
+        // Token do Bot do Telegram
+        const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Estado Global da Aplicação
+        window.currentSystemUser = null; 
+        window.activeTab = 'dashboard';
         window.editingItemId = null; 
-        
-        // SINCRONIZAÇÃO EM TEMPO REAL COM A NUVEM
-        window.initFirebaseSync = function() {
-            const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit'];
-            cols.forEach(c => {
-                db.collection(c).onSnapshot(snap => {
-                    window.localData[c] = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    
-                    // Se o banco estiver vazio, cria os usuários padrão
-                    if (c === 'users' && snap.empty) {
-                        db.collection('users').doc('u1').set({ login: 'admin', pass: 'admin123', role: 'admin' });
-                        db.collection('users').doc('u2').set({ login: 'func', pass: 'func123', role: 'func' });
-                    }
+        window.localData = { ceis: [], users: [], reports: [], quotes: [], thirdParty: [], audit: [] };
+        window.unsubscribers = [];
 
-                    // Atualiza a tela de quem estiver usando
-                    if (window.currentSystemUser) {
-                        if (window.currentSystemUser.role === 'admin') {
-                            window.renderAdminTables();
-                        } else { 
-                            window.updateCeiDropdowns(); 
-                            window.renderEmployeeHistory(); 
-                        }
-                    }
-                });
-            });
-        };
+        // Referências DOM
+        const loginScreen = document.getElementById('loginScreen');
+        const appLayout = document.getElementById('appLayout');
+        const mainContent = document.getElementById('mainContent');
+        const navLinks = document.getElementById('navLinks');
 
-        // Funções de Utilidade (Mostrar/Ocultar Telas)
+        // Utilitários de Janela (Atachados ao window para o HTML poder chamar)
         window.showElement = (id) => document.getElementById(id).classList.remove('hidden');
         window.hideElement = (id) => document.getElementById(id).classList.add('hidden');
-        
-        window.formatDateBR = (iso) => {
-            if (!iso) return "";
-            return iso.split('-').reverse().join('/');
-        };
-        
-        window.showToast = function(msg, type = 'info') {
+        window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
-            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg font-medium animate-fade-in flex items-center justify-between min-w-[250px]`;
-            toast.innerHTML = `<span>${msg}</span><button type="button" onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
+            const colorClass = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
+            toast.className = `${colorClass} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300 animate-fade-in`;
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            toast.innerHTML = `<i class="fas ${icon}"></i> <span class="font-medium">${msg}</span><button onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+            setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10);
+            setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 4000);
+        };
+        
+        window.formatDateBR = (isoString) => {
+            if(!isoString) return "";
+            const [year, month, day] = isoString.split('-');
+            return `${day}/${month}/${year}`;
         };
 
-        // Auditoria
-        window.logAudit = function(action) {
-            db.collection('audit').add({ 
-                date: new Date().toLocaleString('pt-BR'), 
-                user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', 
-                action: action, 
-                timestamp: Date.now() 
-            });
+        window.formatMoney = (val) => {
+            return parseFloat(val).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
         };
 
-        // Autenticação (Login)
-        window.handleLogin = function(e) {
-            e.preventDefault();
-            const u = document.getElementById('loginUsername').value.trim();
-            const p = document.getElementById('loginPassword').value.trim();
-            const user = window.localData.users.find(x => x.login === u && x.pass === p);
-            
-            if (user) {
-                window.currentSystemUser = user;
-                window.hideElement('loginScreen'); 
-                window.showElement('mainApp');
-                document.getElementById('userBadge').textContent = user.role === 'admin' ? 'Admin' : 'Func';
-                window.logAudit('Login realizado');
-                
-                if (user.role === 'admin') { 
-                    window.showElement('adminPanel'); 
-                    window.hideElement('employeePanel'); 
-                    window.renderAdminTables(); 
-                } else { 
-                    window.showElement('employeePanel'); 
-                    window.hideElement('adminPanel'); 
-                    window.updateCeiDropdowns(); 
-                    window.renderEmployeeHistory(); 
-                }
-            } else {
-                window.showToast("Credenciais inválidas!", "error"); 
-            }
-        };
-
-        window.logout = function() { 
-            window.logAudit('Logout realizado');
-            window.currentSystemUser = null; 
-            document.getElementById('loginForm').reset(); 
-            window.hideElement('mainApp'); 
-            window.showElement('loginScreen'); 
-        };
-
-        // Controle dos Formulários
-        window.updateCeiDropdowns = function() {
-            let opts = '<option value="">Selecione...</option>';
-            const sortedCeis = window.localData.ceis.sort((a,b)=>a.name.localeCompare(b.name));
-            sortedCeis.forEach(c => {
-                opts += `<option value="${c.id}">${c.name}</option>`;
-            });
-            ['repCei', 'quoCei', 'tpCei', 'filterCei'].forEach(id => { 
-                if(document.getElementById(id)) document.getElementById(id).innerHTML = opts; 
-            });
-        };
-
-        window.addMaterialRow = function(cId) {
-            const container = document.getElementById(cId);
-            if (container.querySelector('.italic')) container.innerHTML = '';
-            
-            window.materialCount++;
-            const id = `mat_${window.materialCount}`;
-            const div = document.createElement('div'); 
-            div.id = id; 
-            div.className = "mat-row flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm animate-fade-in";
-            div.innerHTML = `
-                <input type="text" placeholder="Material" class="flex-1 w-full p-2 border border-slate-300 rounded outline-none focus:border-blue-500" required>
-                <input type="text" placeholder="Marca" class="w-full sm:w-32 p-2 border border-slate-300 rounded outline-none focus:border-blue-500" required>
-                <input type="number" placeholder="Qtd" class="w-full sm:w-20 p-2 border border-slate-300 rounded outline-none focus:border-blue-500" required>
-                <input type="number" step="0.01" placeholder="R$ Un." class="w-full sm:w-28 p-2 border border-slate-300 rounded outline-none focus:border-blue-500">
-                <button type="button" onclick="document.getElementById('${id}').remove()" class="w-full sm:w-auto bg-red-100 hover:bg-red-200 text-red-600 px-3 py-2 rounded font-bold transition-colors"><i class="fas fa-trash"></i> Remover</button>
-            `;
-            container.appendChild(div);
-        };
-
-        // Funções de Imagem e PDF
-        window.compressImage = (file) => new Promise((resolve) => {
-            const reader = new FileReader(); 
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image(); 
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; 
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH; 
-                    canvas.height = img.height * scaleSize;
-                    const ctx = canvas.getContext('2d'); 
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.6));
+        // Compressão de Imagem para Base64
+        window.compressImage = (file, maxWidth = 800, quality = 0.7) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width; let height = img.height;
+                        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
                 };
-            };
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        // Sistema de Confirmação
+        let confirmActionCallback = null;
+        window.confirmAction = (callback) => {
+            confirmActionCallback = callback;
+            window.showElement('modalConfirm');
+        };
+        document.getElementById('btnConfirmAction').addEventListener('click', () => {
+            if(confirmActionCallback) confirmActionCallback();
+            window.hideElement('modalConfirm');
+            confirmActionCallback = null;
         });
 
-        window.handlePhotoSelection = function(e, previewId) {
-            const container = document.getElementById(previewId); 
-            container.innerHTML = '';
-            Array.from(e.target.files).forEach(file => { 
-                if(file.type.startsWith('image/')) {
-                    const reader = new FileReader(); 
-                    reader.onload = (ev) => {
-                        container.innerHTML += `<div class="w-24 h-24 bg-cover bg-center rounded-lg border border-slate-300 shadow-sm" style="background-image: url('${ev.target.result}')"></div>`;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        };
-
-        // Navegação de Abas
-        window.switchAdminTab = function(tab) {
-            document.querySelectorAll('.admin-tab-btn').forEach(b => { 
-                b.classList.remove('bg-blue-100','text-blue-700'); 
-                b.classList.add('text-slate-600'); 
-            });
-            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
-            
-            document.getElementById(`tabBtn_${tab}`).classList.add('bg-blue-100','text-blue-700');
-            document.getElementById(`tabContent_${tab}`).classList.remove('hidden');
-            
-            if (['reports', 'quotes', 'thirdParty'].includes(tab)) { 
-                document.getElementById('filterBar').classList.remove('hidden'); 
-                window.applyFilters(); 
-            } else {
-                document.getElementById('filterBar').classList.add('hidden'); 
-            }
-        };
-
-        window.switchEmpTab = function(tab) {
-            document.querySelectorAll('.emp-tab-btn').forEach(b => { 
-                b.classList.remove('bg-blue-100','text-blue-700'); 
-                b.classList.add('text-slate-600'); 
-            });
-            document.querySelectorAll('.emp-tab-content').forEach(c => c.classList.add('hidden'));
-            
-            document.getElementById(`empTabBtn_${tab}`).classList.add('bg-blue-100','text-blue-700');
-            document.getElementById(`empTabContent_${tab}`).classList.remove('hidden');
-        };
-
-        window.cancelEdit = function() {
-            window.editingItemId = null; 
-            window.hideElement('cancelEditBtn');
-            ['reportForm','quoteForm','thirdPartyForm'].forEach(f => document.getElementById(f).reset());
-            
-            document.getElementById('formTitleReports').textContent = "Registrar Manutenção"; 
-            document.getElementById('btnSubmitReport').innerHTML = "Salvar Serviço";
-            
-            document.getElementById('formTitleQuotes').textContent = "Novo Orçamento"; 
-            document.getElementById('btnSubmitQuote').innerHTML = "Salvar Orçamento";
-            
-            document.getElementById('formTitleThirdParty').textContent = "Acompanhamento de Terceiros"; 
-            document.getElementById('btnSubmitThirdParty').innerHTML = "Salvar Acompanhamento";
-            
-            document.getElementById('materialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>';
-            document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>';
-            ['repPhotoPreview','quoPhotoPreview','tpPhotoPreview'].forEach(id => document.getElementById(id).innerHTML='');
-        };
-
-        // Integração Avançada do Telegram com PDF Invisível
-        window.sendToTelegram = async function(ceiId, base64Photos, isEdit, dataObj, typeLabel) {
+        // -------------------------------------------------------------
+        // INTEGRAÇÃO TELEGRAM COM GERAÇÃO DE PDF INVISÍVEL E FLAG DE EDIÇÃO
+        // -------------------------------------------------------------
+        window.sendToTelegram = async (ceiId, dataObj, base64Photos, isEdit, typeLabel) => {
             const cei = window.localData.ceis.find(c => c.id === ceiId);
-            if (!cei || !cei.telegramGroupId || cei.telegramGroupId.trim() === "") return false;
+            if(!cei || !cei.telegramGroupId || cei.telegramGroupId.trim() === "") {
+                console.log("Telegram ignorado: CEI sem grupo configurado.");
+                return false;
+            }
             
-            const chatId = cei.telegramGroupId.trim(); 
+            const chatId = cei.telegramGroupId.trim();
             const topicId = cei.telegramTopicId ? cei.telegramTopicId.trim() : null;
             
-            let totalValue = 0; 
-            let materialText = "";
-            
+            let totalValue = 0; let materialText = "";
             if(dataObj.materials) {
-                dataObj.materials.forEach(m => { 
-                    let v = parseFloat(m.value || 0); 
-                    totalValue += (v * m.qtd); 
-                    materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * m.qtd).toFixed(2)}
-`; 
+                dataObj.materials.forEach(m => {
+                    let v = parseFloat(m.price || 0); totalValue += (v * m.qtd);
+                    materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * m.qtd).toFixed(2)}\n`;
                 });
             }
 
-            let headerTag = isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>
-" : `🛠 <b>NOVO: ${typeLabel}</b>
-`;
-            let textMsg = `${headerTag}<b>Creche:</b> ${cei.name}
-<b>Data:</b> ${window.formatDateBR(dataObj.date)}
-<b>Técnico:</b> ${window.currentSystemUser.login}
-`;
-            
-            if (dataObj.desc) textMsg += `<b>Descrição:</b> ${dataObj.desc}
-`;
-            if (dataObj.tpDesc) textMsg += `<b>Serviço:</b> ${dataObj.tpDesc}
-`;
-            if (dataObj.materials && dataObj.materials.length > 0) {
-                textMsg += `
-<b>Materiais:</b>
-${materialText}<b>TOTAL MATERIAIS: R$ ${totalValue.toFixed(2)}</b>
-`;
-            }
+            // Flag visual de Edição
+            let headerTag = isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>\n" : `🛠 <b>NOVO: ${typeLabel}</b>\n`;
+            let tgText = `${headerTag}🏫 <b>CEI:</b> ${cei.name}\n👨‍🔧 <b>Técnico:</b> ${dataObj.userName}\n📅 <b>Data:</b> ${window.formatDateBR(dataObj.date)}\n`;
+            if (dataObj.timeStart) tgText += `🕒 <b>Horário:</b> ${dataObj.timeStart} às ${dataObj.timeEnd}\n`;
+            if (dataObj.workDone) tgText += `\n🛠 <b>Descrição/Serviço:</b>\n${dataObj.workDone}\n`;
+            if (dataObj.materials && dataObj.materials.length > 0) tgText += `\n📦 <b>Materiais:</b>\n${materialText}<b>TOTAL MATERIAIS: R$ ${totalValue.toFixed(2)}</b>\n`;
+            if (dataObj.obs) tgText += `\n📌 <b>Obs:</b> ${dataObj.obs}\n`;
 
             try {
-                // 1. Enviar Aviso de Texto
-                let pLoad = { chat_id: chatId, text: textMsg, parse_mode: 'HTML' };
-                if (topicId) pLoad.message_thread_id = topicId;
-                
-                let rTxt = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { 
-                    method: 'POST', 
-                    headers:{'Content-Type': 'application/json'}, 
-                    body: JSON.stringify(pLoad) 
-                });
-                
-                if(!rTxt.ok) return false; 
+                // 1. Enviar Texto Informativo
+                const payload = { chat_id: chatId, text: tgText, parse_mode: 'HTML' };
+                if (topicId) payload.message_thread_id = topicId;
 
-                // 2. Montar Layout do PDF na memória
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+                });
+                if (!response.ok) return false;
+
+                // 2. Gerar Layout PDF na memória
                 const pdfDiv = document.createElement('div');
-                pdfDiv.style.position = 'absolute'; 
-                pdfDiv.style.left = '-9999px'; 
-                pdfDiv.style.top = '-9999px'; 
-                pdfDiv.style.width = '800px'; 
+                pdfDiv.style.position = 'absolute'; pdfDiv.style.left = '-9999px'; pdfDiv.style.top = '-9999px'; pdfDiv.style.width = '800px';
                 document.body.appendChild(pdfDiv);
                 
                 let matsHtml = '';
                 if(dataObj.materials && dataObj.materials.length > 0) {
                     matsHtml = `<table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;">
                         <tr style="background:#e2e8f0;"><th style="padding:10px; border:1px solid #cbd5e1; text-align:left;">Material</th><th style="padding:10px; border:1px solid #cbd5e1;">Qtd</th><th style="padding:10px; border:1px solid #cbd5e1; text-align:right;">Total (R$)</th></tr>
-                        ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #cbd5e1;">${m.name}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:center;">${m.qtd}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right;">${(parseFloat(m.value||0)*m.qtd).toFixed(2)}</td></tr>`).join('')}
+                        ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #cbd5e1;">${m.name}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:center;">${m.qtd}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right;">${(parseFloat(m.price||0)*m.qtd).toFixed(2)}</td></tr>`).join('')}
                         <tr style="background:#f1f5f9;"><td colspan="2" style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">TOTAL:</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">R$ ${totalValue.toFixed(2)}</td></tr>
                         </table>`;
                 }
@@ -580,40 +369,33 @@ ${materialText}<b>TOTAL MATERIAIS: R$ ${totalValue.toFixed(2)}</b>
                 let imgsHtml = '';
                 if(base64Photos && base64Photos.length > 0) {
                     imgsHtml = `<div style="display:flex; flex-wrap:wrap; gap:15px; margin-top:20px;">
-                        ${base64Photos.map(i => `<img src="${i}" style="height:220px; border-radius:5px; border:1px solid #cbd5e1;">`).join('')}
+                        ${base64Photos.map(i => `<img src="${i}" style="height:250px; border-radius:5px; border:1px solid #cbd5e1;">`).join('')}
                     </div>`;
                 }
 
                 pdfDiv.innerHTML = `
                     <div style="padding:40px; font-family:sans-serif; color:#334155;">
                         <h1 style="color:#1d4ed8; border-bottom:3px solid #1d4ed8; padding-bottom:10px;">LYM Eletrônicos - ${typeLabel}</h1>
-                        ${isEdit ? '<h2 style="color:#eab308;">[CORREÇÃO DE SERVIÇO]</h2>' : ''}
+                        ${isEdit ? '<h2 style="color:#eab308; margin-top:10px;">[REGISTRO CORRIGIDO/EDITADO]</h2>' : ''}
                         
                         <table style="width:100%; margin:20px 0; font-size:16px;">
                             <tr><td style="padding:5px 0;"><strong>Creche (CEI):</strong> ${cei.name}</td>
                                 <td style="padding:5px 0;"><strong>Data:</strong> ${window.formatDateBR(dataObj.date)}</td></tr>
-                            <tr><td style="padding:5px 0;"><strong>Técnico:</strong> ${window.currentSystemUser.login}</td>
-                                <td style="padding:5px 0;"><strong>Horário:</strong> ${dataObj.startTime || '--:--'} às ${dataObj.endTime || '--:--'}</td></tr>
+                            <tr><td style="padding:5px 0;"><strong>Técnico:</strong> ${dataObj.userName}</td>
+                                <td style="padding:5px 0;"><strong>Horário:</strong> ${dataObj.timeStart || '--:--'} às ${dataObj.timeEnd || '--:--'}</td></tr>
                         </table>
                         
                         <div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0;">
                             <h3 style="margin-top:0; color:#0f172a;">Descrição / Serviço Realizado</h3>
-                            <p style="margin-bottom:0; line-height:1.5;">${dataObj.desc || dataObj.tpDesc || 'Sem descrição detalhada.'}</p>
+                            <p style="margin-bottom:0; line-height:1.5;">${dataObj.workDone || 'Sem descrição.'}</p>
                         </div>
                         ${matsHtml}
                         ${imgsHtml}
                     </div>
                 `;
 
-                // 3. Converter e Enviar Anexo
-                const opt = { 
-                    margin: 10, 
-                    filename: `Relatorio_${cei.name.replace(/[^a-z0-9]/gi, '_')}.pdf`, 
-                    image: { type: 'jpeg', quality: 0.98 }, 
-                    html2canvas: { scale: 2, useCORS: true }, 
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-                };
-                
+                // 3. Gerar Arquivo e enviar
+                const opt = { margin: 10, filename: `Relatorio_${cei.name.replace(/[^a-z0-9]/gi, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
                 let pdfBlob = await html2pdf().set(opt).from(pdfDiv).outputPdf('blob');
                 document.body.removeChild(pdfDiv); 
 
@@ -622,398 +404,546 @@ ${materialText}<b>TOTAL MATERIAIS: R$ ${totalValue.toFixed(2)}</b>
                 if (topicId) fData.append('message_thread_id', topicId);
                 fData.append('document', pdfBlob, opt.filename);
                 
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { 
-                    method: 'POST', 
-                    body: fData 
-                });
-                
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: fData });
                 return true;
-            } catch(e) { 
-                return false; 
+            } catch (err) {
+                console.error("Falha no Telegram PDF:", err);
+                return false;
             }
         };
 
-        // Salvar e Gravar no Firebase
-        window.saveRecord = async function(e, type) {
+        // Funções de Banco Firebase
+        const getColRef = (colName) => collection(db, colName);
+        const getDocRef = (colName, docId) => doc(db, colName, docId);
+
+        window.dbSave = async (colName, docId, data) => {
+            data.updatedAt = new Date().toISOString();
+            await setDoc(getDocRef(colName, docId), data, { merge: true });
+        };
+        
+        window.dbDelete = async (colName, docId) => {
+            await deleteDoc(getDocRef(colName, docId));
+        };
+
+        // Sincronização e Renderização
+        const setupRealtimeSync = () => {
+            const collections = ['ceis', 'users', 'reports', 'quotes', 'thirdParty', 'audit'];
+            collections.forEach(col => {
+                const unsub = onSnapshot(getColRef(col), (snapshot) => {
+                    const items = [];
+                    snapshot.forEach(doc => items.push(doc.data()));
+                    window.localData[col] = items;
+                    
+                    if (col === 'users' && snapshot.empty) {
+                        window.dbSave('users', 'admin', { id: 'admin', username: 'admin', password: 'admin123', role: 'admin' });
+                        window.dbSave('users', 'func', { id: 'func', username: 'func', password: 'func123', role: 'funcionario' });
+                    }
+
+                    if (window.currentSystemUser) {
+                        if (window.currentSystemUser.role === 'admin') {
+                            const isTableTab = ['admin-reports', 'admin-quotes', 'admin-thirdParty', 'admin-ceis', 'admin-users', 'admin-audit', 'dashboard'].includes(window.activeTab);
+                            if(isTableTab) renderActiveTab();
+                        } else { 
+                            if(window.activeTab === 'func-history') window.renderEmployeeHistory(); 
+                        }
+                    }
+                }, (error) => { console.error(`Erro escutando ${col}:`, error); });
+                window.unsubscribers.push(unsub);
+            });
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const btnMap = { 
-                reports: ['btnSubmitReport', 'Manutenção'], 
-                quotes: ['btnSubmitQuote', 'Orçamento'], 
-                thirdParty: ['btnSubmitThirdParty', 'Acomp. Terceiro'] 
-            };
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
             
-            const btn = document.getElementById(btnMap[type][0]); 
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...'; 
-            btn.disabled = true;
+            const user = window.localData.users.find(x => x.username === u && x.password === p);
+            if (user) {
+                window.currentSystemUser = user;
+                window.showToast(`Bem-vindo, ${u}!`);
+                window.logAudit(`Login Efetuado`);
+                
+                loginScreen.classList.add('hidden');
+                appLayout.classList.remove('hidden');
+                
+                document.getElementById('userNameDisplay').textContent = u;
+                document.getElementById('userRoleDisplay').textContent = user.role === 'admin' ? 'Administrador' : 'Funcionário';
+                document.getElementById('userInitial').textContent = u.charAt(0).toUpperCase();
+                
+                buildMenu();
+                window.activeTab = user.role === 'admin' ? 'dashboard' : 'func-reports';
+                renderActiveTab();
+            } else {
+                window.showToast("Usuário ou senha inválidos", "error");
+            }
+        });
+
+        window.logout = () => {
+            window.logAudit(`Logout Efetuado`);
+            window.currentSystemUser = null;
+            appLayout.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+        };
+
+        // Construção do Menu e Abas
+        const buildMenu = () => {
+            navLinks.innerHTML = "";
+            document.getElementById('mobileMenuBtn').onclick = () => {
+                navLinks.classList.toggle('hidden');
+                navLinks.classList.toggle('flex');
+            };
+
+            const role = window.currentSystemUser.role;
+            let menuItems = role === 'admin' ? [
+                { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' },
+                { id: 'admin-ceis', icon: 'fa-school', label: 'Creches (CEIs)' },
+                { id: 'admin-users', icon: 'fa-users', label: 'Usuários' },
+                { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços Concluídos' },
+                { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' },
+                { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Serviços Terceiros' },
+                { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' }
+            ] : [
+                { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' },
+                { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' },
+                { id: 'func-thirdParty', icon: 'fa-eye', label: 'Acompanhar Terceiro' },
+                { id: 'func-history', icon: 'fa-history', label: 'Meus Registros' }
+            ];
+
+            menuItems.forEach(item => {
+                const a = document.createElement('a');
+                a.href = "#";
+                a.className = "flex items-center gap-3 px-6 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition group";
+                a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span class="font-medium">${item.label}</span>`;
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    window.activeTab = item.id;
+                    if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); }
+                    renderActiveTab();
+                };
+                navLinks.appendChild(a);
+            });
+        };
+
+        const renderActiveTab = () => {
+            if(!window.currentSystemUser) return;
+            const role = window.currentSystemUser.role;
+            let html = ""; let title = "";
+
+            if(role === 'admin') {
+                switch(window.activeTab) {
+                    case 'dashboard': title = "Resumo Geral"; html = renderAdminDashboard(); break;
+                    case 'admin-ceis': title = "Gestão de Creches (CEIs)"; html = renderAdminCeis(); break;
+                    case 'admin-users': title = "Gestão de Usuários"; html = renderAdminUsers(); break;
+                    case 'admin-reports': title = "Serviços Concluídos"; html = renderAdminReports(); break;
+                    case 'admin-quotes': title = "Orçamentos Recebidos"; html = renderAdminQuotes(); break;
+                    case 'admin-thirdParty': title = "Acompanhamento Terceiros"; html = renderAdminThirdParty(); break;
+                    case 'admin-audit': title = "Logs de Auditoria"; html = renderAdminAudit(); break;
+                }
+            } else {
+                switch(window.activeTab) {
+                    case 'func-reports': title = "Registrar Manutenção"; html = renderFuncReportForm(); break;
+                    case 'func-quotes': title = "Novo Orçamento"; html = renderFuncQuoteForm(); break;
+                    case 'func-thirdParty': title = "Acompanhar Terceiro"; html = renderFuncThirdPartyForm(); break;
+                    case 'func-history': title = "Meus Registros"; html = renderFuncHistory(); break;
+                }
+            }
+            
+            document.getElementById('mobilePageTitle').textContent = title;
+            mainContent.innerHTML = `<h2 class="text-2xl font-bold text-slate-800 mb-6 hidden md:block">${title}</h2>${html}`;
+            
+            if(window.activeTab === 'func-reports') populateCeiSelect('ceiSelectRep');
+            if(window.activeTab === 'func-quotes') populateCeiSelect('ceiSelectQuote');
+            if(window.activeTab === 'func-thirdParty') populateCeiSelect('ceiSelectThirdParty');
+            if(window.activeTab === 'func-history') window.renderEmployeeHistory();
+            if(['admin-reports', 'admin-quotes', 'admin-thirdParty'].includes(window.activeTab)) window.setupAdminFilters();
+        };
+
+        const populateCeiSelect = (elementId) => {
+            const sel = document.getElementById(elementId);
+            if(!sel) return;
+            sel.innerHTML = '<option value="">Selecione a Creche...</option>';
+            window.localData.ceis.forEach(c => {
+                sel.innerHTML += `<option value="${c.name}" data-id="${c.id}">${c.name}</option>`;
+            });
+        };
+
+        const renderAdminDashboard = () => {
+            return `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl"><i class="fas fa-tools"></i></div>
+                    <div><p class="text-slate-500 text-sm font-medium">Serviços</p><p class="text-2xl font-bold text-slate-800">${window.localData.reports.length}</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div><p class="text-slate-500 text-sm font-medium">Orçamentos</p><p class="text-2xl font-bold text-slate-800">${window.localData.quotes.length}</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl"><i class="fas fa-handshake"></i></div>
+                    <div><p class="text-slate-500 text-sm font-medium">Terceiros</p><p class="text-2xl font-bold text-slate-800">${window.localData.thirdParty.length}</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-2xl"><i class="fas fa-school"></i></div>
+                    <div><p class="text-slate-500 text-sm font-medium">Creches</p><p class="text-2xl font-bold text-slate-800">${window.localData.ceis.length}</p></div>
+                </div>
+            </div>`;
+        };
+
+        const renderAdminCeis = () => {
+            let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${c.name}</td><td class="p-4 text-sm text-slate-500">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="p-4 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join("");
+            return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-plus mr-1"></i> Nova Creche</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Nome</th><th class="p-4 font-semibold">Telegram (Grupo / Tópico)</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-8 text-center text-slate-400">Nenhuma creche cadastrada.</td></tr>`}</tbody></table></div></div>`;
+        };
+
+        const renderAdminUsers = () => {
+            let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${u.username}</td><td class="p-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}">${u.role.toUpperCase()}</span></td><td class="p-4 text-right space-x-2"><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join("");
+            return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-user-plus mr-1"></i> Novo Usuário</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Login</th><th class="p-4 font-semibold">Nível</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`;
+        };
+
+        const renderFilterBar = (type) => `
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 animate-fade-in">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                    <div><label class="block text-xs font-semibold text-slate-500 mb-1">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border rounded-lg text-sm outline-none" placeholder="Nome, CEI..."></div>
+                    <div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border rounded-lg text-sm outline-none"></div>
+                    <div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border rounded-lg text-sm outline-none"></div>
+                    <div class="flex gap-2">
+                        <button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-900"><i class="fas fa-filter"></i> Filtrar</button>
+                        <button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const renderAdminReports = () => return renderFilterBar('reports') + `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Data</th><th class="p-4 font-semibold">CEI</th><th class="p-4 font-semibold">Técnico</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
+        const renderAdminQuotes = () => return renderFilterBar('quotes') + `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Data</th><th class="p-4 font-semibold">CEI</th><th class="p-4 font-semibold">Total Orçado</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
+        const renderAdminThirdParty = () => return renderFilterBar('thirdParty') + `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Data</th><th class="p-4 font-semibold">CEI</th><th class="p-4 font-semibold">Empresa</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
+        const renderAdminAudit = () => `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Data/Hora</th><th class="p-4 font-semibold">Usuário</th><th class="p-4 font-semibold">Ação Realizada</th></tr></thead><tbody>${[...window.localData.audit].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 50).map(a => `<tr class="border-b border-slate-100 hover:bg-slate-50 text-sm"><td class="p-4">${new Date(a.timestamp).toLocaleString('pt-BR')}</td><td class="p-4 font-medium text-slate-700 capitalize">${a.user}</td><td class="p-4 text-slate-600">${a.action}</td></tr>`).join("") || `<tr><td colspan="3" class="p-8 text-center text-slate-400">Nenhum log registrado.</td></tr>`}</tbody></table></div></div>`;
+
+        let currentFilteredData = [];
+        window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
+        
+        window.applyFilters = (type) => {
+            const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
+            const start = document.getElementById('filterDateStart')?.value || "";
+            const end = document.getElementById('filterDateEnd')?.value || "";
+            
+            let data = [...window.localData[type]];
+            if(search) {
+                data = data.filter(item => (item.cei && item.cei.toLowerCase().includes(search)) || (item.userName && item.userName.toLowerCase().includes(search)) || (item.companyName && item.companyName.toLowerCase().includes(search)) || (item.workDone && item.workDone.toLowerCase().includes(search)));
+            }
+            if(start) data = data.filter(item => item.date >= start);
+            if(end) data = data.filter(item => item.date <= end);
+            
+            data.sort((a,b) => new Date(b.date) - new Date(a.date));
+            currentFilteredData = data; 
+            
+            const tbody = document.getElementById(`tableBody${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            if(!tbody) return;
+            
+            tbody.innerHTML = data.map(item => {
+                let col3 = "";
+                if(type === 'reports') col3 = item.userName;
+                if(type === 'quotes') col3 = window.formatMoney(item.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0));
+                if(type === 'thirdParty') col3 = item.companyName;
+
+                return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4">${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${item.cei}</td><td class="p-4 text-slate-600 capitalize">${col3}</td><td class="p-4 text-right"><button onclick="window.viewRecord('${type}', '${item.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded shadow-sm border border-blue-100"><i class="fas fa-eye"></i> Detalhes</button></td></tr>`;
+            }).join("") || `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+        };
+
+        window.openCeiModal = () => { window.editingItemId = null; document.getElementById('ceiForm').reset(); document.getElementById('modalTitleCei').textContent = "Nova Creche (CEI)"; window.showElement('modalCei'); };
+        window.editCei = (id) => { const c = window.localData.ceis.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('ceiName').value = c.name; document.getElementById('ceiTelegramId').value = c.telegramGroupId || ""; document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId || ""; document.getElementById('modalTitleCei').textContent = "Editar Creche (CEI)"; window.showElement('modalCei'); } };
+        document.getElementById('ceiForm').addEventListener('submit', async (e) => { e.preventDefault(); const n = document.getElementById('ceiName').value.trim(); const tg = document.getElementById('ceiTelegramId').value.trim(); const tp = document.getElementById('ceiTelegramTopicId').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('ceis', id, { id, name: n, telegramGroupId: tg, telegramTopicId: tp }); window.logAudit(window.editingItemId ? `CEI Editado: ${n}` : `CEI Criado: ${n}`); window.showToast("CEI salvo!"); window.hideElement('modalCei'); });
+        window.deleteCei = (id) => { window.confirmAction(async () => { await window.dbDelete('ceis', id); window.logAudit(`CEI Excluído ID: ${id}`); window.showToast("CEI excluído!"); }); };
+
+        window.openUserModal = () => { window.editingItemId = null; document.getElementById('userForm').reset(); document.getElementById('modalTitleUser').textContent = "Novo Usuário"; window.showElement('modalUser'); };
+        window.editUser = (id) => { const u = window.localData.users.find(x => x.id === id); if(u) { window.editingItemId = id; document.getElementById('newUsername').value = u.username; document.getElementById('newPassword').value = u.password; document.getElementById('newRole').value = u.role; document.getElementById('modalTitleUser').textContent = "Editar Usuário"; window.showElement('modalUser'); } };
+        document.getElementById('userForm').addEventListener('submit', async (e) => { e.preventDefault(); const u = document.getElementById('newUsername').value.trim(); const p = document.getElementById('newPassword').value.trim(); const r = document.getElementById('newRole').value; if(!u || !p) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { id, username: u, password: p, role: r }); window.logAudit(window.editingItemId ? `Usuário Editado: ${u}` : `Usuário Criado: ${u}`); window.showToast("Usuário salvo!"); window.hideElement('modalUser'); });
+        window.deleteUser = (id) => { if(id === window.currentSystemUser.id) return window.showToast("Não pode excluir a si mesmo", "error"); window.confirmAction(async () => { await window.dbDelete('users', id); window.logAudit(`Usuário Excluído ID: ${id}`); window.showToast("Usuário excluído!"); }); };
+
+        window.viewRecord = (type, id) => {
+            const record = window.localData[type].find(r => r.id === id);
+            if(!record) return;
+            const btnPrint = document.getElementById('btnPrintRecord');
+            if(type === 'quotes') { btnPrint.classList.remove('hidden'); btnPrint.onclick = () => window.printQuote(record); } else { btnPrint.classList.add('hidden'); }
+
+            let html = `<div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 p-4 rounded border"><div><span class="font-bold text-slate-500">Data:</span> ${window.formatDateBR(record.date)}</div><div><span class="font-bold text-slate-500">CEI:</span> ${record.cei}</div><div><span class="font-bold text-slate-500">Registro por:</span> <span class="capitalize">${record.userName}</span></div>`;
+            if(type === 'reports' || type === 'thirdParty') html += `<div><span class="font-bold text-slate-500">Horário:</span> ${record.timeStart} às ${record.timeEnd}</div>`;
+            if(type === 'thirdParty') html += `<div class="col-span-2"><span class="font-bold text-slate-500">Empresa:</span> ${record.companyName}</div>`;
+            if(type === 'reports') html += `<div><span class="font-bold text-slate-500">Dificuldade:</span> ${record.difficulty}/5</div>`;
+            html += `</div>`;
+
+            if(record.workDone) html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Serviço Realizado / Descrição</h4><p class="text-slate-600 text-sm whitespace-pre-wrap mb-6 bg-slate-50 p-3 rounded border">${record.workDone}</p>`;
+
+            if(record.materials && record.materials.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Materiais / Custos</h4><table class="w-full text-sm text-left mb-6 border"><thead class="bg-slate-100"><tr><th class="p-2 border">Qtd</th><th class="p-2 border">Material</th><th class="p-2 border">Marca</th><th class="p-2 border text-right">R$ Un.</th><th class="p-2 border text-right">Total</th></tr></thead><tbody>`;
+                let totalGeral = 0;
+                record.materials.forEach(m => {
+                    const price = parseFloat(m.price || 0); const q = parseFloat(m.qtd || 1); const total = price * q; totalGeral += total;
+                    html += `<tr><td class="p-2 border">${m.qtd}</td><td class="p-2 border">${m.name}</td><td class="p-2 border">${m.brand||'-'}</td><td class="p-2 border text-right">${window.formatMoney(price)}</td><td class="p-2 border font-medium text-right">${window.formatMoney(total)}</td></tr>`;
+                });
+                if(type === 'reports' || type === 'quotes') html += `<tr class="bg-blue-50"><td colspan="4" class="p-2 border text-right font-bold">TOTAL:</td><td class="p-2 border font-bold text-blue-700 text-right text-lg">${window.formatMoney(totalGeral)}</td></tr>`;
+                html += `</tbody></table>`;
+            }
+
+            if(record.obs) html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Observações</h4><p class="text-slate-600 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 p-3 border border-yellow-200 rounded">${record.obs}</p>`;
+
+            if(record.telegramSent) {
+                html += `<div class="bg-green-50 text-green-700 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 font-medium"><i class="fab fa-telegram text-xl"></i> PDF e Fotos enviados com sucesso para o Telegram da creche.</div>`;
+            } else if(record.photos && record.photos.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`;
+                record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; });
+                html += `</div>`;
+            }
+
+            document.getElementById('viewRecordContent').innerHTML = html;
+            window.showElement('modalViewRecord');
+        };
+
+        window.printQuote = (record) => {
+            const printArea = document.getElementById('printArea');
+            let totalGeral = record.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0);
+            let matHtml = record.materials.map(m => `<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 12px 8px;">${m.qtd}</td><td style="padding: 12px 8px;">${m.name} ${m.brand ? '('+m.brand+')' : ''}</td><td style="padding: 12px 8px;">${window.formatMoney(m.price)}</td><td style="padding: 12px 8px; text-align:right;">${window.formatMoney(m.qtd * m.price)}</td></tr>`).join('');
+
+            printArea.innerHTML = `<div style="font-family: Arial, sans-serif; color: #333; max-width: 800px; margin: 0 auto; line-height: 1.5;"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px;"><div><h1 style="margin:0; font-size: 28px; color:#1e293b;">LYM Eletrônicos</h1><p style="margin:5px 0 0; color:#64748b;">Orçamento Comercial</p></div><div style="text-align: right; color:#64748b; font-size:14px;"><p style="margin:0;">Data: <strong>${window.formatDateBR(record.date)}</strong></p><p style="margin:0;">Ref: #LYM-${record.id.substring(record.id.length-6)}</p></div></div><div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e2e8f0;"><p style="margin:0 0 10px;"><strong>Cliente / Local:</strong> ${record.cei}</p><p style="margin:0 0 10px;"><strong>Técnico Responsável:</strong> <span style="text-transform:capitalize;">${record.userName}</span></p>${record.workDone ? `<p style="margin:0;"><strong>Descrição do Serviço:</strong><br>${record.workDone.replace(/\n/g, '<br>')}</p>` : ''}</div><table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;"><thead><tr style="background: #1e293b; color: white; text-align: left;"><th style="padding: 12px 8px;">Qtd</th><th style="padding: 12px 8px;">Descrição do Material/Serviço</th><th style="padding: 12px 8px;">Valor Un.</th><th style="padding: 12px 8px; text-align:right;">Subtotal</th></tr></thead><tbody>${matHtml}<tr style="background: #f1f5f9; font-weight: bold; font-size: 18px;"><td colspan="3" style="padding: 15px 8px; text-align: right; color: #0f172a;">TOTAL DO ORÇAMENTO:</td><td style="padding: 15px 8px; text-align:right; color: #2563eb;">${window.formatMoney(totalGeral)}</td></tr></tbody></table>${record.obs ? `<div style="margin-bottom: 40px; padding-top:20px; border-top: 1px solid #e2e8f0;"><p style="margin:0;"><strong>Observações Importantes:</strong><br>${record.obs.replace(/\n/g, '<br>')}</p></div>` : ''}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">Este orçamento é válido por 15 dias. Qualquer alteração no escopo poderá gerar reajuste nos valores.</div></div>`;
+            window.print();
+        };
+
+        window.exportToExcel = (type) => {
+            if(currentFilteredData.length === 0) return window.showToast("Nenhum dado para exportar", "error");
+            let exportData = [];
+            if(type === 'reports') {
+                exportData = currentFilteredData.map(r => ({ Data: window.formatDateBR(r.date), Creche: r.cei, Tecnico: r.userName, Inicio: r.timeStart, Termino: r.timeEnd, Dificuldade: r.difficulty, Servico: r.workDone, Materiais: r.materials ? r.materials.map(m => `${m.qtd}x ${m.name} (${m.brand}) R$${m.price}`).join(" | ") : "", TotalGasto: r.materials ? r.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0) : 0, Observacao: r.obs, Telegram: r.telegramSent ? "Sim" : "Não" }));
+            } else if (type === 'quotes') {
+                exportData = currentFilteredData.map(r => ({ Data: window.formatDateBR(r.date), Creche: r.cei, Tecnico: r.userName, Descricao: r.workDone, Materiais: r.materials ? r.materials.map(m => `${m.qtd}x ${m.name} R$${m.price}`).join(" | ") : "", Total_Orcado: r.materials ? r.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0) : 0, Observacao: r.obs }));
+            } else if (type === 'thirdParty') {
+                exportData = currentFilteredData.map(r => ({ Data: window.formatDateBR(r.date), Creche: r.cei, Funcionario_Acompanhante: r.userName, Empresa_Terceirizada: r.companyName, Inicio: r.timeStart, Termino: r.timeEnd, Servico_Realizado: r.workDone, Observacao: r.obs }));
+            }
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Relatório");
+            XLSX.writeFile(wb, `LYM_${type}_${new Date().getTime()}.xlsx`);
+            window.logAudit(`Exportou Excel: ${type}`);
+        };
+
+        // Inputs de Materiais
+        const renderMaterialInputs = () => `
+            <div class="bg-slate-100 p-4 sm:p-5 rounded-xl border border-slate-200 mt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-bold text-slate-700"><i class="fas fa-boxes mr-2"></i>Materiais / Peças Utilizadas</h4>
+                    <button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 shadow"><i class="fas fa-plus mr-1"></i> Adicionar Item</button>
+                </div>
+                <div id="materialsContainer" class="space-y-3"><p class="text-sm text-slate-500 italic">Nenhum material listado.</p></div>
+            </div>`;
+
+        const renderFormFieldsCommon = (typeId) => `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">Selecione a Creche (CEI) *</label><select id="ceiSelect${typeId}" required class="w-full p-3 border rounded-lg outline-none focus:border-blue-500"></select></div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">Data *</label><input type="date" id="date${typeId}" required class="w-full p-3 border rounded-lg outline-none focus:border-blue-500" value="${new Date().toISOString().split('T')[0]}"></div>
+            </div>`;
+
+        const renderTimeFields = (typeId) => `
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-3 border rounded-lg outline-none focus:border-blue-500"></div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-3 border rounded-lg outline-none focus:border-blue-500"></div>
+            </div>`;
+
+        const renderFuncReportForm = () => `
+            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in">
+                <div class="flex justify-between items-center mb-6 border-b pb-2">
+                    <h3 class="text-xl font-bold text-blue-800 flex items-center gap-2"><i class="fas fa-wrench"></i> <span id="formTitleReports">Registrar Manutenção</span></h3>
+                </div>
+                <form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-5">
+                    <input type="hidden" id="editIdreports">
+                    ${renderFormFieldsCommon('Rep')}
+                    ${renderTimeFields('Rep')}
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">O que foi feito? *</label><textarea id="workDoneRep" required rows="3" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500 resize-none"></textarea></div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Nível de Dificuldade (1 a 5) *</label>
+                        <input type="range" id="diffRep" min="1" max="5" value="3" class="w-full" oninput="document.getElementById('diffVal').textContent = this.value">
+                        <div class="text-center text-sm font-bold text-blue-600">Nível <span id="diffVal">3</span></div>
+                    </div>
+                    ${renderMaterialInputs()}
+                    <div class="bg-slate-50 p-4 rounded-xl border mt-4">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Serviço</label>
+                        <input type="file" id="photosRep" multiple accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')">
+                        <div id="repPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div>
+                    </div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500 resize-none"></textarea></div>
+                    <button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Serviço</button>
+                </form>
+            </div>`;
+
+        const renderFuncQuoteForm = () => `
+            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in">
+                <h3 class="text-xl font-bold text-green-700 flex items-center gap-2 mb-6 border-b pb-2"><i class="fas fa-file-invoice"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3>
+                <form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-5">
+                    <input type="hidden" id="editIdquotes">
+                    ${renderFormFieldsCommon('Quote')}
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Descrição / Diagnóstico *</label><textarea id="workDoneQuote" required rows="3" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500 resize-none" placeholder="Qual o problema? O que precisa ser feito?"></textarea></div>
+                    ${renderMaterialInputs().replace('materialsContainer', 'quoMaterialsContainer')}
+                    <div class="bg-slate-50 p-4 rounded-xl border mt-4">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Problema</label>
+                        <input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')">
+                        <div id="quoPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div>
+                    </div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Observações do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500 resize-none"></textarea></div>
+                    <button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Orçamento</button>
+                </form>
+            </div>`;
+
+        const renderFuncThirdPartyForm = () => `
+            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in">
+                <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2 mb-6 border-b pb-2"><i class="fas fa-eye"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3>
+                <form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-5">
+                    <input type="hidden" id="editIdthirdParty">
+                    ${renderFormFieldsCommon('ThirdParty')}
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Nome da Empresa Terceirizada *</label><input type="text" id="companyNameThirdParty" required class="w-full p-3 border rounded-lg outline-none focus:border-blue-500"></div>
+                    ${renderTimeFields('ThirdParty')}
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Serviço Realizado pelo Terceiro *</label><textarea id="workDoneThirdParty" required rows="3" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500 resize-none"></textarea></div>
+                    <div class="bg-slate-50 p-4 rounded-xl border mt-4">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Serviço</label>
+                        <input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')">
+                        <div id="tpPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div>
+                    </div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Observações / Problemas (Opcional)</label><textarea id="obsThirdParty" rows="2" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500 resize-none"></textarea></div>
+                    <button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Acompanhamento</button>
+                </form>
+            </div>`;
+
+        window.cancelEdit = () => { window.activeTab = 'func-history'; renderActiveTab(); };
+
+        window.editFuncRecord = (type, id) => {
+            const record = window.localData[type].find(r => r.id === id); if(!record) return;
+            if(type === 'reports') window.activeTab = 'func-reports';
+            if(type === 'quotes') window.activeTab = 'func-quotes';
+            if(type === 'thirdParty') window.activeTab = 'func-thirdParty';
+            renderActiveTab();
+            
+            setTimeout(() => {
+                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                document.getElementById(`editId${type}`).value = record.id;
+                
+                const selectCei = document.getElementById(`ceiSelect${sffx}`);
+                const opt = Array.from(selectCei.options).find(o => o.value === record.cei);
+                if(opt) selectCei.value = opt.value;
+                
+                document.getElementById(`date${sffx}`).value = record.date;
+                document.getElementById(`workDone${sffx}`).value = record.workDone;
+                if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
+                
+                if(type === 'reports' || type === 'thirdParty') {
+                    document.getElementById(`timeStart${sffx}`).value = record.timeStart;
+                    document.getElementById(`timeEnd${sffx}`).value = record.timeEnd;
+                }
+                if(type === 'thirdParty') { document.getElementById('companyNameThirdParty').value = record.companyName; }
+                if(type === 'reports') { document.getElementById('diffRep').value = record.difficulty; document.getElementById('diffVal').textContent = record.difficulty; }
+                
+                if((type === 'reports' || type === 'quotes') && record.materials) {
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
+                    document.getElementById(contId).innerHTML = '';
+                    record.materials.forEach(m => {
+                        window.addMaterialRow(contId);
+                        const lastRow = document.getElementById(`mat_${window.materialCount}`);
+                        lastRow.querySelector('.mat-name').value = m.name;
+                        if(m.brand) lastRow.querySelector('.mat-brand').value = m.brand;
+                        lastRow.querySelector('.mat-qtd').value = m.qtd;
+                        if(m.price) lastRow.querySelector('.mat-price').value = m.price;
+                    });
+                }
+                
+                document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`).textContent = `Editando ${type === 'reports' ? 'Serviço' : (type==='quotes'?'Orçamento':'Acompanhamento')}`;
+                if(document.getElementById('cancelEditBtn')) window.showElement('cancelEditBtn');
+            }, 100);
+        };
+
+        window.deleteFuncRecord = (type, id) => {
+            window.confirmAction(async () => {
+                await window.dbDelete(type, id);
+                window.logAudit(`Funcionário excluiu seu ${type} ID: ${id}`);
+                window.showToast("Registro excluído com sucesso!");
+                window.renderEmployeeHistory();
+            });
+        };
+
+        window.saveRecord = async (e, type) => {
+            e.preventDefault();
+            const btnId = type === 'reports' ? 'btnSubmitReport' : (type === 'quotes' ? 'btnSubmitQuote' : 'btnSubmitThirdParty');
+            const btn = document.getElementById(btnId);
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...'; btn.disabled = true;
 
             try {
-                const checkEditFlag = (window.editingItemId !== null && window.editingItemId !== undefined);
-                let dataObj = { userId: window.currentSystemUser.id, userLogin: window.currentSystemUser.login };
-                let filesInput = null;
+                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                const editId = document.getElementById(`editId${type}`).value;
+                const isEdit = !!editId;
+                const recordId = editId || Date.now().toString();
+                
+                const selectElement = document.getElementById(`ceiSelect${sffx}`);
+                const ceiName = selectElement.value;
+                const ceiId = selectElement.options[selectElement.selectedIndex]?.dataset.id;
+                
+                const recordData = {
+                    id: recordId, userId: window.currentSystemUser.id, userName: window.currentSystemUser.username,
+                    cei: ceiName, ceiId: ceiId, date: document.getElementById(`date${sffx}`).value,
+                    workDone: document.getElementById(`workDone${sffx}`).value, obs: document.getElementById(`obs${sffx}`).value || "", timestamp: new Date().toISOString()
+                };
 
-                if (type === 'reports') {
-                    dataObj.ceiId = document.getElementById('repCei').value; 
-                    dataObj.date = document.getElementById('repDate').value; 
-                    dataObj.startTime = document.getElementById('repStart').value; 
-                    dataObj.endTime = document.getElementById('repEnd').value; 
-                    dataObj.difficulty = document.getElementById('repDifficulty').value; 
-                    dataObj.desc = document.getElementById('repDesc').value; 
-                    dataObj.obs = document.getElementById('repObs').value; 
-                    filesInput = document.getElementById('repPhotos');
-                    
-                    dataObj.materials = Array.from(document.querySelectorAll('#materialsContainer .mat-row')).map(r => { 
-                        const i = r.querySelectorAll('input'); 
-                        return { name: i[0].value, brand: i[1].value, qtd: parseInt(i[2].value), value: i[3].value || "0" }; 
+                if(type === 'reports' || type === 'thirdParty') {
+                    recordData.timeStart = document.getElementById(`timeStart${sffx}`).value;
+                    recordData.timeEnd = document.getElementById(`timeEnd${sffx}`).value;
+                }
+                if(type === 'thirdParty') recordData.companyName = document.getElementById('companyNameThirdParty').value;
+                if(type === 'reports') recordData.difficulty = document.getElementById('diffRep').value;
+
+                if(type === 'reports' || type === 'quotes') {
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
+                    const container = document.getElementById(contId);
+                    const mats = [];
+                    container.querySelectorAll('[id^="mat_"]').forEach(row => {
+                        mats.push({ name: row.querySelector('.mat-name').value, brand: row.querySelector('.mat-brand').value, qtd: row.querySelector('.mat-qtd').value, price: row.querySelector('.mat-price').value });
                     });
-                } else if (type === 'quotes') {
-                    dataObj.ceiId = document.getElementById('quoCei').value; 
-                    dataObj.date = document.getElementById('quoDate').value; 
-                    dataObj.desc = document.getElementById('quoDesc').value; 
-                    filesInput = document.getElementById('quoPhotos');
-                    
-                    dataObj.materials = Array.from(document.querySelectorAll('#quoMaterialsContainer .mat-row')).map(r => { 
-                        const i = r.querySelectorAll('input'); 
-                        return { name: i[0].value, brand: i[1].value, qtd: parseInt(i[2].value), value: i[3].value || "0" }; 
-                    });
-                } else if (type === 'thirdParty') {
-                    dataObj.ceiId = document.getElementById('tpCei').value; 
-                    dataObj.companyName = document.getElementById('tpCompany').value; 
-                    dataObj.date = document.getElementById('tpDate').value; 
-                    dataObj.startTime = document.getElementById('tpStart').value; 
-                    dataObj.endTime = document.getElementById('tpEnd').value; 
-                    dataObj.tpDesc = document.getElementById('tpDesc').value; 
-                    dataObj.obs = document.getElementById('tpObs').value; 
-                    filesInput = document.getElementById('tpPhotos');
+                    recordData.materials = mats;
                 }
 
                 let base64Photos = [];
-                if (filesInput && filesInput.files.length > 0) {
-                    for (let f of filesInput.files) {
-                        if (f.type.startsWith('image/')) {
-                            base64Photos.push(await window.compressImage(f));
-                        }
+                const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
+                const fileInputId = type === 'reports' ? 'photosRep' : (type === 'quotes' ? 'photosQuote' : 'photosThirdParty');
+                const fileInput = document.getElementById(fileInputId);
+                
+                if (fileInput && fileInput.files.length > 0) {
+                    for(let file of fileInput.files) {
+                        const b64 = await window.compressImage(file); base64Photos.push(b64);
                     }
-                } else if (checkEditFlag) {
-                    const oldR = window.localData[type].find(r => r.id === window.editingItemId);
-                    if(oldR && oldR.photos) base64Photos = oldR.photos;
-                }
-
-                const telSuccess = await window.sendToTelegram(dataObj.ceiId, base64Photos, checkEditFlag, dataObj, btnMap[type][1]);
-                dataObj.photos = telSuccess ? [] : base64Photos; 
-                dataObj.telegramSent = telSuccess;
-
-                if (checkEditFlag) {
-                    await db.collection(type).doc(window.editingItemId).set(dataObj, {merge: true});
-                    window.showToast("Editado e Enviado!", "success");
-                    window.logAudit(`${btnMap[type][1]} Editado: ${window.editingItemId}`);
-                } else {
-                    const docRef = await db.collection(type).add(dataObj);
-                    window.showToast("Salvo e Enviado!", "success");
-                    window.logAudit(`${btnMap[type][1]} Criado: ${docRef.id}`);
+                } else if (isEdit) {
+                    const oldRecord = window.localData[type].find(r => r.id === editId);
+                    if(oldRecord && oldRecord.photos) base64Photos = oldRecord.photos;
                 }
                 
-                window.cancelEdit(); 
-            } catch (err) { 
-                console.error(err); 
-                window.showToast("Erro ao processar", "error"); 
-            } finally { 
-                btn.innerHTML = originalHTML; 
-                btn.disabled = false; 
-            }
-        };
+                if (ceiId) {
+                    const tgSent = await window.sendToTelegram(ceiId, recordData, base64Photos, isEdit, typeLabel);
+                    if (tgSent) {
+                        recordData.telegramSent = true; base64Photos = []; 
+                    } else {
+                        recordData.telegramSent = false; recordData.photos = base64Photos; 
+                    }
+                } else { recordData.photos = base64Photos; }
 
-        // Controle da Tabela de Funcionários
-        window.renderEmployeeHistory = function() {
-            if (!window.currentSystemUser) return;
-            const uid = window.currentSystemUser.id; 
-            const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
-            
-            const buildRow = (type, r, extra) => `<tr class="border-b hover:bg-slate-50"><td class="p-3 whitespace-nowrap">${window.formatDateBR(r.date)}</td><td class="p-3">${extra}</td><td class="p-3 flex gap-2"><button onclick="window.editRecord('${r.id}', '${type}')" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-edit"></i></button><button onclick="window.deleteRecord('${r.id}', '${type}')" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-trash"></i></button></td></tr>`;
-            
-            document.getElementById('emphistoryReports').innerHTML = window.localData.reports.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('reports', r, ceisMap[r.ceiId] || 'Excluída')).join('');
-            document.getElementById('emphistoryQuotes').innerHTML = window.localData.quotes.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('quotes', r, ceisMap[r.ceiId] || 'Excluída')).join('');
-            document.getElementById('emphistoryThirdParty').innerHTML = window.localData.thirdParty.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('thirdParty', r, r.companyName)).join('');
-        };
-
-        // Editar e Apagar Registros de Funcionários
-        window.editRecord = function(id, type) {
-            window.cancelEdit(); 
-            const r = window.localData[type].find(x => x.id === id); 
-            if (!r) return;
-            
-            window.editingItemId = id; 
-            window.showElement('cancelEditBtn'); 
-            window.switchEmpTab(type); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            if (type === 'reports') {
-                document.getElementById('formTitleReports').textContent = "Editando Manutenção"; 
-                document.getElementById('btnSubmitReport').innerHTML = "Salvar Alterações"; 
-                document.getElementById('repCei').value = r.ceiId; 
-                document.getElementById('repDate').value = r.date; 
-                document.getElementById('repStart').value = r.startTime; 
-                document.getElementById('repEnd').value = r.endTime; 
-                document.getElementById('repDifficulty').value = r.difficulty; 
-                document.getElementById('repDesc').value = r.desc; 
-                document.getElementById('repObs').value = r.obs || ''; 
+                await window.dbSave(type, recordId, recordData);
+                window.logAudit(`${isEdit ? 'Editou' : 'Registrou'} ${type} ID: ${recordId}`);
+                window.showToast(isEdit ? "Atualizado e Enviado!" : "Salvo e Enviado!");
                 
-                const c = document.getElementById('materialsContainer'); c.innerHTML = '';
-                if(r.materials) {
-                    r.materials.forEach(m => { 
-                        window.addMaterialRow('materialsContainer'); 
-                        const i = c.lastElementChild.querySelectorAll('input'); 
-                        i[0].value = m.name; i[1].value = m.brand; i[2].value = m.qtd; i[3].value = m.value; 
-                    });
+                if (isEdit) window.cancelEdit();
+                else {
+                    document.getElementById(`${type === 'reports' ? 'reportForm' : (type==='quotes'?'quoteForm':'thirdPartyForm')}`).reset();
+                    if(type === 'reports') { document.getElementById('materialsContainer').innerHTML = '<p class="text-sm text-slate-400 italic">Nenhum material listado.</p>'; document.getElementById('repPhotoPreview').innerHTML = ''; }
+                    if(type === 'quotes') { document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-sm text-slate-400 italic">Nenhum material listado.</p>'; document.getElementById('quoPhotoPreview').innerHTML = ''; }
+                    if(type === 'thirdParty') document.getElementById('tpPhotoPreview').innerHTML = '';
                 }
-            } else if (type === 'quotes') {
-                document.getElementById('formTitleQuotes').textContent = "Editando Orçamento"; 
-                document.getElementById('btnSubmitQuote').innerHTML = "Salvar Alterações"; 
-                document.getElementById('quoCei').value = r.ceiId; 
-                document.getElementById('quoDate').value = r.date; 
-                document.getElementById('quoDesc').value = r.desc; 
-                
-                const c = document.getElementById('quoMaterialsContainer'); c.innerHTML = '';
-                if(r.materials) {
-                    r.materials.forEach(m => { 
-                        window.addMaterialRow('quoMaterialsContainer'); 
-                        const i = c.lastElementChild.querySelectorAll('input'); 
-                        i[0].value = m.name; i[1].value = m.brand; i[2].value = m.qtd; i[3].value = m.value; 
-                    });
-                }
-            } else if (type === 'thirdParty') {
-                document.getElementById('formTitleThirdParty').textContent = "Editando Terceiro"; 
-                document.getElementById('btnSubmitThirdParty').innerHTML = "Salvar Alterações"; 
-                document.getElementById('tpCei').value = r.ceiId; 
-                document.getElementById('tpCompany').value = r.companyName; 
-                document.getElementById('tpDate').value = r.date; 
-                document.getElementById('tpStart').value = r.startTime; 
-                document.getElementById('tpEnd').value = r.endTime; 
-                document.getElementById('tpDesc').value = r.tpDesc; 
-                document.getElementById('tpObs').value = r.obs || '';
-            }
+            } catch (err) { console.error(err); window.showToast("Erro ao salvar", "error"); } 
+            finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
         };
 
-        window.deleteRecord = function(id, type) { 
-            if(confirm("Apagar este registro permanentemente?")) { 
-                db.collection(type).doc(id).delete();
-                window.showToast("Apagado com sucesso.", "success"); 
-                window.logAudit(`Registro apagado (${type}): ${id}`);
-            } 
-        };
-
-        // Funções da Área do Administrador
-        window.renderAdminTables = function() { 
-            window.updateCeiDropdowns(); 
-            window.applyFilters(); 
-            window.renderConfigLists(); 
-            window.renderAuditTable(); 
-        };
-
-        window.applyFilters = function() {
-            const txt = (document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : ''); 
-            const ceiId = (document.getElementById('filterCei') ? document.getElementById('filterCei').value : ''); 
-            const dStart = document.getElementById('filterDateStart') ? document.getElementById('filterDateStart').value : ''; 
-            const dEnd = document.getElementById('filterDateEnd') ? document.getElementById('filterDateEnd').value : ''; 
-            
-            const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
-            
-            const fFn = (r) => { 
-                let m = true; 
-                if(ceiId && r.ceiId !== ceiId) m = false; 
-                if(dStart && r.date < dStart) m = false; 
-                if(dEnd && r.date > dEnd) m = false; 
-                if(txt && !`${r.userLogin} ${ceisMap[r.ceiId]||''} ${r.desc||''} ${r.companyName||''}`.toLowerCase().includes(txt)) m = false; 
-                return m; 
-            };
-            
-            if(document.getElementById('adminReportsTable')) {
-                document.getElementById('adminReportsTable').innerHTML = window.localData.reports.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-[200px]" title="${r.desc}">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'reports')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
-            }
-            if(document.getElementById('adminQuotesTable')) {
-                document.getElementById('adminQuotesTable').innerHTML = window.localData.quotes.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-[200px]" title="${r.desc}">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'quotes')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
-            }
-            if(document.getElementById('adminThirdPartyTable')) {
-                document.getElementById('adminThirdPartyTable').innerHTML = window.localData.thirdParty.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-bold">${r.companyName}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-[200px]" title="${r.tpDesc}">${r.tpDesc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'thirdParty')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded font-medium transition-colors"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
-            }
-        };
-        
-        window.renderAuditTable = function() {
-            const sortedAudit = [...window.localData.audit].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-            document.getElementById('adminAuditTable').innerHTML = sortedAudit.map(a => `<tr class="border-b hover:bg-slate-50"><td class="p-3 text-xs text-slate-500">${a.date}</td><td class="p-3 font-semibold capitalize">${a.user}</td><td class="p-3 text-slate-700">${a.action}</td></tr>`).join('');
-        };
-        
-        window.renderConfigLists = function() {
-            document.getElementById('adminCeiList').innerHTML = window.localData.ceis.map(c => `<li class="py-4 flex justify-between items-center border-b"><span class="font-bold text-slate-700">${c.name} <span class="text-xs font-normal text-slate-500 block mt-1"><i class="fab fa-telegram text-blue-400 mr-1"></i>Grupo ID: ${c.telegramGroupId||'-'} | Tópico: ${c.telegramTopicId||'-'}</span></span><div><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 mr-3 p-2 bg-blue-50 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded"><i class="fas fa-trash"></i></button></div></li>`).join('');
-            document.getElementById('adminUserList').innerHTML = window.localData.users.map(u => `<li class="py-4 flex justify-between items-center border-b"><span class="font-bold capitalize text-slate-700">${u.login} <span class="text-xs bg-slate-200 px-2 py-1 rounded ml-2 font-normal">${u.role}</span></span><div><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 mr-3 p-2 bg-blue-50 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded"><i class="fas fa-trash"></i></button></div></li>`).join('');
-        };
-
-        window.viewDetails = function(id, type) { 
-            const r = window.localData[type].find(r => r.id === id); 
-            const cei = window.localData.ceis.find(c => c.id === r.ceiId); 
-            
-            let html = `<div class="grid grid-cols-2 gap-4 border-b pb-4">
-                <div><p class="text-sm text-slate-500 mb-1">Creche (CEI)</p><p class="font-bold text-lg">${cei?cei.name:'Excluída'}</p></div>
-                <div><p class="text-sm text-slate-500 mb-1">Data</p><p class="font-bold text-lg">${window.formatDateBR(r.date)}</p></div>
-                <div><p class="text-sm text-slate-500 mb-1">Lançado por</p><p class="font-bold capitalize">${r.userLogin}</p></div>
-                ${r.startTime ? `<div><p class="text-sm text-slate-500 mb-1">Horário</p><p class="font-bold">${r.startTime} às ${r.endTime}</p></div>` : ''}
-            </div>`;
-            
-            if(type === 'reports' || type === 'quotes') {
-                html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-1">Descrição do Serviço</p><div class="bg-slate-50 p-4 rounded-lg border border-slate-200">${r.desc}</div></div>`;
-                if(r.materials && r.materials.length > 0) {
-                    html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-2">Materiais Listados</p>
-                    <div class="overflow-x-auto"><table class="w-full text-sm border-collapse border border-slate-200">
-                    <tr class="bg-slate-100"><th class="border p-2 text-left">Qtd</th><th class="border p-2 text-left">Material/Marca</th><th class="border p-2 text-right">R$ Un.</th><th class="border p-2 text-right">R$ Total</th></tr>`;
-                    let sum = 0;
-                    r.materials.forEach(m => {
-                        let total = (parseFloat(m.value || 0) * m.qtd);
-                        sum += total;
-                        html += `<tr><td class="border p-2">${m.qtd}</td><td class="border p-2">${m.name} (${m.brand})</td><td class="border p-2 text-right">${parseFloat(m.value||0).toFixed(2)}</td><td class="border p-2 text-right font-bold">${total.toFixed(2)}</td></tr>`;
-                    });
-                    html += `<tr class="bg-blue-50"><td colspan="3" class="border p-2 text-right font-bold">Total Geral:</td><td class="border p-2 text-right font-bold text-blue-700">R$ ${sum.toFixed(2)}</td></tr></table></div></div>`;
-                }
-            } else if (type === 'thirdParty') {
-                html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-1">Empresa Terceira</p><p class="font-bold text-lg">${r.companyName}</p></div>`;
-                html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-1">Serviço Realizado</p><div class="bg-slate-50 p-4 rounded-lg border border-slate-200">${r.tpDesc}</div></div>`;
-            }
-
-            if(r.telegramSent) {
-                html += `<div class="mt-6 p-4 bg-green-50 text-green-700 rounded-lg border border-green-200 flex items-center"><i class="fas fa-check-circle text-2xl mr-3"></i><div><p class="font-bold">Enviado ao Telegram</p><p class="text-sm">O relatório em PDF e as fotos já foram anexados no grupo da creche.</p></div></div>`; 
-            } else if(r.photos && r.photos.length > 0) {
-                html += `<div class="mt-6"><p class="text-sm text-slate-500 mb-2">Fotos (Salvas no Banco Local)</p><div class="flex flex-wrap gap-2">${r.photos.map(p => `<a href="${p}" target="_blank"><img src="${p}" class="h-24 rounded border border-slate-300 shadow-sm hover:opacity-80 transition-opacity"></a>`).join('')}</div></div>`;
-            }
-            
-            document.getElementById('modalDetailsContent').innerHTML = html; 
-            window.showElement('modalDetails'); 
-        };
-
-        // Geração do Relatório Excel
-        window.exportToExcel = function() {
-            window.showToast("Gerando Excel...", "info"); 
-            const wb = XLSX.utils.book_new();
-            
-            const txt = (document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : ''); 
-            const ceiId = (document.getElementById('filterCei') ? document.getElementById('filterCei').value : ''); 
-            const dStart = document.getElementById('filterDateStart') ? document.getElementById('filterDateStart').value : ''; 
-            const dEnd = document.getElementById('filterDateEnd') ? document.getElementById('filterDateEnd').value : ''; 
-            const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
-            
-            const fFn = (r) => { 
-                let m = true; 
-                if(ceiId && r.ceiId !== ceiId) m = false; 
-                if(dStart && r.date < dStart) m = false; 
-                if(dEnd && r.date > dEnd) m = false; 
-                if(txt && !`${r.userLogin} ${ceisMap[r.ceiId]||''} ${r.desc||''} ${r.companyName||''}`.toLowerCase().includes(txt)) m = false; 
-                return m; 
-            };
-            
-            const sheetR = [["Data", "Creche", "Técnico", "Serviço", "Dificuldade", "Custo Mat."]]; 
-            window.localData.reports.filter(fFn).forEach(r => { 
-                let sum=0; 
-                if(r.materials) r.materials.forEach(m => sum += (parseFloat(m.value||0)*m.qtd)); 
-                sheetR.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, r.difficulty, sum]); 
-            }); 
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetR), "Manutenções");
-            
-            const sheetQ = [["Data", "Creche", "Técnico", "Orçamento", "Estimativa"]]; 
-            window.localData.quotes.filter(fFn).forEach(r => { 
-                let sum=0; 
-                if(r.materials) r.materials.forEach(m => sum += (parseFloat(m.value||0)*m.qtd)); 
-                sheetQ.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, sum]); 
-            }); 
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetQ), "Orçamentos");
-            
-            const sheetT = [["Data", "Creche", "Empresa", "Técnico Acomp.", "Serviço Terceiro"]]; 
-            window.localData.thirdParty.filter(fFn).forEach(r => { 
-                sheetT.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.companyName, r.userLogin, r.tpDesc]); 
-            }); 
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetT), "Terceiros");
-
-            XLSX.writeFile(wb, "Relatorio_LYM.xlsx"); 
-            window.logAudit(`Gerou Relatório Excel Filtrado`);
-        };
-
-        // Salvar as configurações do Administrador
-        window.saveCei = function(e) { 
-            e.preventDefault(); 
-            const n = document.getElementById('ceiName').value.trim(); 
-            const g = document.getElementById('ceiTelegramId').value.trim(); 
-            const t = document.getElementById('ceiTelegramTopicId').value.trim(); 
-            
-            if(window.editingItemId) { 
-                db.collection('ceis').doc(window.editingItemId).set({name:n, telegramGroupId:g, telegramTopicId:t}, {merge:true}); 
-                window.showToast("Creche atualizada!", "success");
-            } else {
-                db.collection('ceis').add({name:n, telegramGroupId:g, telegramTopicId:t}); 
-                window.showToast("Creche criada!", "success");
-            }
-            window.hideElement('modalCei'); 
-        };
-
-        window.editCei = function(id) { 
-            window.editingItemId = id; 
-            const c = window.localData.ceis.find(x=>x.id===id); 
-            document.getElementById('ceiName').value = c.name; 
-            document.getElementById('ceiTelegramId').value = c.telegramGroupId||''; 
-            document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId||''; 
-            document.getElementById('modalTitleCei').textContent = "Editar Creche (CEI)";
-            window.showElement('modalCei'); 
-        };
-
-        window.deleteCei = function(id) { 
-            if(confirm("Apagar Creche permanentemente?")) {
-                db.collection('ceis').doc(id).delete();
-                window.showToast("Creche apagada.", "success");
-            }
-        };
-
-        window.saveUser = function(e) { 
-            e.preventDefault(); 
-            const l = document.getElementById('userName').value.trim(); 
-            const p = document.getElementById('userPass').value.trim(); 
-            const r = document.getElementById('userRole').value; 
-            
-            if(window.editingItemId) { 
-                db.collection('users').doc(window.editingItemId).set({login:l, pass:p, role:r}, {merge:true}); 
-                window.showToast("Usuário atualizado!", "success");
-            } else {
-                db.collection('users').add({login:l, pass:p, role:r}); 
-                window.showToast("Usuário criado!", "success");
-            }
-            window.hideElement('modalUser'); 
-        };
-
-        window.editUser = function(id) { 
-            window.editingItemId = id; 
-            const u = window.localData.users.find(x=>x.id===id); 
-            document.getElementById('userName').value = u.login; 
-            document.getElementById('userPass').value = u.pass; 
-            document.getElementById('userRole').value = u.role; 
-            document.getElementById('modalTitleUser').textContent = "Editar Usuário";
-            window.showElement('modalUser'); 
-        };
-
-        window.deleteUser = function(id) { 
-            if(confirm("Apagar Usuário permanentemente?")) {
-                db.collection('users').doc(id).delete();
-                window.showToast("Usuário apagado.", "success");
-            }
-        };
-
-        // Resetar Variáveis nos Modais
-        document.getElementById('modalCei').addEventListener('click', (e) => { 
-            if(e.target.id==='modalCei'){ window.hideElement('modalCei'); window.editingItemId = null; } 
-        });
-        document.getElementById('modalUser').addEventListener('click', (e) => { 
-            if(e.target.id==='modalUser'){ window.hideElement('modalUser'); window.editingItemId = null; } 
-        });
-        document.getElementById('modalDetails').addEventListener('click', (e) => { 
-            if(e.target.id==='modalDetails'){ window.hideElement('modalDetails'); } 
-        });
-
-        // INICIAR APLICAÇÃO
-        window.onload = window.initFirebaseSync;
+        window.onload = () => { setupRealtimeSync(); };
     </script>
 </body>
 </html>
