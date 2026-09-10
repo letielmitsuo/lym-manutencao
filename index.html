@@ -204,7 +204,7 @@
         </div>
     </div>
 
-    <!-- SCRIPTS CORE: FIREBASE E LÓGICA -->
+<!-- SCRIPTS CORE: FIREBASE E LÓGICA -->
     <script>
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
 
@@ -238,11 +238,11 @@
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             const colorClass = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
-            toast.className = `${colorClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300`;
-            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span>${msg}</span>`;
+            toast.className = `${colorClass} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300 animate-fade-in z-50`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span class="font-medium">${msg}</span><button onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
             container.appendChild(toast);
             setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10);
-            setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
+            setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 5000);
         };
 
         // Confirmações
@@ -265,7 +265,6 @@
                 db.collection(col).onSnapshot(snap => {
                     window.localData[col] = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     
-                    // Injeta usuários padrão se o banco estiver 100% vazio
                     if (col === 'users' && snap.empty) {
                         db.collection('users').add({ login: 'admin', pass: 'admin123', role: 'admin' });
                         db.collection('users').add({ login: 'func', pass: 'func123', role: 'funcionario' });
@@ -306,7 +305,6 @@
             const u = document.getElementById('loginUsername').value.trim();
             const p = document.getElementById('loginPassword').value.trim();
             
-            // Busca o usuário compatível (checa username ou login por redundância)
             const user = window.localData.users.find(x => 
                 (x.login === u && x.pass === p) || (x.username === u && x.password === p)
             );
@@ -340,7 +338,7 @@
         };
 
         // ==========================================
-        // RENDERIZAÇÃO DO MENU E ABAS (CORE)
+        // RENDERIZAÇÃO DO MENU E ABAS
         // ==========================================
         window.buildMenu = () => {
             const navLinks = document.getElementById('navLinks');
@@ -407,7 +405,6 @@
             document.getElementById('mobilePageTitle').textContent = title;
             document.getElementById('mainContent').innerHTML = `<h2 class="text-2xl font-bold text-slate-800 mb-6 hidden md:block">${title}</h2>${html}`;
             
-            // Post Render Triggers
             if(window.activeTab === 'func-reports') populateCeiSelect('ceiSelectRep');
             if(window.activeTab === 'func-quotes') populateCeiSelect('ceiSelectQuote');
             if(window.activeTab === 'func-thirdParty') populateCeiSelect('ceiSelectThirdParty');
@@ -416,7 +413,7 @@
         };
 
         // ==========================================
-        // LAYOUTS (GERADORES HTML)
+        // LAYOUTS (HTML)
         // ==========================================
         
         const populateCeiSelect = (id) => {
@@ -424,109 +421,23 @@
             sel.innerHTML = '<option value="">Selecione a Creche...</option>' + window.localData.ceis.sort((a,b)=>a.name.localeCompare(b.name)).map(c => `<option value="${c.name}" data-id="${c.id}">${c.name}</option>`).join('');
         };
 
-        // ------------- ADMIN -------------
-        const renderAdminDashboard = () => `
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 text-sm font-medium">Serviços</p><p class="text-2xl font-bold text-slate-800">${window.localData.reports.length}</p></div></div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 text-sm font-medium">Orçamentos</p><p class="text-2xl font-bold text-slate-800">${window.localData.quotes.length}</p></div></div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 text-sm font-medium">Terceiros</p><p class="text-2xl font-bold text-slate-800">${window.localData.thirdParty.length}</p></div></div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-2xl"><i class="fas fa-school"></i></div><div><p class="text-slate-500 text-sm font-medium">Creches</p><p class="text-2xl font-bold text-slate-800">${window.localData.ceis.length}</p></div></div>
-            </div>`;
-
-        const renderAdminCeis = () => {
-            let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${c.name}</td><td class="p-4 text-sm text-slate-500">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="p-4 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join("");
-            return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Nome</th><th class="p-4 font-semibold">Telegram (Grupo/Tópico)</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-8 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`;
-        };
-
-        const renderAdminUsers = () => {
-            let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${u.login || u.username}</td><td class="p-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}">${u.role.toUpperCase()}</span></td><td class="p-4 text-right space-x-2"><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join("");
-            return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Login</th><th class="p-4 font-semibold">Nível</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`;
-        };
-
-        const renderFilterBar = (type) => `
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 animate-fade-in">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                    <div><label class="block text-xs font-semibold text-slate-500 mb-1">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border rounded-lg text-sm" placeholder="Nome, CEI..."></div>
-                    <div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border rounded-lg text-sm"></div>
-                    <div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border rounded-lg text-sm"></div>
-                    <div class="flex gap-2">
-                        <button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-900"><i class="fas fa-filter"></i> Filtrar</button>
-                        <button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button>
-                    </div>
-                </div>
-            </div>`;
-
+        const renderAdminDashboard = () => `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in"><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 text-sm font-medium">Serviços</p><p class="text-2xl font-bold text-slate-800">${window.localData.reports.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 text-sm font-medium">Orçamentos</p><p class="text-2xl font-bold text-slate-800">${window.localData.quotes.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 text-sm font-medium">Terceiros</p><p class="text-2xl font-bold text-slate-800">${window.localData.thirdParty.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-2xl"><i class="fas fa-school"></i></div><div><p class="text-slate-500 text-sm font-medium">Creches</p><p class="text-2xl font-bold text-slate-800">${window.localData.ceis.length}</p></div></div></div>`;
+        const renderAdminCeis = () => { let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${c.name}</td><td class="p-4 text-sm text-slate-500">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="p-4 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Nome</th><th class="p-4 font-semibold">Telegram (Grupo/Tópico)</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-8 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
+        const renderAdminUsers = () => { let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${u.login || u.username}</td><td class="p-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}">${u.role.toUpperCase()}</span></td><td class="p-4 text-right space-x-2"><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Login</th><th class="p-4 font-semibold">Nível</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
+        const renderFilterBar = (type) => `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 animate-fade-in"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end"><div><label class="block text-xs font-semibold text-slate-500 mb-1">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border rounded-lg text-sm" placeholder="Nome, CEI..."></div><div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-slate-500 mb-1">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border rounded-lg text-sm"></div><div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-900"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div></div></div>`;
         const renderAdminReports = () => renderFilterBar('reports') + `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Técnico</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
         const renderAdminQuotes = () => renderFilterBar('quotes') + `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Total Orçado</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
         const renderAdminThirdParty = () => renderFilterBar('thirdParty') + `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data</th><th class="p-4">CEI</th><th class="p-4">Empresa</th><th class="p-4 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
         const renderAdminAudit = () => `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4">Data/Hora</th><th class="p-4">Usuário</th><th class="p-4">Ação Realizada</th></tr></thead><tbody>${[...window.localData.audit].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 50).map(a => `<tr class="border-b hover:bg-slate-50 text-sm"><td class="p-4">${a.date}</td><td class="p-4 font-medium capitalize text-slate-700">${a.user}</td><td class="p-4 text-slate-600">${a.action}</td></tr>`).join("")}</tbody></table></div></div>`;
 
         // ------------- FUNCIONÁRIO -------------
-        const renderFormFieldsCommon = (typeId) => `
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><label class="block text-sm font-bold text-slate-700 mb-1">CEI (Creche) *</label><select id="ceiSelect${typeId}" required class="w-full p-3 border rounded-lg bg-white"></select></div>
-                <div><label class="block text-sm font-bold text-slate-700 mb-1">Data *</label><input type="date" id="date${typeId}" required class="w-full p-3 border rounded-lg bg-white" value="${new Date().toISOString().split('T')[0]}"></div>
-            </div>`;
-            
-        const renderTimeFields = (typeId) => `
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-3 border rounded-lg bg-white"></div>
-                <div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-3 border rounded-lg bg-white"></div>
-            </div>`;
-            
-        const renderMaterialInputs = () => `
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4">
-                <div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Material</button></div>
-                <div id="materialsContainer" class="space-y-3"><p class="text-sm text-slate-400 italic">Nenhum material listado.</p></div>
-            </div>`;
-
-        const renderFuncReportForm = () => `
-            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in">
-                <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-sm bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded">Cancelar Edição</button></div>
-                <form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-5"><input type="hidden" id="editIdreports">
-                    ${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div>
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Dificuldade (1 a 5) *</label><input type="range" id="diffRep" min="1" max="5" value="3" class="w-full" oninput="document.getElementById('diffVal').textContent = this.value"><div class="text-center text-sm font-bold text-blue-600">Nível <span id="diffVal">3</span></div></div>
-                    ${renderMaterialInputs()}
-                    <div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Serviço (Para o Telegram)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div>
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div>
-                    <button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Serviço</button>
-                </form>
-            </div>`;
-
-        const renderFuncQuoteForm = () => `
-            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in">
-                <h3 class="text-xl font-bold text-green-700 mb-6"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3>
-                <form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-5"><input type="hidden" id="editIdquotes">
-                    ${renderFormFieldsCommon('Quote')}
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div>
-                    ${renderMaterialInputs().replace('materialsContainer', 'quoMaterialsContainer')}
-                    <div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Problema</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div>
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div>
-                    <button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Orçamento</button>
-                </form>
-            </div>`;
-
-        const renderFuncThirdPartyForm = () => `
-            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in">
-                <h3 class="text-xl font-bold text-purple-700 mb-6"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3>
-                <form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-5"><input type="hidden" id="editIdthirdParty">
-                    ${renderFormFieldsCommon('ThirdParty')}
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-3 border rounded-lg bg-white"></div>
-                    ${renderTimeFields('ThirdParty')}
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div>
-                    <div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div>
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div>
-                    <button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Acompanhamento</button>
-                </form>
-            </div>`;
-
-        const renderFuncHistory = () => `
-            <div class="max-w-4xl mx-auto animate-fade-in space-y-8">
-                <div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-blue-50 font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> Minhas Manutenções</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div>
-                <div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-green-50 font-bold text-green-800"><i class="fas fa-file-invoice mr-2"></i> Meus Orçamentos</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div>
-                <div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-purple-50 font-bold text-purple-800"><i class="fas fa-handshake mr-2"></i> Meus Terceiros</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div>
-            </div>`;
+        const renderFormFieldsCommon = (typeId) => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">CEI (Creche) *</label><select id="ceiSelect${typeId}" required class="w-full p-3 border rounded-lg bg-white"></select></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Data *</label><input type="date" id="date${typeId}" required class="w-full p-3 border rounded-lg bg-white" value="${new Date().toISOString().split('T')[0]}"></div></div>`;
+        const renderTimeFields = (typeId) => `<div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-3 border rounded-lg bg-white"></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-3 border rounded-lg bg-white"></div></div>`;
+        const renderMaterialInputs = () => `<div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Material</button></div><div id="materialsContainer" class="space-y-3"><p class="text-sm text-slate-400 italic">Nenhum material listado.</p></div></div>`;
+        const renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-sm bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded">Cancelar Edição</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-5"><input type="hidden" id="editIdreports">${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Dificuldade (1 a 5) *</label><input type="range" id="diffRep" min="1" max="5" value="3" class="w-full" oninput="document.getElementById('diffVal').textContent = this.value"><div class="text-center text-sm font-bold text-blue-600">Nível <span id="diffVal">3</span></div></div>${renderMaterialInputs()}<div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Serviço (Para o Telegram)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Serviço</button></form></div>`;
+        const renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in"><h3 class="text-xl font-bold text-green-700 mb-6"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-5"><input type="hidden" id="editIdquotes">${renderFormFieldsCommon('Quote')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div>${renderMaterialInputs().replace('materialsContainer', 'quoMaterialsContainer')}<div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Problema</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Orçamento</button></form></div>`;
+        const renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in"><h3 class="text-xl font-bold text-purple-700 mb-6"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-5"><input type="hidden" id="editIdthirdParty">${renderFormFieldsCommon('ThirdParty')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-3 border rounded-lg bg-white"></div>${renderTimeFields('ThirdParty')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div><div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Acompanhamento</button></form></div>`;
+        const renderFuncHistory = () => `<div class="max-w-4xl mx-auto animate-fade-in space-y-8"><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-blue-50 font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> Minhas Manutenções</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-green-50 font-bold text-green-800"><i class="fas fa-file-invoice mr-2"></i> Meus Orçamentos</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white rounded-xl shadow-sm border overflow-hidden"><div class="p-4 bg-purple-50 font-bold text-purple-800"><i class="fas fa-handshake mr-2"></i> Meus Terceiros</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-3">Data</th><th class="p-3">CEI</th><th class="p-3 text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div></div>`;
 
         // ==========================================
         // LÓGICA DE DADOS, EDIÇÃO E TELEGRAM
@@ -541,6 +452,30 @@
             div.id = id; div.className = "flex flex-col sm:flex-row gap-2 bg-white p-3 rounded border animate-fade-in";
             div.innerHTML = `<input type="text" class="mat-name flex-grow p-2 border rounded text-sm" placeholder="Material" required><input type="text" class="mat-brand w-full sm:w-24 p-2 border rounded text-sm" placeholder="Marca"><input type="number" class="mat-qtd w-full sm:w-20 p-2 border rounded text-sm" placeholder="Qtd" value="1" min="0.1" step="0.1" required><input type="number" class="mat-price w-full sm:w-28 p-2 border rounded text-sm" placeholder="R$ Un." step="0.01"><button type="button" onclick="document.getElementById('${id}').remove()" class="w-full sm:w-auto bg-red-100 text-red-600 px-3 py-2 rounded font-bold">X</button>`;
             container.appendChild(div);
+        };
+
+        window.compressImage = (file, maxWidth = 800, quality = 0.7) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width; let height = img.height;
+                            if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                            canvas.width = width; canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            resolve(canvas.toDataURL('image/jpeg', quality));
+                        } catch(e) { reject(e); }
+                    };
+                    img.onerror = () => reject("Erro ao processar imagem.");
+                };
+                reader.onerror = () => reject("Erro ao ler o arquivo.");
+            });
         };
 
         window.handlePhotoSelection = (e, previewId) => {
@@ -564,8 +499,8 @@
             let totalValue = 0; let materialText = "";
             if(dataObj.materials) {
                 dataObj.materials.forEach(m => {
-                    let v = parseFloat(m.price || 0); totalValue += (v * m.qtd);
-                    materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * m.qtd).toFixed(2)}\n`;
+                    let v = parseFloat(m.price || 0); totalValue += (v * parseFloat(m.qtd || 1));
+                    materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * parseFloat(m.qtd || 1)).toFixed(2)}\n`;
                 });
             }
 
@@ -583,13 +518,13 @@
                 const rTxt = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
                 if (!rTxt.ok) return false;
 
-                // Gerar PDF na tela de fundo
+                // Gerar PDF
                 const pdfDiv = document.createElement('div');
                 pdfDiv.style.position = 'absolute'; pdfDiv.style.left = '-9999px'; pdfDiv.style.top = '-9999px'; pdfDiv.style.width = '800px'; document.body.appendChild(pdfDiv);
                 
                 let matsHtml = '';
                 if(dataObj.materials && dataObj.materials.length > 0) {
-                    matsHtml = `<table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;"><tr style="background:#e2e8f0;"><th style="padding:10px; border:1px solid #cbd5e1; text-align:left;">Material</th><th style="padding:10px; border:1px solid #cbd5e1;">Qtd</th><th style="padding:10px; border:1px solid #cbd5e1; text-align:right;">Total (R$)</th></tr>${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #cbd5e1;">${m.name}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:center;">${m.qtd}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right;">${(parseFloat(m.price||0)*m.qtd).toFixed(2)}</td></tr>`).join('')}<tr style="background:#f1f5f9;"><td colspan="2" style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">TOTAL:</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">R$ ${totalValue.toFixed(2)}</td></tr></table>`;
+                    matsHtml = `<table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;"><tr style="background:#e2e8f0;"><th style="padding:10px; border:1px solid #cbd5e1; text-align:left;">Material</th><th style="padding:10px; border:1px solid #cbd5e1;">Qtd</th><th style="padding:10px; border:1px solid #cbd5e1; text-align:right;">Total (R$)</th></tr>${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #cbd5e1;">${m.name}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:center;">${m.qtd}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right;">${(parseFloat(m.price||0)*parseFloat(m.qtd||1)).toFixed(2)}</td></tr>`).join('')}<tr style="background:#f1f5f9;"><td colspan="2" style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">TOTAL:</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">R$ ${totalValue.toFixed(2)}</td></tr></table>`;
                 }
 
                 let imgsHtml = '';
@@ -598,7 +533,7 @@
                 pdfDiv.innerHTML = `<div style="padding:40px; font-family:sans-serif; color:#334155;"><h1 style="color:#1d4ed8; border-bottom:3px solid #1d4ed8; padding-bottom:10px;">LYM Eletrônicos - ${typeLabel}</h1>${isEdit ? '<h2 style="color:#eab308; margin-top:10px;">[REGISTRO CORRIGIDO/EDITADO]</h2>' : ''}<table style="width:100%; margin:20px 0; font-size:16px;"><tr><td style="padding:5px 0;"><strong>Creche (CEI):</strong> ${cei.name}</td><td style="padding:5px 0;"><strong>Data:</strong> ${window.formatDateBR(dataObj.date)}</td></tr><tr><td style="padding:5px 0;"><strong>Técnico:</strong> ${dataObj.userName}</td><td style="padding:5px 0;"><strong>Horário:</strong> ${dataObj.timeStart || '--:--'} às ${dataObj.timeEnd || '--:--'}</td></tr></table><div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0;"><h3 style="margin-top:0; color:#0f172a;">Descrição / Serviço Realizado</h3><p style="margin-bottom:0; line-height:1.5;">${dataObj.workDone || 'Sem descrição.'}</p></div>${matsHtml}${imgsHtml}</div>`;
 
                 const opt = { margin: 10, filename: `Relatorio_${cei.name.replace(/[^a-z0-9]/gi, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-                let pdfBlob = await html2pdf().set(opt).from(pdfDiv).outputPdf('blob');
+                let pdfBlob = await html2pdf().set(opt).from(pdfDiv).output('blob');
                 document.body.removeChild(pdfDiv); 
 
                 const fData = new FormData();
@@ -608,7 +543,10 @@
                 
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: fData });
                 return true;
-            } catch (err) { return false; }
+            } catch (err) { 
+                console.error("Falha ao gerar PDF ou Telegram:", err);
+                return false; 
+            }
         };
 
         window.saveRecord = async (e, type) => {
@@ -617,32 +555,48 @@
             const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
             const btn = document.getElementById(btnId);
             const originalBtnText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...'; btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; 
+            btn.disabled = true;
 
             try {
                 const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                const editId = document.getElementById(`editId${type}`).value;
+                const editId = document.getElementById(`editId${type}`)?.value;
                 const isEdit = !!editId;
                 const recordId = editId || Date.now().toString();
                 
                 const selectElement = document.getElementById(`ceiSelect${sffx}`);
-                const ceiId = selectElement.options[selectElement.selectedIndex]?.dataset.id;
+                const ceiId = selectElement?.options[selectElement.selectedIndex]?.getAttribute('data-id') || "";
                 
+                // BLINDAGEM CONTRA "UNDEFINED" PARA O FIREBASE
                 const recordData = {
-                    id: recordId, userId: window.currentSystemUser.id, userName: window.currentSystemUser.login,
-                    cei: selectElement.value, ceiId: ceiId, date: document.getElementById(`date${sffx}`).value,
-                    workDone: document.getElementById(`workDone${sffx}`).value, obs: document.getElementById(`obs${sffx}`).value || "", timestamp: new Date().toISOString()
+                    id: recordId, 
+                    userId: window.currentSystemUser?.id || "anon", 
+                    userName: window.currentSystemUser?.login || "Usuário",
+                    cei: selectElement?.value || "CEI Não Informada", 
+                    ceiId: ceiId, 
+                    date: document.getElementById(`date${sffx}`)?.value || "",
+                    workDone: document.getElementById(`workDone${sffx}`)?.value || "", 
+                    obs: document.getElementById(`obs${sffx}`)?.value || "", 
+                    timestamp: new Date().toISOString()
                 };
 
-                if(type === 'reports' || type === 'thirdParty') { recordData.timeStart = document.getElementById(`timeStart${sffx}`).value; recordData.timeEnd = document.getElementById(`timeEnd${sffx}`).value; }
-                if(type === 'thirdParty') recordData.companyName = document.getElementById('companyNameThirdParty').value;
-                if(type === 'reports') recordData.difficulty = document.getElementById('diffRep').value;
+                if(type === 'reports' || type === 'thirdParty') { 
+                    recordData.timeStart = document.getElementById(`timeStart${sffx}`)?.value || ""; 
+                    recordData.timeEnd = document.getElementById(`timeEnd${sffx}`)?.value || ""; 
+                }
+                if(type === 'thirdParty') recordData.companyName = document.getElementById('companyNameThirdParty')?.value || "";
+                if(type === 'reports') recordData.difficulty = document.getElementById('diffRep')?.value || "3";
 
                 if(type === 'reports' || type === 'quotes') {
                     const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
                     const mats = [];
                     document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => {
-                        mats.push({ name: row.querySelector('.mat-name').value, brand: row.querySelector('.mat-brand').value, qtd: row.querySelector('.mat-qtd').value, price: row.querySelector('.mat-price').value });
+                        mats.push({ 
+                            name: row.querySelector('.mat-name')?.value || "", 
+                            brand: row.querySelector('.mat-brand')?.value || "", 
+                            qtd: row.querySelector('.mat-qtd')?.value || "1", 
+                            price: row.querySelector('.mat-price')?.value || "0" 
+                        });
                     });
                     recordData.materials = mats;
                 }
@@ -650,8 +604,12 @@
                 let base64Photos = [];
                 const fileInput = document.getElementById(type === 'reports' ? 'photosRep' : (type === 'quotes' ? 'photosQuote' : 'photosThirdParty'));
                 
-                if (fileInput && fileInput.files.length > 0) {
-                    for(let file of fileInput.files) base64Photos.push(await window.compressImage(file));
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    for(let file of fileInput.files) {
+                        if (file.type.startsWith('image/')) {
+                            base64Photos.push(await window.compressImage(file));
+                        }
+                    }
                 } else if (isEdit) {
                     const oldR = window.localData[type].find(r => r.id === editId);
                     if(oldR && oldR.photos) base64Photos = oldR.photos;
@@ -659,28 +617,114 @@
                 
                 if (ceiId) {
                     const tgSent = await window.sendToTelegram(ceiId, recordData, base64Photos, isEdit, typeLabel);
-                    if (tgSent) { recordData.telegramSent = true; base64Photos = []; } 
-                    else { recordData.telegramSent = false; recordData.photos = base64Photos; }
-                } else { recordData.photos = base64Photos; }
+                    if (tgSent) { 
+                        recordData.telegramSent = true; 
+                        base64Photos = []; 
+                    } else { 
+                        recordData.telegramSent = false; 
+                    }
+                } else { 
+                    recordData.telegramSent = false; 
+                }
+                
+                recordData.photos = base64Photos;
 
+                // Salvar no Banco
                 await window.dbSave(type, recordId, recordData);
                 window.logAudit(`${isEdit ? 'Editou' : 'Registrou'} ${typeLabel} ID: ${recordId}`);
                 window.showToast("Salvo e Enviado!", "success");
                 
-                if (isEdit) window.cancelEdit();
-                else {
-                    document.getElementById(`${type === 'reports' ? 'reportForm' : (type==='quotes'?'quoteForm':'thirdPartyForm')}`).reset();
-                    if(type === 'reports') { document.getElementById('materialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; document.getElementById('repPhotoPreview').innerHTML = ''; }
-                    if(type === 'quotes') { document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; document.getElementById('quoPhotoPreview').innerHTML = ''; }
+                if (isEdit) {
+                    window.cancelEdit();
+                } else {
+                    document.getElementById(type === 'reports' ? 'reportForm' : (type==='quotes'?'quoteForm':'thirdPartyForm')).reset();
+                    if(type === 'reports') { 
+                        document.getElementById('materialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; 
+                        document.getElementById('repPhotoPreview').innerHTML = ''; 
+                    }
+                    if(type === 'quotes') { 
+                        document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; 
+                        document.getElementById('quoPhotoPreview').innerHTML = ''; 
+                    }
                     if(type === 'thirdParty') document.getElementById('tpPhotoPreview').innerHTML = '';
                 }
-            } catch (err) { console.error(err); window.showToast("Erro ao salvar", "error"); } 
-            finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
+            } catch (err) { 
+                console.error("ERRO COMPLETO AO SALVAR:", err); 
+                window.showToast("Erro: " + (err.message || "Falha técnica ao salvar"), "error"); 
+            } finally { 
+                btn.innerHTML = originalBtnText; 
+                btn.disabled = false; 
+            }
         };
 
-        // ==========================================
-        // FILTROS, VISUALIZAÇÃO E EXPORTAÇÃO
-        // ==========================================
+        // HISTÓRICO DE FUNCIONÁRIOS E MANUSEIOS
+        window.renderEmployeeHistory = () => {
+            if(!window.currentSystemUser) return;
+            const uid = window.currentSystemUser.id;
+            const renderRows = (type, tbodyId) => {
+                const tbody = document.getElementById(tbodyId); if(!tbody) return;
+                const myData = window.localData[type].filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date));
+                tbody.innerHTML = myData.map(r => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${r.cei}</td><td class="p-3 text-right space-x-1"><button type="button" onclick="window.editFuncRecord('${type}','${r.id}')" class="bg-blue-100 text-blue-700 p-2 rounded hover:bg-blue-200 shadow-sm"><i class="fas fa-edit"></i></button><button type="button" onclick="window.deleteFuncRecord('${type}','${r.id}')" class="bg-red-100 text-red-700 p-2 rounded hover:bg-red-200 shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`).join("") || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+            };
+            renderRows('reports', 'empHistoryReports');
+            renderRows('quotes', 'empHistoryQuotes');
+            renderRows('thirdParty', 'empHistoryThirdParty');
+        };
+
+        window.cancelEdit = () => { window.editingItemId = null; window.activeTab = 'func-history'; window.renderActiveTab(); };
+
+        window.editFuncRecord = (type, id) => {
+            const record = window.localData[type].find(r => r.id === id); if(!record) return;
+            if(type === 'reports') window.activeTab = 'func-reports';
+            if(type === 'quotes') window.activeTab = 'func-quotes';
+            if(type === 'thirdParty') window.activeTab = 'func-thirdParty';
+            window.renderActiveTab();
+            
+            setTimeout(() => {
+                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                window.editingItemId = record.id;
+                document.getElementById(`editId${type}`).value = record.id;
+                
+                const selectCei = document.getElementById(`ceiSelect${sffx}`);
+                const opt = Array.from(selectCei.options).find(o => o.value === record.cei);
+                if(opt) selectCei.value = opt.value;
+                
+                document.getElementById(`date${sffx}`).value = record.date;
+                document.getElementById(`workDone${sffx}`).value = record.workDone;
+                if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
+                
+                if(type === 'reports' || type === 'thirdParty') { document.getElementById(`timeStart${sffx}`).value = record.timeStart; document.getElementById(`timeEnd${sffx}`).value = record.timeEnd; }
+                if(type === 'thirdParty') document.getElementById('companyNameThirdParty').value = record.companyName;
+                if(type === 'reports') { document.getElementById('diffRep').value = record.difficulty; document.getElementById('diffVal').textContent = record.difficulty; }
+                
+                if((type === 'reports' || type === 'quotes') && record.materials) {
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
+                    document.getElementById(contId).innerHTML = '';
+                    record.materials.forEach(m => {
+                        window.addMaterialRow(contId); const lastRow = document.getElementById(`mat_${window.materialCount}`);
+                        lastRow.querySelector('.mat-name').value = m.name; if(m.brand) lastRow.querySelector('.mat-brand').value = m.brand;
+                        lastRow.querySelector('.mat-qtd').value = m.qtd; if(m.price) lastRow.querySelector('.mat-price').value = m.price;
+                    });
+                }
+                document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`).textContent = `Editando ${type === 'reports' ? 'Serviço' : (type==='quotes'?'Orçamento':'Acompanhamento')}`;
+                window.showElement('cancelEditBtn');
+            }, 100);
+        };
+
+        window.deleteFuncRecord = (type, id) => { window.confirmAction(async () => { await window.dbDelete(type, id); window.logAudit(`Funcionário excluiu seu ${type} ID: ${id}`); window.showToast("Registro excluído!"); window.renderEmployeeHistory(); }); };
+
+        // Cadastro CEI/USUARIO pelo Admin
+        window.openCeiModal = () => { window.editingItemId = null; document.getElementById('ceiForm').reset(); document.getElementById('modalTitleCei').textContent = "Nova Creche (CEI)"; window.showElement('modalCei'); };
+        window.editCei = (id) => { const c = window.localData.ceis.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('ceiName').value = c.name; document.getElementById('ceiTelegramId').value = c.telegramGroupId || ""; document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId || ""; document.getElementById('modalTitleCei').textContent = "Editar Creche (CEI)"; window.showElement('modalCei'); } };
+        window.saveCei = async (e) => { e.preventDefault(); const n = document.getElementById('ceiName').value.trim(); const tg = document.getElementById('ceiTelegramId').value.trim(); const tp = document.getElementById('ceiTelegramTopicId').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('ceis', id, { id, name: n, telegramGroupId: tg, telegramTopicId: tp }); window.logAudit(window.editingItemId ? `CEI Editado: ${n}` : `CEI Criado: ${n}`); window.showToast("CEI salvo!"); window.hideElement('modalCei'); };
+        window.deleteCei = (id) => { window.confirmAction(async () => { await window.dbDelete('ceis', id); window.logAudit(`CEI Excluído ID: ${id}`); window.showToast("CEI excluído!"); }); };
+
+        window.openUserModal = () => { window.editingItemId = null; document.getElementById('userForm').reset(); document.getElementById('modalTitleUser').textContent = "Novo Usuário"; window.showElement('modalUser'); };
+        window.editUser = (id) => { const u = window.localData.users.find(x => x.id === id); if(u) { window.editingItemId = id; document.getElementById('newUsername').value = u.login || u.username; document.getElementById('newPassword').value = u.pass || u.password; document.getElementById('newRole').value = u.role; document.getElementById('modalTitleUser').textContent = "Editar Usuário"; window.showElement('modalUser'); } };
+        window.saveUser = async (e) => { e.preventDefault(); const u = document.getElementById('newUsername').value.trim(); const p = document.getElementById('newPassword').value.trim(); const r = document.getElementById('newRole').value; if(!u || !p) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { id, login: u, pass: p, role: r }); window.logAudit(window.editingItemId ? `Usuário Editado: ${u}` : `Usuário Criado: ${u}`); window.showToast("Usuário salvo!"); window.hideElement('modalUser'); };
+        window.deleteUser = (id) => { if(id === window.currentSystemUser.id) return window.showToast("Não pode excluir a si mesmo", "error"); window.confirmAction(async () => { await window.dbDelete('users', id); window.logAudit(`Usuário Excluído ID: ${id}`); window.showToast("Usuário excluído!"); }); };
+
+        // FILTROS ADMIN, VISUALIZAÇÃO E EXCEL
         let currentFilteredData = [];
         window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
         
@@ -771,75 +815,6 @@
             printArea.innerHTML = `<div style="font-family: Arial, sans-serif; color: #333; max-width: 800px; margin: 0 auto; line-height: 1.5;"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px;"><div><h1 style="margin:0; font-size: 28px; color:#1e293b;">LYM Eletrônicos</h1><p style="margin:5px 0 0; color:#64748b;">Orçamento Comercial</p></div><div style="text-align: right; color:#64748b; font-size:14px;"><p style="margin:0;">Data: <strong>${window.formatDateBR(record.date)}</strong></p><p style="margin:0;">Ref: #LYM-${record.id.substring(record.id.length-6)}</p></div></div><div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e2e8f0;"><p style="margin:0 0 10px;"><strong>Cliente / Local:</strong> ${record.cei}</p><p style="margin:0 0 10px;"><strong>Técnico Responsável:</strong> <span style="text-transform:capitalize;">${record.userName}</span></p>${record.workDone ? `<p style="margin:0;"><strong>Descrição do Serviço:</strong><br>${record.workDone.replace(/\n/g, '<br>')}</p>` : ''}</div><table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;"><thead><tr style="background: #1e293b; color: white; text-align: left;"><th style="padding: 12px 8px;">Qtd</th><th style="padding: 12px 8px;">Descrição do Material/Serviço</th><th style="padding: 12px 8px;">Valor Un.</th><th style="padding: 12px 8px; text-align:right;">Subtotal</th></tr></thead><tbody>${matHtml}<tr style="background: #f1f5f9; font-weight: bold; font-size: 18px;"><td colspan="3" style="padding: 15px 8px; text-align: right; color: #0f172a;">TOTAL DO ORÇAMENTO:</td><td style="padding: 15px 8px; text-align:right; color: #2563eb;">${window.formatMoney(totalGeral)}</td></tr></tbody></table>${record.obs ? `<div style="margin-bottom: 40px; padding-top:20px; border-top: 1px solid #e2e8f0;"><p style="margin:0;"><strong>Observações Importantes:</strong><br>${record.obs.replace(/\n/g, '<br>')}</p></div>` : ''}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">Este orçamento é válido por 15 dias. Qualquer alteração no escopo poderá gerar reajuste nos valores.</div></div>`;
             window.print();
         };
-
-        // HISTÓRICO DE FUNCIONÁRIOS E MANUSEIOS
-        window.renderEmployeeHistory = () => {
-            if(!window.currentSystemUser) return;
-            const uid = window.currentSystemUser.id;
-            
-            const renderRows = (type, tbodyId) => {
-                const tbody = document.getElementById(tbodyId); if(!tbody) return;
-                const myData = window.localData[type].filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date));
-                tbody.innerHTML = myData.map(r => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${r.cei}</td><td class="p-3 text-right space-x-1"><button onclick="window.editFuncRecord('${type}','${r.id}')" class="bg-blue-100 text-blue-700 p-2 rounded hover:bg-blue-200 shadow-sm"><i class="fas fa-edit"></i></button><button onclick="window.deleteFuncRecord('${type}','${r.id}')" class="bg-red-100 text-red-700 p-2 rounded hover:bg-red-200 shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`).join("") || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
-            };
-
-            renderRows('reports', 'empHistoryReports');
-            renderRows('quotes', 'empHistoryQuotes');
-            renderRows('thirdParty', 'empHistoryThirdParty');
-        };
-
-        window.cancelEdit = () => { window.editingItemId = null; window.activeTab = 'func-history'; window.renderActiveTab(); };
-
-        window.editFuncRecord = (type, id) => {
-            const record = window.localData[type].find(r => r.id === id); if(!record) return;
-            if(type === 'reports') window.activeTab = 'func-reports';
-            if(type === 'quotes') window.activeTab = 'func-quotes';
-            if(type === 'thirdParty') window.activeTab = 'func-thirdParty';
-            window.renderActiveTab();
-            
-            setTimeout(() => {
-                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                window.editingItemId = record.id;
-                document.getElementById(`editId${type}`).value = record.id;
-                
-                const selectCei = document.getElementById(`ceiSelect${sffx}`);
-                const opt = Array.from(selectCei.options).find(o => o.value === record.cei);
-                if(opt) selectCei.value = opt.value;
-                
-                document.getElementById(`date${sffx}`).value = record.date;
-                document.getElementById(`workDone${sffx}`).value = record.workDone;
-                if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
-                
-                if(type === 'reports' || type === 'thirdParty') { document.getElementById(`timeStart${sffx}`).value = record.timeStart; document.getElementById(`timeEnd${sffx}`).value = record.timeEnd; }
-                if(type === 'thirdParty') document.getElementById('companyNameThirdParty').value = record.companyName;
-                if(type === 'reports') { document.getElementById('diffRep').value = record.difficulty; document.getElementById('diffVal').textContent = record.difficulty; }
-                
-                if((type === 'reports' || type === 'quotes') && record.materials) {
-                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
-                    document.getElementById(contId).innerHTML = '';
-                    record.materials.forEach(m => {
-                        window.addMaterialRow(contId); const lastRow = document.getElementById(`mat_${window.materialCount}`);
-                        lastRow.querySelector('.mat-name').value = m.name; if(m.brand) lastRow.querySelector('.mat-brand').value = m.brand;
-                        lastRow.querySelector('.mat-qtd').value = m.qtd; if(m.price) lastRow.querySelector('.mat-price').value = m.price;
-                    });
-                }
-                document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`).textContent = `Editando ${type === 'reports' ? 'Serviço' : (type==='quotes'?'Orçamento':'Acompanhamento')}`;
-                window.showElement('cancelEditBtn');
-            }, 100);
-        };
-
-        window.deleteFuncRecord = (type, id) => { window.confirmAction(async () => { await window.dbDelete(type, id); window.logAudit(`Funcionário excluiu seu ${type} ID: ${id}`); window.showToast("Registro excluído!"); window.renderEmployeeHistory(); }); };
-
-        // Cadastro CEI/USUARIO pelo Admin
-        window.openCeiModal = () => { window.editingItemId = null; document.getElementById('ceiForm').reset(); document.getElementById('modalTitleCei').textContent = "Nova Creche (CEI)"; window.showElement('modalCei'); };
-        window.editCei = (id) => { const c = window.localData.ceis.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('ceiName').value = c.name; document.getElementById('ceiTelegramId').value = c.telegramGroupId || ""; document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId || ""; document.getElementById('modalTitleCei').textContent = "Editar Creche (CEI)"; window.showElement('modalCei'); } };
-        window.saveCei = async (e) => { e.preventDefault(); const n = document.getElementById('ceiName').value.trim(); const tg = document.getElementById('ceiTelegramId').value.trim(); const tp = document.getElementById('ceiTelegramTopicId').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('ceis', id, { id, name: n, telegramGroupId: tg, telegramTopicId: tp }); window.logAudit(window.editingItemId ? `CEI Editado: ${n}` : `CEI Criado: ${n}`); window.showToast("CEI salvo!"); window.hideElement('modalCei'); };
-        window.deleteCei = (id) => { window.confirmAction(async () => { await window.dbDelete('ceis', id); window.logAudit(`CEI Excluído ID: ${id}`); window.showToast("CEI excluído!"); }); };
-
-        window.openUserModal = () => { window.editingItemId = null; document.getElementById('userForm').reset(); document.getElementById('modalTitleUser').textContent = "Novo Usuário"; window.showElement('modalUser'); };
-        window.editUser = (id) => { const u = window.localData.users.find(x => x.id === id); if(u) { window.editingItemId = id; document.getElementById('newUsername').value = u.login || u.username; document.getElementById('newPassword').value = u.pass || u.password; document.getElementById('newRole').value = u.role; document.getElementById('modalTitleUser').textContent = "Editar Usuário"; window.showElement('modalUser'); } };
-        window.saveUser = async (e) => { e.preventDefault(); const u = document.getElementById('newUsername').value.trim(); const p = document.getElementById('newPassword').value.trim(); const r = document.getElementById('newRole').value; if(!u || !p) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { id, login: u, pass: p, role: r }); window.logAudit(window.editingItemId ? `Usuário Editado: ${u}` : `Usuário Criado: ${u}`); window.showToast("Usuário salvo!"); window.hideElement('modalUser'); };
-        window.deleteUser = (id) => { if(id === window.currentSystemUser.id) return window.showToast("Não pode excluir a si mesmo", "error"); window.confirmAction(async () => { await window.dbDelete('users', id); window.logAudit(`Usuário Excluído ID: ${id}`); window.showToast("Usuário excluído!"); }); };
 
         // INICIALIZAÇÃO
         window.onload = () => { window.initFirebaseSync(); };
