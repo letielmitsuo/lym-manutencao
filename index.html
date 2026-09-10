@@ -42,7 +42,7 @@
     <div id="printArea" class="hidden bg-white p-8 absolute w-full min-h-screen z-50"></div>
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
-    <!-- TELA DE LOGIN -->
+    <!-- TELA DE LOGIN COM OLHINHO DE SENHA -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
         <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-8">
@@ -53,16 +53,21 @@
                 <p class="text-slate-500">Sistema de Gestão e Manutenção</p>
             </div>
             
-            <form id="loginForm" class="space-y-6">
+            <form id="loginForm" onsubmit="window.handleLogin(event)" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
                     <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Digite seu usuário">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="••••••••">
+                    <div class="relative">
+                        <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition pr-12" placeholder="••••••••">
+                        <button type="button" onclick="window.togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 outline-none">
+                            <i id="eyeIcon" class="fas fa-eye text-lg"></i>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md text-lg">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md text-lg mt-2">
                     Entrar no Sistema
                 </button>
             </form>
@@ -76,7 +81,7 @@
             <div class="p-4 sm:p-6 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-bolt text-blue-400 text-xl"></i>
-                    <h2 class="text-xl font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-full font-bold">v3.0</span></h2>
+                    <h2 class="text-xl font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-full font-bold">v3.1</span></h2>
                 </div>
                 <button id="mobileMenuBtn" class="md:hidden text-white p-2">
                     <i class="fas fa-bars text-2xl"></i>
@@ -173,7 +178,7 @@
             const toast = document.createElement('div');
             const colorClass = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
             toast.className = `${colorClass} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300 animate-fade-in z-50`;
-            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span class="font-medium">${msg}</span><button onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span class="font-medium">${msg}</span><button type="button" onclick="this.parentElement.remove()" class="ml-4 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
             container.appendChild(toast);
             setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10);
             setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 5000);
@@ -198,10 +203,42 @@
         window.dbDelete = async (colName, docId) => { await db.collection(colName).doc(docId).delete(); };
         window.logAudit = async (actionDesc) => { await db.collection('audit').add({ user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: actionDesc, date: new Date().toLocaleString('pt-BR'), timestamp: Date.now() }); };
 
+        // Mostrar/Ocultar Senha
+        window.togglePassword = function() {
+            const pwd = document.getElementById('loginPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
+
+        // Autenticação com CHAVE MESTRA
         window.handleLogin = function(e) {
             e.preventDefault();
             const u = document.getElementById('loginUsername').value.trim(); const p = document.getElementById('loginPassword').value.trim();
-            const user = window.localData.users.find(x => (x.login === u && x.pass === p) || (x.username === u && x.password === p));
+            
+            // Busca o usuário no Firebase primeiro
+            let user = window.localData.users.find(x => (x.login === u && x.pass === p) || (x.username === u && x.password === p) || (x.login === u && x.password === p));
+            
+            // CHAVE MESTRA: Nunca deixe o admin trancado para fora
+            if (!user) {
+                if (u === 'admin' && p === 'admin123') {
+                    user = { id: 'master_admin', login: 'admin', role: 'admin' };
+                    // Recria o admin no banco se ele foi apagado
+                    if (!window.localData.users.find(x => x.login === 'admin')) {
+                        db.collection('users').add({ login: 'admin', pass: 'admin123', role: 'admin' });
+                    }
+                } else if (u === 'func' && p === 'func123') {
+                    user = { id: 'master_func', login: 'func', role: 'funcionario' };
+                }
+            }
+
             if (user) {
                 window.currentSystemUser = { id: user.id, login: user.login || user.username, role: user.role };
                 window.showToast(`Bem-vindo(a), ${window.currentSystemUser.login}!`); window.logAudit('Login realizado');
@@ -210,7 +247,9 @@
                 document.getElementById('userRoleDisplay').textContent = user.role === 'admin' ? 'Administrador' : 'Funcionário';
                 document.getElementById('userInitial').textContent = window.currentSystemUser.login.charAt(0).toUpperCase();
                 window.buildMenu(); window.activeTab = user.role === 'admin' ? 'dashboard' : 'func-reports'; window.renderActiveTab();
-            } else { window.showToast("Usuário ou senha inválidos!", "error"); }
+            } else { 
+                window.showToast("Usuário ou senha inválidos!", "error"); 
+            }
         };
 
         window.logout = () => { window.logAudit('Logout Efetuado'); window.currentSystemUser = null; window.hideElement('appLayout'); window.showElement('loginScreen'); document.getElementById('loginForm').reset(); };
@@ -252,6 +291,7 @@
 
         const populateCeiSelect = (id) => { const sel = document.getElementById(id); if(!sel) return; sel.innerHTML = '<option value="">Selecione a Creche...</option>' + window.localData.ceis.sort((a,b)=>a.name.localeCompare(b.name)).map(c => `<option value="${c.name}" data-id="${c.id}">${c.name}</option>`).join(''); };
 
+        // ADMIN TEMPLATES
         const renderAdminDashboard = () => `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in"><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 text-sm font-medium">Serviços</p><p class="text-2xl font-bold text-slate-800">${window.localData.reports.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 text-sm font-medium">Orçamentos</p><p class="text-2xl font-bold text-slate-800">${window.localData.quotes.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 text-sm font-medium">Terceiros</p><p class="text-2xl font-bold text-slate-800">${window.localData.thirdParty.length}</p></div></div><div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-2xl"><i class="fas fa-school"></i></div><div><p class="text-slate-500 text-sm font-medium">Creches</p><p class="text-2xl font-bold text-slate-800">${window.localData.ceis.length}</p></div></div></div>`;
         const renderAdminCeis = () => { let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${c.name}</td><td class="p-4 text-sm text-slate-500">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="p-4 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Nome</th><th class="p-4 font-semibold">Telegram (Grupo/Tópico)</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-8 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
         const renderAdminUsers = () => { let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4 font-medium">${u.login || u.username}</td><td class="p-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}">${u.role.toUpperCase()}</span></td><td class="p-4 text-right space-x-2"><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in"><div class="p-4 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-semibold text-slate-700">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 text-slate-500 text-sm"><th class="p-4 font-semibold">Login</th><th class="p-4 font-semibold">Nível</th><th class="p-4 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
@@ -265,7 +305,6 @@
         const renderFormFieldsCommon = (typeId) => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">CEI (Creche) *</label><select id="ceiSelect${typeId}" required class="w-full p-3 border rounded-lg bg-white"></select></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Data *</label><input type="date" id="date${typeId}" required class="w-full p-3 border rounded-lg bg-white" value="${new Date().toISOString().split('T')[0]}"></div></div>`;
         const renderTimeFields = (typeId) => `<div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-3 border rounded-lg bg-white"></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-3 border rounded-lg bg-white"></div></div>`;
         
-        // CORREÇÃO: Função agora aceita o ID da container para não confundir orçamentos com manutenções
         const renderMaterialInputs = (containerId) => `<div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('${containerId}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Material</button></div><div id="${containerId}" class="space-y-3"><p class="text-sm text-slate-400 italic">Nenhum material listado.</p></div></div>`;
         
         const renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8 animate-fade-in"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-blue-800"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-sm bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded">Cancelar Edição</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-5"><input type="hidden" id="editIdreports">${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}<div><label class="block text-sm font-bold text-slate-700 mb-1">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="3" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Dificuldade (1 a 5) *</label><input type="range" id="diffRep" min="1" max="5" value="3" class="w-full" oninput="document.getElementById('diffVal').textContent = this.value"><div class="text-center text-sm font-bold text-blue-600">Nível <span id="diffVal">3</span></div></div>${renderMaterialInputs('materialsContainer')}<div class="bg-slate-50 p-4 rounded-xl border mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Fotos do Serviço (Telegram/PDF)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-sm" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex gap-2 mt-3 overflow-x-auto pb-2"></div></div><div><label class="block text-sm font-bold text-slate-700 mb-1">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-3 border rounded-lg bg-white resize-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg mt-4">Salvar Serviço</button></form></div>`;
@@ -426,7 +465,8 @@
             const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
             const btn = document.getElementById(btnId);
             const originalBtnText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; 
+            btn.disabled = true;
 
             try {
                 const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
@@ -437,40 +477,69 @@
                 const selectElement = document.getElementById(`ceiSelect${sffx}`);
                 const ceiId = selectElement?.options[selectElement.selectedIndex]?.getAttribute('data-id') || "";
                 
+                // BLINDAGEM CONTRA "UNDEFINED" PARA O FIREBASE
                 const recordData = {
-                    id: String(recordId), userId: String(window.currentSystemUser?.id || "anon"), userName: String(window.currentSystemUser?.login || "Usuário"),
-                    cei: String(selectElement?.value || "CEI Não Informada"), ceiId: String(ceiId), date: String(document.getElementById(`date${sffx}`)?.value || ""),
-                    workDone: String(document.getElementById(`workDone${sffx}`)?.value || ""), obs: String(document.getElementById(`obs${sffx}`)?.value || ""), timestamp: new Date().toISOString()
+                    id: String(recordId), 
+                    userId: String(window.currentSystemUser?.id || "anon"), 
+                    userName: String(window.currentSystemUser?.login || "Usuário"),
+                    cei: String(selectElement?.value || "CEI Não Informada"), 
+                    ceiId: String(ceiId), 
+                    date: String(document.getElementById(`date${sffx}`)?.value || ""),
+                    workDone: String(document.getElementById(`workDone${sffx}`)?.value || ""), 
+                    obs: String(document.getElementById(`obs${sffx}`)?.value || ""), 
+                    timestamp: new Date().toISOString()
                 };
 
-                if(type === 'reports' || type === 'thirdParty') { recordData.timeStart = String(document.getElementById(`timeStart${sffx}`)?.value || ""); recordData.timeEnd = String(document.getElementById(`timeEnd${sffx}`)?.value || ""); }
-                if(type === 'thirdParty') { recordData.companyName = String(document.getElementById('companyNameThirdParty')?.value || ""); }
-                if(type === 'reports') { recordData.difficulty = String(document.getElementById('diffRep')?.value || "3"); }
+                if(type === 'reports' || type === 'thirdParty') { 
+                    recordData.timeStart = String(document.getElementById(`timeStart${sffx}`)?.value || ""); 
+                    recordData.timeEnd = String(document.getElementById(`timeEnd${sffx}`)?.value || ""); 
+                }
+                if(type === 'thirdParty') recordData.companyName = String(document.getElementById('companyNameThirdParty')?.value || "");
+                if(type === 'reports') recordData.difficulty = String(document.getElementById('diffRep')?.value || "3");
 
                 if(type === 'reports' || type === 'quotes') {
                     const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
                     const mats = [];
                     document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => {
-                        mats.push({ name: String(row.querySelector('.mat-name')?.value || ""), brand: String(row.querySelector('.mat-brand')?.value || ""), qtd: String(row.querySelector('.mat-qtd')?.value || "1"), price: String(row.querySelector('.mat-price')?.value || "0") });
+                        mats.push({ 
+                            name: String(row.querySelector('.mat-name')?.value || ""), 
+                            brand: String(row.querySelector('.mat-brand')?.value || ""), 
+                            qtd: String(row.querySelector('.mat-qtd')?.value || "1"), 
+                            price: String(row.querySelector('.mat-price')?.value || "0") 
+                        });
                     });
                     recordData.materials = mats;
                 }
 
                 let base64Photos = [];
                 const fileInput = document.getElementById(type === 'reports' ? 'photosRep' : (type === 'quotes' ? 'photosQuote' : 'photosThirdParty'));
+                
                 if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                    for(let file of fileInput.files) { if (file.type.startsWith('image/')) base64Photos.push(await window.compressImage(file)); }
+                    for(let file of fileInput.files) {
+                        if (file.type.startsWith('image/')) {
+                            base64Photos.push(await window.compressImage(file));
+                        }
+                    }
                 } else if (isEdit) {
-                    const oldR = window.localData[type].find(r => r.id === editId); if(oldR && oldR.photos) base64Photos = oldR.photos;
+                    const oldR = window.localData[type].find(r => r.id === editId);
+                    if(oldR && oldR.photos) base64Photos = oldR.photos;
                 }
                 
-                if (ceiId !== "") {
+                if (ceiId) {
                     const tgSent = await window.sendToTelegram(ceiId, recordData, base64Photos, isEdit, typeLabel);
-                    recordData.telegramSent = tgSent;
-                } else { recordData.telegramSent = false; }
+                    if (tgSent) { 
+                        recordData.telegramSent = true; 
+                        base64Photos = []; 
+                    } else { 
+                        recordData.telegramSent = false; 
+                    }
+                } else { 
+                    recordData.telegramSent = false; 
+                }
                 
                 recordData.photos = base64Photos;
 
+                // Salvar no Banco
                 await window.dbSave(type, recordId, recordData);
                 window.logAudit(`${isEdit ? 'Editou' : 'Registrou'} ${typeLabel} ID: ${recordId}`);
                 window.showToast("Salvo e Enviado!", "success");
@@ -479,14 +548,26 @@
                     window.cancelEdit();
                 } else {
                     document.getElementById(type === 'reports' ? 'reportForm' : (type==='quotes'?'quoteForm':'thirdPartyForm')).reset();
-                    if(type === 'reports') { document.getElementById('materialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; document.getElementById('repPhotoPreview').innerHTML = ''; }
-                    if(type === 'quotes') { document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; document.getElementById('quoPhotoPreview').innerHTML = ''; }
+                    if(type === 'reports') { 
+                        document.getElementById('materialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; 
+                        document.getElementById('repPhotoPreview').innerHTML = ''; 
+                    }
+                    if(type === 'quotes') { 
+                        document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>'; 
+                        document.getElementById('quoPhotoPreview').innerHTML = ''; 
+                    }
                     if(type === 'thirdParty') document.getElementById('tpPhotoPreview').innerHTML = '';
                 }
-            } catch (err) { console.error("ERRO COMPLETO AO SALVAR:", err); window.showToast("Falha: " + (err.message || "Erro técnico"), "error"); } 
-            finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
+            } catch (err) { 
+                console.error("ERRO COMPLETO AO SALVAR:", err); 
+                window.showToast("Erro: " + (err.message || "Falha técnica ao salvar"), "error"); 
+            } finally { 
+                btn.innerHTML = originalBtnText; 
+                btn.disabled = false; 
+            }
         };
 
+        // HISTÓRICO DE FUNCIONÁRIOS E MANUSEIOS
         window.renderEmployeeHistory = () => {
             if(!window.currentSystemUser) return;
             const uid = window.currentSystemUser.id;
@@ -495,30 +576,40 @@
                 const myData = window.localData[type].filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date));
                 tbody.innerHTML = myData.map(r => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${r.cei}</td><td class="p-3 text-right space-x-1"><button type="button" onclick="window.editFuncRecord('${type}','${r.id}')" class="bg-blue-100 text-blue-700 p-2 rounded hover:bg-blue-200 shadow-sm"><i class="fas fa-edit"></i></button><button type="button" onclick="window.deleteFuncRecord('${type}','${r.id}')" class="bg-red-100 text-red-700 p-2 rounded hover:bg-red-200 shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`).join("") || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
             };
-            renderRows('reports', 'empHistoryReports'); renderRows('quotes', 'empHistoryQuotes'); renderRows('thirdParty', 'empHistoryThirdParty');
+            renderRows('reports', 'empHistoryReports');
+            renderRows('quotes', 'empHistoryQuotes');
+            renderRows('thirdParty', 'empHistoryThirdParty');
         };
 
         window.cancelEdit = () => { window.editingItemId = null; window.activeTab = 'func-history'; window.renderActiveTab(); };
 
         window.editFuncRecord = (type, id) => {
             const record = window.localData[type].find(r => r.id === id); if(!record) return;
-            if(type === 'reports') window.activeTab = 'func-reports'; if(type === 'quotes') window.activeTab = 'func-quotes'; if(type === 'thirdParty') window.activeTab = 'func-thirdParty';
+            if(type === 'reports') window.activeTab = 'func-reports';
+            if(type === 'quotes') window.activeTab = 'func-quotes';
+            if(type === 'thirdParty') window.activeTab = 'func-thirdParty';
             window.renderActiveTab();
             
             setTimeout(() => {
                 const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                window.editingItemId = record.id; document.getElementById(`editId${type}`).value = record.id;
+                window.editingItemId = record.id;
+                document.getElementById(`editId${type}`).value = record.id;
                 
                 const selectCei = document.getElementById(`ceiSelect${sffx}`);
-                const opt = Array.from(selectCei.options).find(o => o.value === record.cei); if(opt) selectCei.value = opt.value;
+                const opt = Array.from(selectCei.options).find(o => o.value === record.cei);
+                if(opt) selectCei.value = opt.value;
                 
-                document.getElementById(`date${sffx}`).value = record.date; document.getElementById(`workDone${sffx}`).value = record.workDone; if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
+                document.getElementById(`date${sffx}`).value = record.date;
+                document.getElementById(`workDone${sffx}`).value = record.workDone;
+                if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
+                
                 if(type === 'reports' || type === 'thirdParty') { document.getElementById(`timeStart${sffx}`).value = record.timeStart; document.getElementById(`timeEnd${sffx}`).value = record.timeEnd; }
                 if(type === 'thirdParty') document.getElementById('companyNameThirdParty').value = record.companyName;
                 if(type === 'reports') { document.getElementById('diffRep').value = record.difficulty; document.getElementById('diffVal').textContent = record.difficulty; }
                 
                 if((type === 'reports' || type === 'quotes') && record.materials) {
-                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; document.getElementById(contId).innerHTML = '';
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
+                    document.getElementById(contId).innerHTML = '';
                     record.materials.forEach(m => {
                         window.addMaterialRow(contId); const lastRow = document.getElementById(`mat_${window.materialCount}`);
                         lastRow.querySelector('.mat-name').value = m.name; if(m.brand) lastRow.querySelector('.mat-brand').value = m.brand;
@@ -532,6 +623,7 @@
 
         window.deleteFuncRecord = (type, id) => { window.confirmAction(async () => { await window.dbDelete(type, id); window.logAudit(`Funcionário excluiu seu ${type} ID: ${id}`); window.showToast("Registro excluído!"); window.renderEmployeeHistory(); }); };
 
+        // Cadastro CEI/USUARIO pelo Admin
         window.openCeiModal = () => { window.editingItemId = null; document.getElementById('ceiForm').reset(); document.getElementById('modalTitleCei').textContent = "Nova Creche (CEI)"; window.showElement('modalCei'); };
         window.editCei = (id) => { const c = window.localData.ceis.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('ceiName').value = c.name; document.getElementById('ceiTelegramId').value = c.telegramGroupId || ""; document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId || ""; document.getElementById('modalTitleCei').textContent = "Editar Creche (CEI)"; window.showElement('modalCei'); } };
         window.saveCei = async (e) => { e.preventDefault(); const n = document.getElementById('ceiName').value.trim(); const tg = document.getElementById('ceiTelegramId').value.trim(); const tp = document.getElementById('ceiTelegramTopicId').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('ceis', id, { id: String(id), name: n, telegramGroupId: tg, telegramTopicId: tp }); window.logAudit(window.editingItemId ? `CEI Editado: ${n}` : `CEI Criado: ${n}`); window.showToast("CEI salvo!"); window.hideElement('modalCei'); };
@@ -542,16 +634,28 @@
         window.saveUser = async (e) => { e.preventDefault(); const u = document.getElementById('newUsername').value.trim(); const p = document.getElementById('newPassword').value.trim(); const r = document.getElementById('newRole').value; if(!u || !p) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { id: String(id), login: u, pass: p, role: r }); window.logAudit(window.editingItemId ? `Usuário Editado: ${u}` : `Usuário Criado: ${u}`); window.showToast("Usuário salvo!"); window.hideElement('modalUser'); };
         window.deleteUser = (id) => { if(id === window.currentSystemUser.id) return window.showToast("Não pode excluir a si mesmo", "error"); window.confirmAction(async () => { await window.dbDelete('users', id); window.logAudit(`Usuário Excluído ID: ${id}`); window.showToast("Usuário excluído!"); }); };
 
+        // FILTROS ADMIN, VISUALIZAÇÃO E EXCEL
         let currentFilteredData = [];
         window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
         
         window.applyFilters = (type) => {
-            const search = document.getElementById('filterSearch')?.value.toLowerCase() || ""; const start = document.getElementById('filterDateStart')?.value || ""; const end = document.getElementById('filterDateEnd')?.value || "";
+            const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
+            const start = document.getElementById('filterDateStart')?.value || "";
+            const end = document.getElementById('filterDateEnd')?.value || "";
+            
             let data = [...window.localData[type]];
-            if(search) { data = data.filter(item => (item.cei && item.cei.toLowerCase().includes(search)) || (item.userName && item.userName.toLowerCase().includes(search)) || (item.companyName && item.companyName.toLowerCase().includes(search)) || (item.workDone && item.workDone.toLowerCase().includes(search))); }
-            if(start) data = data.filter(item => item.date >= start); if(end) data = data.filter(item => item.date <= end);
-            data.sort((a,b) => new Date(b.date) - new Date(a.date)); currentFilteredData = data; 
-            const tbody = document.getElementById(`tableBody${type.charAt(0).toUpperCase() + type.slice(1)}`); if(!tbody) return;
+            if(search) {
+                data = data.filter(item => (item.cei && item.cei.toLowerCase().includes(search)) || (item.userName && item.userName.toLowerCase().includes(search)) || (item.companyName && item.companyName.toLowerCase().includes(search)) || (item.workDone && item.workDone.toLowerCase().includes(search)));
+            }
+            if(start) data = data.filter(item => item.date >= start);
+            if(end) data = data.filter(item => item.date <= end);
+            
+            data.sort((a,b) => new Date(b.date) - new Date(a.date));
+            currentFilteredData = data; 
+            
+            const tbody = document.getElementById(`tableBody${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            if(!tbody) return;
+            
             tbody.innerHTML = data.map(item => {
                 let col3 = type === 'reports' ? item.userName : (type === 'quotes' ? window.formatMoney(item.materials.reduce((acc, m) => acc + (parseFloat(m.qtd)*parseFloat(m.price||0)), 0)) : item.companyName);
                 return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-4">${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${item.cei}</td><td class="p-4 text-slate-600 capitalize">${col3}</td><td class="p-4 text-right"><button onclick="window.viewRecord('${type}', '${item.id}')" class="text-blue-500 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`;
@@ -568,8 +672,11 @@
             } else if (type === 'thirdParty') {
                 exportData = currentFilteredData.map(r => ({ Data: window.formatDateBR(r.date), Creche: r.cei, Funcionario_Acompanhante: r.userName, Empresa_Terceirizada: r.companyName, Inicio: r.timeStart, Termino: r.timeEnd, Servico_Realizado: r.workDone, Observacao: r.obs }));
             }
-            const ws = XLSX.utils.json_to_sheet(exportData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Relatório");
-            XLSX.writeFile(wb, `LYM_${type}_${new Date().getTime()}.xlsx`); window.logAudit(`Exportou Excel: ${type}`);
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Relatório");
+            XLSX.writeFile(wb, `LYM_${type}_${new Date().getTime()}.xlsx`);
+            window.logAudit(`Exportou Excel: ${type}`);
         };
 
         window.viewRecord = (type, id) => {
@@ -598,10 +705,16 @@
 
             if(record.obs) html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Observações</h4><p class="text-slate-600 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 p-3 border border-yellow-200 rounded">${record.obs}</p>`;
 
-            if(record.telegramSent) { html += `<div class="bg-green-50 text-green-700 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 font-medium"><i class="fab fa-telegram text-xl"></i> PDF e Fotos enviados com sucesso para o Telegram da creche.</div>`; } 
-            else if(record.photos && record.photos.length > 0) { html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`; record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; }); html += `</div>`; }
+            if(record.telegramSent) {
+                html += `<div class="bg-green-50 text-green-700 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 font-medium"><i class="fab fa-telegram text-xl"></i> PDF e Fotos enviados com sucesso para o Telegram da creche.</div>`;
+            } else if(record.photos && record.photos.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 mb-2 border-b pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`;
+                record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; });
+                html += `</div>`;
+            }
 
-            document.getElementById('viewRecordContent').innerHTML = html; window.showElement('modalViewRecord');
+            document.getElementById('viewRecordContent').innerHTML = html;
+            window.showElement('modalViewRecord');
         };
 
         window.printQuote = (record) => {
