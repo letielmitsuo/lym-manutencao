@@ -13,6 +13,10 @@
     <!-- HTML2PDF (Gerador de PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
     
+    <!-- FIREBASE SDKS -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         input, select, textarea { font-size: 16px !important; } 
         button { touch-action: manipulation; }
@@ -40,13 +44,13 @@
             <form id="loginForm" onsubmit="window.handleLogin(event)" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Usuário</label>
-                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Senha</label>
-                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 outline-none">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md text-lg">Entrar</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg">Entrar</button>
             </form>
         </div>
     </div>
@@ -63,246 +67,112 @@
                         <span id="userBadge" class="text-xs bg-blue-500 px-2 py-1 rounded-full uppercase tracking-wide"></span>
                     </div>
                 </div>
-                <button onclick="window.logout()" class="text-blue-100 hover:text-white p-2">
-                    <i class="fas fa-sign-out-alt text-xl"></i>
-                </button>
+                <button onclick="window.logout()" class="text-blue-100 hover:text-white p-2"><i class="fas fa-sign-out-alt text-xl"></i></button>
             </div>
         </header>
 
         <main class="flex-grow container mx-auto p-4 max-w-6xl">
-            
             <!-- ÁREA DO ADMINISTRADOR -->
             <div id="adminPanel" class="hidden space-y-6 animate-fade-in">
-                <div class="flex overflow-x-auto bg-white rounded-lg shadow-sm border border-slate-200 p-1 mb-4 gap-1">
-                    <button onclick="window.switchAdminTab('reports')" id="tabBtn_reports" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 transition-colors whitespace-nowrap"><i class="fas fa-clipboard-list mr-2"></i>Serviços</button>
-                    <button onclick="window.switchAdminTab('quotes')" id="tabBtn_quotes" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap"><i class="fas fa-file-invoice-dollar mr-2"></i>Orçamentos</button>
-                    <button onclick="window.switchAdminTab('thirdParty')" id="tabBtn_thirdParty" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap"><i class="fas fa-hard-hat mr-2"></i>Terceiros</button>
-                    <button onclick="window.switchAdminTab('config')" id="tabBtn_config" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap"><i class="fas fa-cog mr-2"></i>Ajustes</button>
-                    <button onclick="window.switchAdminTab('audit')" id="tabBtn_audit" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap"><i class="fas fa-history mr-2"></i>Auditoria</button>
+                <div class="flex overflow-x-auto bg-white rounded-lg border p-1 mb-4 gap-1">
+                    <button onclick="window.switchAdminTab('reports')" id="tabBtn_reports" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap">Serviços</button>
+                    <button onclick="window.switchAdminTab('quotes')" id="tabBtn_quotes" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Orçamentos</button>
+                    <button onclick="window.switchAdminTab('thirdParty')" id="tabBtn_thirdParty" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Terceiros</button>
+                    <button onclick="window.switchAdminTab('config')" id="tabBtn_config" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Ajustes</button>
+                    <button onclick="window.switchAdminTab('audit')" id="tabBtn_audit" class="admin-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Auditoria</button>
                 </div>
 
-                <!-- Barra de Filtros -->
                 <div id="filterBar" class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-end">
-                    <div class="flex-1 w-full"><label class="block text-xs font-medium text-slate-500 mb-1">Buscar texto</label><input type="text" id="filterSearch" onkeyup="window.applyFilters()" class="w-full px-3 py-2 rounded border border-slate-300" placeholder="Digite para buscar..."></div>
-                    <div class="flex-1 w-full"><label class="block text-xs font-medium text-slate-500 mb-1">Creche</label><select id="filterCei" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border border-slate-300"><option value="">Todas</option></select></div>
-                    <div class="w-full md:w-auto"><label class="block text-xs font-medium text-slate-500 mb-1">Data Ini</label><input type="date" id="filterDateStart" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border border-slate-300"></div>
-                    <div class="w-full md:w-auto"><label class="block text-xs font-medium text-slate-500 mb-1">Data Fim</label><input type="date" id="filterDateEnd" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border border-slate-300"></div>
-                    <button onclick="window.exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors whitespace-nowrap"><i class="fas fa-file-excel mr-2"></i>Gerar Excel</button>
+                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Buscar texto</label><input type="text" id="filterSearch" onkeyup="window.applyFilters()" class="w-full px-3 py-2 rounded border" placeholder="Digite para buscar..."></div>
+                    <div class="flex-1 w-full"><label class="block text-xs font-medium mb-1">Creche</label><select id="filterCei" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border"><option value="">Todas</option></select></div>
+                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Ini</label><input type="date" id="filterDateStart" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border"></div>
+                    <div class="w-full md:w-auto"><label class="block text-xs font-medium mb-1">Data Fim</label><input type="date" id="filterDateEnd" onchange="window.applyFilters()" class="w-full px-3 py-2 rounded border"></div>
+                    <button onclick="window.exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded whitespace-nowrap"><i class="fas fa-file-excel mr-2"></i>Gerar Excel</button>
                 </div>
 
-                <!-- Abas Conteúdo Admin -->
                 <div id="tabContent_reports" class="admin-tab-content block"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminReportsTable" class="divide-y text-sm"></tbody></table></div></div>
                 <div id="tabContent_quotes" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Técnico</th><th class="p-3 text-sm">Orçamento</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminQuotesTable" class="divide-y text-sm"></tbody></table></div></div>
                 <div id="tabContent_thirdParty" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Resp.</th><th class="p-3 text-sm">Serviço</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="adminThirdPartyTable" class="divide-y text-sm"></tbody></table></div></div>
                 <div id="tabContent_audit" class="admin-tab-content hidden"><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data/Hora</th><th class="p-3 text-sm">Usuário</th><th class="p-3 text-sm">Ação</th></tr></thead><tbody id="adminAuditTable" class="divide-y text-sm"></tbody></table></div></div>
-                
-                <!-- Ajustes Configurações -->
-                <div id="tabContent_config" class="admin-tab-content hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-5 rounded-lg border">
-                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Creches (CEIs)</h3><button onclick="window.showModal('modalCei')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm"><i class="fas fa-plus mr-1"></i> Nova</button></div>
-                            <ul id="adminCeiList" class="divide-y text-sm"></ul>
-                        </div>
-                        <div class="bg-white p-5 rounded-lg border">
-                            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Usuários</h3><button onclick="window.showModal('modalUser')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm"><i class="fas fa-plus mr-1"></i> Novo</button></div>
-                            <ul id="adminUserList" class="divide-y text-sm"></ul>
-                        </div>
-                    </div>
-                </div>
+                <div id="tabContent_config" class="admin-tab-content hidden"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-white p-5 rounded-lg border"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Creches (CEIs)</h3><button onclick="window.showModal('modalCei')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">+ Nova</button></div><ul id="adminCeiList" class="divide-y text-sm"></ul></div><div class="bg-white p-5 rounded-lg border"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Usuários</h3><button onclick="window.showModal('modalUser')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">+ Novo</button></div><ul id="adminUserList" class="divide-y text-sm"></ul></div></div></div>
             </div>
 
             <!-- ÁREA DO FUNCIONÁRIO -->
             <div id="employeePanel" class="hidden space-y-6 animate-fade-in">
-                <div class="flex overflow-x-auto bg-white rounded-lg shadow-sm border border-slate-200 p-1 gap-1">
-                    <button onclick="window.switchEmpTab('reports')" id="empTabBtn_reports" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap"><i class="fas fa-tools mr-2"></i>Execução</button>
-                    <button onclick="window.switchEmpTab('quotes')" id="empTabBtn_quotes" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap"><i class="fas fa-file-invoice-dollar mr-2"></i>Orçamento</button>
-                    <button onclick="window.switchEmpTab('thirdParty')" id="empTabBtn_thirdParty" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap"><i class="fas fa-hard-hat mr-2"></i>Terceiros</button>
+                <div class="flex overflow-x-auto bg-white rounded-lg border p-1 gap-1">
+                    <button onclick="window.switchEmpTab('reports')" id="empTabBtn_reports" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium bg-blue-100 text-blue-700 whitespace-nowrap">Execução</button>
+                    <button onclick="window.switchEmpTab('quotes')" id="empTabBtn_quotes" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Orçamento</button>
+                    <button onclick="window.switchEmpTab('thirdParty')" id="empTabBtn_thirdParty" class="emp-tab-btn flex-1 py-3 px-4 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap">Terceiros</button>
                 </div>
+                
+                <div id="cancelEditBtn" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded flex justify-between items-center shadow-sm"><p class="font-bold">Editando Registro Existente.</p><button onclick="window.cancelEdit()" class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-medium">Cancelar</button></div>
 
-                <div id="cancelEditBtn" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded flex justify-between items-center shadow-sm">
-                    <p class="font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Editando Registro Existente.</p>
-                    <button onclick="window.cancelEdit()" class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-yellow-600">Cancelar Edição</button>
-                </div>
-
-                <!-- Formulário: Manutenção -->
-                <div id="empTabContent_reports" class="emp-tab-content block">
-                    <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleReports" class="text-xl font-bold mb-6 border-b pb-2">Registrar Manutenção</h2>
-                        <form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI *</label><select id="repCei" required class="w-full px-4 py-3 rounded-lg border"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="repDate" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Início *</label><input type="time" id="repStart" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Término *</label><input type="time" id="repEnd" required class="w-full px-4 py-3 rounded-lg border"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Dificuldade</label><select id="repDifficulty" class="w-full px-4 py-3 rounded-lg border"><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
-                            <div><label class="block text-sm font-bold mb-1">O que foi feito? *</label><textarea id="repDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div>
-                            <div class="bg-slate-50 p-4 rounded-lg border">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold">Materiais Utilizados</h3>
-                                    <button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold"><i class="fas fa-plus"></i> Add Material</button>
-                                </div>
-                                <div id="materialsContainer" class="space-y-2"><p class="text-sm text-slate-500 italic">Nenhum material adicionado.</p></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Fotos do Reparo</label><input type="file" id="repPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')" class="w-full text-sm">
-                                <div id="repPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div></div>
-                            <div><label class="block text-sm font-bold mb-1">Obs (Opcional)</label><input type="text" id="repObs" class="w-full px-4 py-3 rounded-lg border"></div>
-                            <button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg">Salvar Serviço</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Formulário: Orçamento -->
-                <div id="empTabContent_quotes" class="emp-tab-content hidden">
-                    <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleQuotes" class="text-xl font-bold mb-6 border-b pb-2">Novo Orçamento</h2>
-                        <form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI *</label><select id="quoCei" required class="w-full px-4 py-3 rounded-lg border"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="quoDate" required class="w-full px-4 py-3 rounded-lg border"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Descrição do Orçamento *</label><textarea id="quoDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div>
-                            <div class="bg-slate-50 p-4 rounded-lg border">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold">Lista de Materiais</h3>
-                                    <button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold"><i class="fas fa-plus"></i> Add Material</button>
-                                </div>
-                                <div id="quoMaterialsContainer" class="space-y-2"><p class="text-sm text-slate-500 italic">Nenhum material listado.</p></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Fotos do Problema</label><input type="file" id="quoPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')" class="w-full text-sm">
-                                <div id="quoPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div></div>
-                            <button type="submit" id="btnSubmitQuote" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg">Salvar Orçamento</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Formulário: Terceiros -->
-                <div id="empTabContent_thirdParty" class="emp-tab-content hidden">
-                    <div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border">
-                        <h2 id="formTitleThirdParty" class="text-xl font-bold mb-6 border-b pb-2">Acompanhamento de Terceiros</h2>
-                        <form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold mb-1">CEI *</label><select id="tpCei" required class="w-full px-4 py-3 rounded-lg border"></select></div>
-                                <div><label class="block text-sm font-bold mb-1">Empresa Terceira *</label><input type="text" id="tpCompany" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="tpDate" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Início *</label><input type="time" id="tpStart" required class="w-full px-4 py-3 rounded-lg border"></div>
-                                <div><label class="block text-sm font-bold mb-1">Término *</label><input type="time" id="tpEnd" required class="w-full px-4 py-3 rounded-lg border"></div>
-                            </div>
-                            <div><label class="block text-sm font-bold mb-1">Serviço Realizado *</label><textarea id="tpDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div>
-                            <div><label class="block text-sm font-bold mb-1">Fotos</label><input type="file" id="tpPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')" class="w-full text-sm">
-                                <div id="tpPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div></div>
-                            <div><label class="block text-sm font-bold mb-1">Obs / Problemas</label><input type="text" id="tpObs" class="w-full px-4 py-3 rounded-lg border"></div>
-                            <button type="submit" id="btnSubmitThirdParty" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg">Salvar Acompanhamento</button>
-                        </form>
-                    </div>
-                </div>
+                <!-- Formulários Func -->
+                <div id="empTabContent_reports" class="emp-tab-content block"><div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border"><h2 id="formTitleReports" class="text-xl font-bold mb-6 border-b pb-2">Registrar Manutenção</h2><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-6"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-bold mb-1">CEI *</label><select id="repCei" required class="w-full px-4 py-3 rounded-lg border"></select></div><div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="repDate" required class="w-full px-4 py-3 rounded-lg border"></div><div><label class="block text-sm font-bold mb-1">Início *</label><input type="time" id="repStart" required class="w-full px-4 py-3 rounded-lg border"></div><div><label class="block text-sm font-bold mb-1">Término *</label><input type="time" id="repEnd" required class="w-full px-4 py-3 rounded-lg border"></div></div><div><label class="block text-sm font-bold mb-1">Dificuldade</label><select id="repDifficulty" class="w-full px-4 py-3 rounded-lg border"><option>Baixa</option><option>Média</option><option>Alta</option></select></div><div><label class="block text-sm font-bold mb-1">O que foi feito? *</label><textarea id="repDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div><div class="bg-slate-50 p-4 rounded-lg border"><div class="flex justify-between items-center mb-3"><h3 class="font-bold">Materiais Utilizados</h3><button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold">+ Add Material</button></div><div id="materialsContainer" class="space-y-2"><p class="text-sm text-slate-500 italic">Nenhum material.</p></div></div><div><label class="block text-sm font-bold mb-1">Fotos do Reparo</label><input type="file" id="repPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')" class="w-full text-sm"><div id="repPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div></div><div><label class="block text-sm font-bold mb-1">Obs (Opcional)</label><input type="text" id="repObs" class="w-full px-4 py-3 rounded-lg border"></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-lg">Salvar Serviço</button></form></div></div>
+                <div id="empTabContent_quotes" class="emp-tab-content hidden"><div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border"><h2 id="formTitleQuotes" class="text-xl font-bold mb-6 border-b pb-2">Novo Orçamento</h2><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-6"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-bold mb-1">CEI *</label><select id="quoCei" required class="w-full px-4 py-3 rounded-lg border"></select></div><div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="quoDate" required class="w-full px-4 py-3 rounded-lg border"></div></div><div><label class="block text-sm font-bold mb-1">Descrição do Orçamento *</label><textarea id="quoDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div><div class="bg-slate-50 p-4 rounded-lg border"><div class="flex justify-between items-center mb-3"><h3 class="font-bold">Lista de Materiais</h3><button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold">+ Add Material</button></div><div id="quoMaterialsContainer" class="space-y-2"><p class="text-sm text-slate-500 italic">Nenhum material listado.</p></div></div><div><label class="block text-sm font-bold mb-1">Fotos do Problema</label><input type="file" id="quoPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')" class="w-full text-sm"><div id="quoPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div></div><button type="submit" id="btnSubmitQuote" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-lg">Salvar Orçamento</button></form></div></div>
+                <div id="empTabContent_thirdParty" class="emp-tab-content hidden"><div class="bg-white p-5 sm:p-8 rounded-lg shadow-sm border"><h2 id="formTitleThirdParty" class="text-xl font-bold mb-6 border-b pb-2">Acompanhamento de Terceiros</h2><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-6"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-bold mb-1">CEI *</label><select id="tpCei" required class="w-full px-4 py-3 rounded-lg border"></select></div><div><label class="block text-sm font-bold mb-1">Empresa Terceira *</label><input type="text" id="tpCompany" required class="w-full px-4 py-3 rounded-lg border"></div><div><label class="block text-sm font-bold mb-1">Data *</label><input type="date" id="tpDate" required class="w-full px-4 py-3 rounded-lg border"></div><div><label class="block text-sm font-bold mb-1">Início *</label><input type="time" id="tpStart" required class="w-full px-4 py-3 rounded-lg border"></div><div><label class="block text-sm font-bold mb-1">Término *</label><input type="time" id="tpEnd" required class="w-full px-4 py-3 rounded-lg border"></div></div><div><label class="block text-sm font-bold mb-1">Serviço Realizado *</label><textarea id="tpDesc" required rows="3" class="w-full px-4 py-3 rounded-lg border"></textarea></div><div><label class="block text-sm font-bold mb-1">Fotos</label><input type="file" id="tpPhotos" multiple accept="image/*" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')" class="w-full text-sm"><div id="tpPhotoPreview" class="flex flex-wrap gap-2 mt-2"></div></div><div><label class="block text-sm font-bold mb-1">Obs / Problemas</label><input type="text" id="tpObs" class="w-full px-4 py-3 rounded-lg border"></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-lg">Salvar Acompanhamento</button></form></div></div>
 
                 <!-- Históricos do Funcionário -->
-                <div class="mt-8">
-                    <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Manutenções)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryReports" class="divide-y text-sm"></tbody></table></div>
-                </div>
-                <div class="mt-8">
-                    <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Orçamentos)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryQuotes" class="divide-y text-sm"></tbody></table></div>
-                </div>
-                <div class="mt-8">
-                    <h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Terceiros)</h3>
-                    <div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryThirdParty" class="divide-y text-sm"></tbody></table></div>
-                </div>
+                <div class="mt-8"><h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Manutenções)</h3><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryReports" class="divide-y text-sm"></tbody></table></div></div>
+                <div class="mt-8"><h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Orçamentos)</h3><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Creche</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryQuotes" class="divide-y text-sm"></tbody></table></div></div>
+                <div class="mt-8"><h3 class="font-bold text-xl mb-4 border-l-4 border-blue-600 pl-3">Meus Registros (Terceiros)</h3><div class="bg-white rounded-lg border overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-slate-50 border-b"><th class="p-3 text-sm">Data</th><th class="p-3 text-sm">Empresa</th><th class="p-3 text-sm">Ações</th></tr></thead><tbody id="emphistoryThirdParty" class="divide-y text-sm"></tbody></table></div></div>
             </div>
         </main>
     </div>
 
     <!-- MODAIS DO SISTEMA -->
-    <div id="modalDetails" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-xl font-bold">Detalhes do Registro</h2>
-                <button onclick="window.hideElement('modalDetails')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div id="modalDetailsContent" class="p-5 overflow-y-auto flex-grow space-y-4"></div>
-            <div class="p-4 border-t bg-slate-50 flex justify-end">
-                <button onclick="window.hideElement('modalDetails')" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded font-medium">Fechar</button>
-            </div>
-        </div>
-    </div>
+    <div id="modalDetails" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"><div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="flex justify-between items-center p-4 border-b"><h2 class="text-xl font-bold">Detalhes do Registro</h2><button onclick="window.hideElement('modalDetails')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button></div><div id="modalDetailsContent" class="p-5 overflow-y-auto flex-grow space-y-4"></div><div class="p-4 border-t bg-slate-50 flex justify-end"><button onclick="window.hideElement('modalDetails')" class="bg-slate-200 px-4 py-2 rounded font-medium">Fechar</button></div></div></div>
+    <div id="modalCei" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"><div class="bg-white rounded-xl shadow-xl w-full max-w-md"><div class="flex justify-between items-center p-4 border-b"><h2 id="modalTitleCei" class="text-xl font-bold">Nova Creche</h2><button onclick="window.hideElement('modalCei')" class="text-slate-500"><i class="fas fa-times text-xl"></i></button></div><form onsubmit="window.saveCei(event)" class="p-5 space-y-4"><div><label class="block text-sm font-medium mb-1">Nome da Creche (CEI) *</label><input type="text" id="ceiName" required class="w-full px-3 py-2 border rounded"></div><div><label class="block text-sm font-medium mb-1">ID Grupo Telegram</label><input type="text" id="ceiTelegramId" class="w-full px-3 py-2 border rounded"></div><div><label class="block text-sm font-medium mb-1">ID Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full px-3 py-2 border rounded"></div><div class="flex justify-end gap-2 pt-4 border-t"><button type="button" onclick="window.hideElement('modalCei')" class="bg-slate-200 px-4 py-2 rounded">Cancelar</button><button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white">Salvar</button></div></form></div></div>
+    <div id="modalUser" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"><div class="bg-white rounded-xl shadow-xl w-full max-w-md"><div class="flex justify-between items-center p-4 border-b"><h2 id="modalTitleUser" class="text-xl font-bold">Novo Usuário</h2><button onclick="window.hideElement('modalUser')" class="text-slate-500"><i class="fas fa-times text-xl"></i></button></div><form onsubmit="window.saveUser(event)" class="p-5 space-y-4"><div><label class="block text-sm font-medium mb-1">Login *</label><input type="text" id="userName" required class="w-full px-3 py-2 border rounded"></div><div><label class="block text-sm font-medium mb-1">Senha *</label><input type="password" id="userPass" required class="w-full px-3 py-2 border rounded"></div><div><label class="block text-sm font-medium mb-1">Perfil</label><select id="userRole" class="w-full px-3 py-2 border rounded"><option value="func">Funcionário</option><option value="admin">Administrador</option></select></div><div class="flex justify-end gap-2 pt-4 border-t"><button type="button" onclick="window.hideElement('modalUser')" class="bg-slate-200 px-4 py-2 rounded">Cancelar</button><button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white">Salvar</button></div></form></div></div>
 
-    <div id="modalCei" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 id="modalTitleCei" class="text-xl font-bold">Nova Creche</h2>
-                <button onclick="window.hideElement('modalCei')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <form onsubmit="window.saveCei(event)" class="p-5 space-y-4">
-                <div><label class="block text-sm font-medium mb-1">Nome da Creche (CEI) *</label><input type="text" id="ceiName" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
-                <div><label class="block text-sm font-medium mb-1">ID Grupo Telegram (Ex: -100...)</label><input type="text" id="ceiTelegramId" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
-                <div><label class="block text-sm font-medium mb-1">ID Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
-                <div class="flex justify-end gap-2 pt-4 border-t">
-                    <button type="button" onclick="window.hideElement('modalCei')" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="modalUser" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 id="modalTitleUser" class="text-xl font-bold">Novo Usuário</h2>
-                <button onclick="window.hideElement('modalUser')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <form onsubmit="window.saveUser(event)" class="p-5 space-y-4">
-                <div><label class="block text-sm font-medium mb-1">Login *</label><input type="text" id="userName" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
-                <div><label class="block text-sm font-medium mb-1">Senha *</label><input type="password" id="userPass" required class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500"></div>
-                <div><label class="block text-sm font-medium mb-1">Perfil</label>
-                    <select id="userRole" class="w-full px-3 py-2 border rounded outline-none focus:border-blue-500">
-                        <option value="func">Funcionário</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-2 pt-4 border-t">
-                    <button type="button" onclick="window.hideElement('modalUser')" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- SCRIPT PRINCIPAL (FIREBASE CLOUD INTEGRATION) -->
     <script>
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
         
-        // Estado Global
+        // CONFIGURAÇÃO OFICIAL DO SEU FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM",
+            authDomain: "lym-manutencao.firebaseapp.com",
+            projectId: "lym-manutencao",
+            storageBucket: "lym-manutencao.firebasestorage.app",
+            messagingSenderId: "172405408906",
+            appId: "1:172405408906:web:19ef22e87e8ecbe1d91973",
+            measurementId: "G-BECF0MECZ7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
         window.localData = { users: [], ceis: [], reports: [], quotes: [], thirdParty: [], audit: [] };
         window.currentSystemUser = null;
         window.materialCount = 0;
         window.editingItemId = null; 
         
-        // Inicialização e Persistência
-        window.loadInitialData = function() {
-            const saved = localStorage.getItem('lymData');
-            if (saved) {
-                window.localData = JSON.parse(saved);
-            } else {
-                window.localData.users.push({ id: 'u1', login: 'admin', pass: 'admin123', role: 'admin' });
-                window.localData.users.push({ id: 'u2', login: 'func', pass: 'func123', role: 'func' });
-                window.saveData();
-            }
-        };
-        
-        window.saveData = function() { 
-            localStorage.setItem('lymData', JSON.stringify(window.localData)); 
+        // SINCRONIZAÇÃO EM TEMPO REAL COM A NUVEM
+        window.initFirebaseSync = function() {
+            const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit'];
+            cols.forEach(c => {
+                db.collection(c).onSnapshot(snap => {
+                    window.localData[c] = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    
+                    // Se for o primeiro load e não tiver usuários, cria os padrões automaticamente na nuvem
+                    if (c === 'users' && snap.empty) {
+                        db.collection('users').doc('u1').set({ login: 'admin', pass: 'admin123', role: 'admin' });
+                        db.collection('users').doc('u2').set({ login: 'func', pass: 'func123', role: 'func' });
+                    }
+
+                    // Se alguém estiver logado, atualiza as telas em tempo real
+                    if (window.currentSystemUser) {
+                        if (window.currentSystemUser.role === 'admin') window.renderAdminTables();
+                        else { window.updateCeiDropdowns(); window.renderEmployeeHistory(); }
+                    }
+                });
+            });
         };
 
-        // Funções Utilitárias UI
+        // UI Utilities
         window.showElement = (id) => document.getElementById(id).classList.remove('hidden');
         window.hideElement = (id) => document.getElementById(id).classList.add('hidden');
-        window.formatDateBR = (isoStr) => { 
-            if(!isoStr) return "";
-            const [y, m, d] = isoStr.split('-'); 
-            return `${d}/${m}/${y}`; 
-        };
+        window.formatDateBR = (iso) => iso ? iso.split('-').reverse().join('/') : "";
         window.showToast = function(msg, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -313,16 +183,15 @@
             setTimeout(() => toast.remove(), 4000);
         };
 
-        // Auditoria
         window.logAudit = function(action) {
-            const entry = { date: new Date().toLocaleString('pt-BR'), user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: action };
-            window.localData.audit.unshift(entry);
-            if(window.localData.audit.length > 500) window.localData.audit.pop();
-            window.saveData();
-            if(window.currentSystemUser && window.currentSystemUser.role === 'admin') window.renderAuditTable();
+            db.collection('audit').add({ 
+                date: new Date().toLocaleString('pt-BR'), 
+                user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', 
+                action: action, 
+                timestamp: Date.now() 
+            });
         };
 
-        // Autenticação
         window.handleLogin = function(e) {
             e.preventDefault();
             const u = document.getElementById('loginUsername').value.trim();
@@ -331,81 +200,55 @@
             
             if (user) {
                 window.currentSystemUser = user;
-                window.hideElement('loginScreen'); 
-                window.showElement('mainApp');
+                window.hideElement('loginScreen'); window.showElement('mainApp');
                 document.getElementById('userBadge').textContent = user.role === 'admin' ? 'Admin' : 'Func';
-                
                 window.logAudit('Login realizado');
-                
-                if (user.role === 'admin') { 
-                    window.showElement('adminPanel'); 
-                    window.hideElement('employeePanel'); 
-                    window.renderAdminTables(); 
-                } else { 
-                    window.showElement('employeePanel'); 
-                    window.hideElement('adminPanel'); 
-                    window.updateCeiDropdowns(); 
-                    window.renderEmployeeHistory(); 
-                }
-            } else { 
-                window.showToast("Credenciais inválidas!", "error"); 
-            }
+                if (user.role === 'admin') { window.showElement('adminPanel'); window.hideElement('employeePanel'); window.renderAdminTables(); } 
+                else { window.showElement('employeePanel'); window.hideElement('adminPanel'); window.updateCeiDropdowns(); window.renderEmployeeHistory(); }
+            } else window.showToast("Credenciais inválidas!", "error"); 
         };
 
         window.logout = function() { 
             window.logAudit('Logout realizado');
-            window.currentSystemUser = null; 
-            document.getElementById('loginForm').reset(); 
-            window.hideElement('mainApp'); 
-            window.showElement('loginScreen'); 
+            window.currentSystemUser = null; document.getElementById('loginForm').reset(); 
+            window.hideElement('mainApp'); window.showElement('loginScreen'); 
         };
 
-        // Comportamento do Formulário (Abas e Inputs)
         window.updateCeiDropdowns = function() {
             let opts = '<option value="">Selecione...</option>' + window.localData.ceis.sort((a,b)=>a.name.localeCompare(b.name)).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            ['repCei', 'quoCei', 'tpCei', 'filterCei'].forEach(id => { 
-                if(document.getElementById(id)) document.getElementById(id).innerHTML = opts; 
-            });
+            ['repCei', 'quoCei', 'tpCei', 'filterCei'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = opts; });
         };
 
-        window.addMaterialRow = function(containerId) {
-            const container = document.getElementById(containerId);
+        window.addMaterialRow = function(cId) {
+            const container = document.getElementById(cId);
             if (container.querySelector('.italic')) container.innerHTML = '';
-            window.materialCount++;
-            const id = `mat_${window.materialCount}`;
-            const div = document.createElement('div');
-            div.id = id; 
-            div.className = "mat-row flex flex-col sm:flex-row gap-2 bg-white p-2 rounded border items-start sm:items-center";
-            div.innerHTML = `<input type="text" placeholder="Material" class="flex-1 w-full p-2 border rounded outline-none" required><input type="text" placeholder="Marca" class="w-full sm:w-28 p-2 border rounded outline-none" required><input type="number" placeholder="Qtd" class="w-full sm:w-20 p-2 border rounded outline-none" required><input type="number" step="0.01" placeholder="R$ Un." class="w-full sm:w-24 p-2 border rounded outline-none"><button type="button" onclick="document.getElementById('${id}').remove()" class="w-full sm:w-auto bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded"><i class="fas fa-trash"></i> Remover</button>`;
+            const id = `mat_${++window.materialCount}`;
+            const div = document.createElement('div'); div.id = id; 
+            div.className = "mat-row flex flex-col sm:flex-row gap-2 bg-white p-2 rounded border";
+            div.innerHTML = `<input type="text" placeholder="Material" class="flex-1 w-full p-2 border rounded" required><input type="text" placeholder="Marca" class="w-full sm:w-28 p-2 border rounded" required><input type="number" placeholder="Qtd" class="w-full sm:w-20 p-2 border rounded" required><input type="number" step="0.01" placeholder="R$ Un." class="w-full sm:w-24 p-2 border rounded"><button type="button" onclick="document.getElementById('${id}').remove()" class="bg-red-100 text-red-600 px-3 py-2 rounded">Remover</button>`;
             container.appendChild(div);
         };
 
         window.compressImage = (file) => new Promise((resolve) => {
-            const reader = new FileReader(); 
-            reader.readAsDataURL(file);
+            const reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = (e) => {
-                const img = new Image(); 
-                img.src = e.target.result;
+                const img = new Image(); img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; 
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH; 
-                    canvas.height = img.height * scaleSize;
-                    const ctx = canvas.getContext('2d'); 
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const MAX_WIDTH = 600; const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     resolve(canvas.toDataURL('image/jpeg', 0.6));
                 };
             };
         });
 
         window.handlePhotoSelection = function(e, previewId) {
-            const c = document.getElementById(previewId); 
-            c.innerHTML = '';
+            const c = document.getElementById(previewId); c.innerHTML = '';
             Array.from(e.target.files).forEach(file => { 
                 if(file.type.startsWith('image/')) {
                     const reader = new FileReader(); 
-                    reader.onload = (ev) => c.innerHTML += `<div class="w-20 h-20 bg-cover bg-center rounded border shadow-sm" style="background-image: url('${ev.target.result}')"></div>`;
+                    reader.onload = (ev) => c.innerHTML += `<div class="w-20 h-20 bg-cover bg-center rounded border" style="background-image: url('${ev.target.result}')"></div>`;
                     reader.readAsDataURL(file);
                 }
             });
@@ -416,13 +259,8 @@
             document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
             document.getElementById(`tabBtn_${tab}`).classList.add('bg-blue-100','text-blue-700');
             document.getElementById(`tabContent_${tab}`).classList.remove('hidden');
-            
-            if (['reports', 'quotes', 'thirdParty'].includes(tab)) { 
-                document.getElementById('filterBar').classList.remove('hidden'); 
-                window.applyFilters(); 
-            } else { 
-                document.getElementById('filterBar').classList.add('hidden'); 
-            }
+            if (['reports', 'quotes', 'thirdParty'].includes(tab)) { document.getElementById('filterBar').classList.remove('hidden'); window.applyFilters(); } 
+            else document.getElementById('filterBar').classList.add('hidden'); 
         };
 
         window.switchEmpTab = function(tab) {
@@ -433,39 +271,25 @@
         };
 
         window.cancelEdit = function() {
-            window.editingItemId = null;
-            window.hideElement('cancelEditBtn');
+            window.editingItemId = null; window.hideElement('cancelEditBtn');
             ['reportForm','quoteForm','thirdPartyForm'].forEach(f => document.getElementById(f).reset());
-            
-            document.getElementById('formTitleReports').textContent = "Registrar Manutenção"; 
-            document.getElementById('btnSubmitReport').innerHTML = "Salvar Serviço";
-            document.getElementById('formTitleQuotes').textContent = "Novo Orçamento"; 
-            document.getElementById('btnSubmitQuote').innerHTML = "Salvar Orçamento";
-            document.getElementById('formTitleThirdParty').textContent = "Acompanhamento de Terceiros"; 
-            document.getElementById('btnSubmitThirdParty').innerHTML = "Salvar Acompanhamento";
-            
+            document.getElementById('formTitleReports').textContent = "Registrar Manutenção"; document.getElementById('btnSubmitReport').innerHTML = "Salvar Serviço";
+            document.getElementById('formTitleQuotes').textContent = "Novo Orçamento"; document.getElementById('btnSubmitQuote').innerHTML = "Salvar Orçamento";
+            document.getElementById('formTitleThirdParty').textContent = "Acompanhamento Terceiros"; document.getElementById('btnSubmitThirdParty').innerHTML = "Salvar Acompanhamento";
             document.getElementById('materialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>';
             document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-sm italic text-slate-500">Nenhum material.</p>';
             ['repPhotoPreview','quoPhotoPreview','tpPhotoPreview'].forEach(id => document.getElementById(id).innerHTML='');
         };
 
-        // INTEGRAÇÃO TELEGRAM C/ PDF INVISÍVEL
         window.sendToTelegram = async function(ceiId, base64Photos, isEdit, dataObj, typeLabel) {
             const cei = window.localData.ceis.find(c => c.id === ceiId);
             if (!cei || !cei.telegramGroupId || cei.telegramGroupId.trim() === "") return false;
-
-            const chatId = cei.telegramGroupId.trim();
-            const topicId = cei.telegramTopicId ? cei.telegramTopicId.trim() : null;
-
+            const chatId = cei.telegramGroupId.trim(); const topicId = cei.telegramTopicId ? cei.telegramTopicId.trim() : null;
             let totalValue = 0; let materialText = "";
             if(dataObj.materials) {
-                dataObj.materials.forEach(m => {
-                    let v = parseFloat(m.value || 0); totalValue += (v * m.qtd);
-                    materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * m.qtd).toFixed(2)}\n`;
-                });
+                dataObj.materials.forEach(m => { let v = parseFloat(m.value || 0); totalValue += (v * m.qtd); materialText += `- ${m.qtd}x ${m.name} (${m.brand}) - R$ ${(v * m.qtd).toFixed(2)}\n`; });
             }
 
-            // TEXTO PARA TELEGRAM (Aviso Rápido)
             let headerTag = isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>\n" : `🛠 <b>NOVO: ${typeLabel}</b>\n`;
             let textMsg = `${headerTag}<b>Creche:</b> ${cei.name}\n<b>Data:</b> ${window.formatDateBR(dataObj.date)}\n<b>Técnico:</b> ${window.currentSystemUser.login}\n`;
             if (dataObj.desc) textMsg += `<b>Descrição:</b> ${dataObj.desc}\n`;
@@ -473,449 +297,155 @@
             if (dataObj.materials && dataObj.materials.length > 0) textMsg += `\n<b>Materiais:</b>\n${materialText}<b>TOTAL MATERIAIS: R$ ${totalValue.toFixed(2)}</b>\n`;
 
             try {
-                // 1. Enviar Texto
                 let pLoad = { chat_id: chatId, text: textMsg, parse_mode: 'HTML' };
                 if (topicId) pLoad.message_thread_id = topicId;
                 let rTxt = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(pLoad) });
-                if(!rTxt.ok) { 
-                    const errJson = await rTxt.json();
-                    window.showToast(`Erro Telegram: ${errJson.description}`, "error"); 
-                    return false; 
-                }
+                if(!rTxt.ok) return false; 
 
-                // 2. Anexar à tela um "Painel Invisível" pro html2pdf renderizar as tabelas perfeitamente
                 const pdfDiv = document.createElement('div');
-                pdfDiv.style.position = 'absolute'; 
-                pdfDiv.style.left = '-9999px'; 
-                pdfDiv.style.top = '-9999px'; 
-                pdfDiv.style.width = '800px';
-                document.body.appendChild(pdfDiv);
+                pdfDiv.style.position = 'absolute'; pdfDiv.style.left = '-9999px'; pdfDiv.style.top = '-9999px'; pdfDiv.style.width = '800px'; document.body.appendChild(pdfDiv);
+                pdfDiv.innerHTML = `<div style="padding:40px; font-family:sans-serif;"><h1 style="color:#1e3a8a; border-bottom:2px solid #1e3a8a;">LYM - ${typeLabel}</h1>${isEdit ? '<h2 style="color:#eab308;">[CORREÇÃO DE SERVIÇO]</h2>' : ''}<p><strong>Creche:</strong> ${cei.name}<br><strong>Data:</strong> ${window.formatDateBR(dataObj.date)}<br><strong>Técnico:</strong> ${window.currentSystemUser.login}</p><div style="background:#f1f5f9; padding:20px; border-radius:5px;"><p>${dataObj.desc || dataObj.tpDesc || ''}</p></div>${dataObj.materials && dataObj.materials.length > 0 ? `<table style="width:100%; border-collapse:collapse; margin-top:20px;"><tr style="background:#e2e8f0;"><th style="padding:10px; border:1px solid #cbd5e1; text-align:left;">Material</th><th style="padding:10px; border:1px solid #cbd5e1;">Qtd</th><th style="padding:10px; border:1px solid #cbd5e1; text-align:right;">Total (R$)</th></tr>${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #cbd5e1;">${m.name}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:center;">${m.qtd}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right;">${(parseFloat(m.value||0)*m.qtd).toFixed(2)}</td></tr>`).join('')}</table>` : ''}${base64Photos && base64Photos.length > 0 ? `<div style="display:flex; flex-wrap:wrap; gap:15px; margin-top:20px;">${base64Photos.map(i => `<img src="${i}" style="height:250px; border-radius:5px;">`).join('')}</div>` : ''}</div>`;
 
-                pdfDiv.innerHTML = `
-                    <div style="padding:40px; font-family:sans-serif; color:#333;">
-                        <h1 style="color:#1e3a8a; border-bottom:2px solid #1e3a8a; margin-bottom:5px;">LYM Eletrônicos - ${typeLabel}</h1>
-                        ${isEdit ? '<h2 style="color:#eab308; margin-top:0;">[CORREÇÃO DE SERVIÇO]</h2>' : ''}
-                        
-                        <table style="width: 100%; margin: 20px 0; font-size: 16px;">
-                            <tr><td style="padding: 5px 0;"><strong>Creche (CEI):</strong> ${cei.name}</td>
-                                <td style="padding: 5px 0;"><strong>Data:</strong> ${window.formatDateBR(dataObj.date)}</td></tr>
-                            <tr><td style="padding: 5px 0;"><strong>Técnico:</strong> ${window.currentSystemUser.login}</td>
-                                <td style="padding: 5px 0;"><strong>Horário:</strong> ${dataObj.startTime || '--'} às ${dataObj.endTime || '--'}</td></tr>
-                        </table>
-
-                        <div style="background:#f1f5f9; padding:20px; border-radius:5px; border: 1px solid #cbd5e1; margin-bottom:20px;">
-                            <h3 style="margin-top:0;">Descrição / Serviço Realizado</h3>
-                            <p style="margin-bottom:0; line-height:1.5;">${dataObj.desc || dataObj.tpDesc || 'Sem descrição detalhada.'}</p>
-                        </div>
-                        
-                        ${dataObj.materials && dataObj.materials.length > 0 ? `
-                        <div style="margin-bottom: 30px;">
-                            <h3 style="border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">Lista de Materiais</h3>
-                            <table style="width:100%; border-collapse:collapse; margin-top:10px;">
-                                <tr style="background:#e2e8f0;"><th style="padding:10px; border:1px solid #cbd5e1; text-align:left;">Material / Marca</th><th style="padding:10px; border:1px solid #cbd5e1; text-align:center;">Qtd</th><th style="padding:10px; border:1px solid #cbd5e1; text-align:right;">Total (R$)</th></tr>
-                                ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #cbd5e1;">${m.name} (${m.brand})</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:center;">${m.qtd}</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right;">${(parseFloat(m.value||0)*m.qtd).toFixed(2)}</td></tr>`).join('')}
-                                <tr style="background:#f8fafc;"><td colspan="2" style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">TOTAL GERAL:</td><td style="padding:10px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;">R$ ${totalValue.toFixed(2)}</td></tr>
-                            </table>
-                        </div>` : ''}
-                        
-                        ${base64Photos && base64Photos.length > 0 ? `
-                        <div>
-                            <h3 style="border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">Evidências Fotográficas</h3>
-                            <div style="display:flex; flex-wrap:wrap; gap:15px; margin-top:15px;">
-                                ${base64Photos.map(i => `<img src="${i}" style="height:250px; border-radius:5px; border:1px solid #cbd5e1;">`).join('')}
-                            </div>
-                        </div>` : ''}
-                    </div>
-                `;
-
-                // 3. Gerar PDF e limpar painel
-                const opt = { 
-                    margin: 10, 
-                    filename: `Relatorio_${cei.name.replace(/[^a-z0-9]/gi, '_')}.pdf`, 
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true }, 
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-                };
-                
+                const opt = { margin: 10, filename: `Relatorio_${cei.name.replace(/[^a-z0-9]/gi, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
                 let pdfBlob = await html2pdf().set(opt).from(pdfDiv).outputPdf('blob');
-                document.body.removeChild(pdfDiv); // Remove a tela suja do fundo
+                document.body.removeChild(pdfDiv); 
 
-                // 4. Enviar PDF como Documento
                 const fData = new FormData();
                 fData.append('chat_id', chatId);
                 if (topicId) fData.append('message_thread_id', topicId);
                 fData.append('document', pdfBlob, opt.filename);
-                
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: fData });
-
                 return true;
-            } catch(e) { 
-                console.error(e); 
-                window.showToast("Falha técnica ao gerar PDF para o Telegram.", "error"); 
-                return false; 
-            }
+            } catch(e) { return false; }
         };
 
-        // Salvar Relatório (Funcionário)
         window.saveRecord = async function(e, type) {
             e.preventDefault();
-            const btnMap = { 
-                reports: ['btnSubmitReport', 'Manutenção'], 
-                quotes: ['btnSubmitQuote', 'Orçamento'], 
-                thirdParty: ['btnSubmitThirdParty', 'Acomp. Terceiro'] 
-            };
-            
-            const btn = document.getElementById(btnMap[type][0]);
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...'; 
-            btn.disabled = true;
+            const btnMap = { reports: ['btnSubmitReport', 'Manutenção'], quotes: ['btnSubmitQuote', 'Orçamento'], thirdParty: ['btnSubmitThirdParty', 'Acomp. Terceiro'] };
+            const btn = document.getElementById(btnMap[type][0]); const originalHTML = btn.innerHTML;
+            btn.innerHTML = 'Processando...'; btn.disabled = true;
 
             try {
                 const checkEditFlag = (window.editingItemId !== null && window.editingItemId !== undefined);
-
-                let dataObj = { id: window.editingItemId || Date.now().toString(), userId: window.currentSystemUser.id, userLogin: window.currentSystemUser.login };
+                let dataObj = { userId: window.currentSystemUser.id, userLogin: window.currentSystemUser.login };
                 let filesInput = null;
 
                 if (type === 'reports') {
-                    dataObj.ceiId = document.getElementById('repCei').value; 
-                    dataObj.date = document.getElementById('repDate').value;
-                    dataObj.startTime = document.getElementById('repStart').value; 
-                    dataObj.endTime = document.getElementById('repEnd').value;
-                    dataObj.difficulty = document.getElementById('repDifficulty').value; 
-                    dataObj.desc = document.getElementById('repDesc').value;
-                    dataObj.obs = document.getElementById('repObs').value; 
-                    filesInput = document.getElementById('repPhotos');
+                    dataObj.ceiId = document.getElementById('repCei').value; dataObj.date = document.getElementById('repDate').value; dataObj.startTime = document.getElementById('repStart').value; dataObj.endTime = document.getElementById('repEnd').value; dataObj.difficulty = document.getElementById('repDifficulty').value; dataObj.desc = document.getElementById('repDesc').value; dataObj.obs = document.getElementById('repObs').value; filesInput = document.getElementById('repPhotos');
                     dataObj.materials = Array.from(document.querySelectorAll('#materialsContainer .mat-row')).map(r => { const i = r.querySelectorAll('input'); return { name: i[0].value, brand: i[1].value, qtd: parseInt(i[2].value), value: i[3].value || "0" }; });
                 } else if (type === 'quotes') {
-                    dataObj.ceiId = document.getElementById('quoCei').value; 
-                    dataObj.date = document.getElementById('quoDate').value; 
-                    dataObj.desc = document.getElementById('quoDesc').value; 
-                    filesInput = document.getElementById('quoPhotos');
+                    dataObj.ceiId = document.getElementById('quoCei').value; dataObj.date = document.getElementById('quoDate').value; dataObj.desc = document.getElementById('quoDesc').value; filesInput = document.getElementById('quoPhotos');
                     dataObj.materials = Array.from(document.querySelectorAll('#quoMaterialsContainer .mat-row')).map(r => { const i = r.querySelectorAll('input'); return { name: i[0].value, brand: i[1].value, qtd: parseInt(i[2].value), value: i[3].value || "0" }; });
                 } else if (type === 'thirdParty') {
-                    dataObj.ceiId = document.getElementById('tpCei').value; 
-                    dataObj.companyName = document.getElementById('tpCompany').value; 
-                    dataObj.date = document.getElementById('tpDate').value;
-                    dataObj.startTime = document.getElementById('tpStart').value; 
-                    dataObj.endTime = document.getElementById('tpEnd').value; 
-                    dataObj.tpDesc = document.getElementById('tpDesc').value; 
-                    dataObj.obs = document.getElementById('tpObs').value; 
-                    filesInput = document.getElementById('tpPhotos');
+                    dataObj.ceiId = document.getElementById('tpCei').value; dataObj.companyName = document.getElementById('tpCompany').value; dataObj.date = document.getElementById('tpDate').value; dataObj.startTime = document.getElementById('tpStart').value; dataObj.endTime = document.getElementById('tpEnd').value; dataObj.tpDesc = document.getElementById('tpDesc').value; dataObj.obs = document.getElementById('tpObs').value; filesInput = document.getElementById('tpPhotos');
                 }
 
                 let base64Photos = [];
                 if (filesInput && filesInput.files.length > 0) {
                     for (let f of filesInput.files) if (f.type.startsWith('image/')) base64Photos.push(await window.compressImage(f));
                 } else if (checkEditFlag) {
-                    const oldR = window.localData[type].find(r => r.id === dataObj.id);
+                    const oldR = window.localData[type].find(r => r.id === window.editingItemId);
                     if(oldR && oldR.photos) base64Photos = oldR.photos;
                 }
 
-                // Disparo com Flag de Edição
                 const telSuccess = await window.sendToTelegram(dataObj.ceiId, base64Photos, checkEditFlag, dataObj, btnMap[type][1]);
                 dataObj.photos = telSuccess ? [] : base64Photos; 
                 dataObj.telegramSent = telSuccess;
 
                 if (checkEditFlag) {
-                    const idx = window.localData[type].findIndex(r => r.id === window.editingItemId);
-                    if (idx > -1) window.localData[type][idx] = dataObj;
+                    await db.collection(type).doc(window.editingItemId).set(dataObj, {merge: true});
                     window.showToast("Editado e Enviado!", "success");
-                    window.logAudit(`${btnMap[type][1]} Editado: ${dataObj.id}`);
+                    window.logAudit(`${btnMap[type][1]} Editado: ${window.editingItemId}`);
                 } else {
-                    window.localData[type].push(dataObj);
+                    const docRef = await db.collection(type).add(dataObj);
                     window.showToast("Salvo e Enviado!", "success");
-                    window.logAudit(`${btnMap[type][1]} Criado: ${dataObj.id}`);
+                    window.logAudit(`${btnMap[type][1]} Criado: ${docRef.id}`);
                 }
                 
-                window.saveData(); 
                 window.cancelEdit(); 
-                window.renderEmployeeHistory();
-            } catch (err) { 
-                console.error(err); 
-                window.showToast("Erro ao processar formulário", "error"); 
-            } finally { 
-                btn.innerHTML = originalHTML; 
-                btn.disabled = false; 
-            }
+            } catch (err) { console.error(err); window.showToast("Erro ao processar", "error"); } 
+            finally { btn.innerHTML = originalHTML; btn.disabled = false; }
         };
 
-        // Histórico de Funcionário
         window.renderEmployeeHistory = function() {
             if (!window.currentSystemUser) return;
-            const uid = window.currentSystemUser.id; 
-            const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
-            
-            const buildRow = (type, r, extra) => `<tr class="border-b hover:bg-slate-50"><td class="p-3 whitespace-nowrap">${window.formatDateBR(r.date)}</td><td class="p-3">${extra}</td><td class="p-3 flex gap-2"><button onclick="window.editRecord('${r.id}', '${type}')" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded font-medium">Editar</button><button onclick="window.deleteRecord('${r.id}', '${type}')" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded font-medium">Apagar</button></td></tr>`;
-            
+            const uid = window.currentSystemUser.id; const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
+            const buildRow = (type, r, extra) => `<tr class="border-b"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${extra}</td><td class="p-3 flex gap-2"><button onclick="window.editRecord('${r.id}', '${type}')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Editar</button><button onclick="window.deleteRecord('${r.id}', '${type}')" class="bg-red-100 text-red-700 px-3 py-1 rounded">Apagar</button></td></tr>`;
             document.getElementById('emphistoryReports').innerHTML = window.localData.reports.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('reports', r, ceisMap[r.ceiId] || 'Excluída')).join('');
             document.getElementById('emphistoryQuotes').innerHTML = window.localData.quotes.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('quotes', r, ceisMap[r.ceiId] || 'Excluída')).join('');
             document.getElementById('emphistoryThirdParty').innerHTML = window.localData.thirdParty.filter(r => r.userId === uid).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => buildRow('thirdParty', r, r.companyName)).join('');
         };
 
         window.editRecord = function(id, type) {
-            window.cancelEdit(); 
-            const r = window.localData[type].find(x => x.id === id); 
-            if (!r) return;
-            
-            window.editingItemId = id; 
-            window.showElement('cancelEditBtn'); 
-            window.switchEmpTab(type); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
+            window.cancelEdit(); const r = window.localData[type].find(x => x.id === id); if (!r) return;
+            window.editingItemId = id; window.showElement('cancelEditBtn'); window.switchEmpTab(type); window.scrollTo({ top: 0, behavior: 'smooth' });
             if (type === 'reports') {
-                document.getElementById('formTitleReports').textContent = "Editando Manutenção"; 
-                document.getElementById('btnSubmitReport').innerHTML = "Salvar Alterações";
-                document.getElementById('repCei').value = r.ceiId; 
-                document.getElementById('repDate').value = r.date; 
-                document.getElementById('repStart').value = r.startTime;
-                document.getElementById('repEnd').value = r.endTime; 
-                document.getElementById('repDifficulty').value = r.difficulty; 
-                document.getElementById('repDesc').value = r.desc; 
-                document.getElementById('repObs').value = r.obs || '';
-                
-                const c = document.getElementById('materialsContainer'); c.innerHTML = '';
-                if(r.materials) r.materials.forEach(m => { 
-                    window.addMaterialRow('materialsContainer'); 
-                    const i = c.lastElementChild.querySelectorAll('input'); 
-                    i[0].value = m.name; i[1].value = m.brand; i[2].value = m.qtd; i[3].value = m.value; 
-                });
+                document.getElementById('formTitleReports').textContent = "Editando Manutenção"; document.getElementById('btnSubmitReport').innerHTML = "Salvar Alterações"; document.getElementById('repCei').value = r.ceiId; document.getElementById('repDate').value = r.date; document.getElementById('repStart').value = r.startTime; document.getElementById('repEnd').value = r.endTime; document.getElementById('repDifficulty').value = r.difficulty; document.getElementById('repDesc').value = r.desc; document.getElementById('repObs').value = r.obs || ''; const c = document.getElementById('materialsContainer'); c.innerHTML = '';
+                if(r.materials) r.materials.forEach(m => { window.addMaterialRow('materialsContainer'); const i = c.lastElementChild.querySelectorAll('input'); i[0].value = m.name; i[1].value = m.brand; i[2].value = m.qtd; i[3].value = m.value; });
             } else if (type === 'quotes') {
-                document.getElementById('formTitleQuotes').textContent = "Editando Orçamento"; 
-                document.getElementById('btnSubmitQuote').innerHTML = "Salvar Alterações";
-                document.getElementById('quoCei').value = r.ceiId; 
-                document.getElementById('quoDate').value = r.date; 
-                document.getElementById('quoDesc').value = r.desc;
-                
-                const c = document.getElementById('quoMaterialsContainer'); c.innerHTML = '';
-                if(r.materials) r.materials.forEach(m => { 
-                    window.addMaterialRow('quoMaterialsContainer'); 
-                    const i = c.lastElementChild.querySelectorAll('input'); 
-                    i[0].value = m.name; i[1].value = m.brand; i[2].value = m.qtd; i[3].value = m.value; 
-                });
+                document.getElementById('formTitleQuotes').textContent = "Editando Orçamento"; document.getElementById('btnSubmitQuote').innerHTML = "Salvar Alterações"; document.getElementById('quoCei').value = r.ceiId; document.getElementById('quoDate').value = r.date; document.getElementById('quoDesc').value = r.desc; const c = document.getElementById('quoMaterialsContainer'); c.innerHTML = '';
+                if(r.materials) r.materials.forEach(m => { window.addMaterialRow('quoMaterialsContainer'); const i = c.lastElementChild.querySelectorAll('input'); i[0].value = m.name; i[1].value = m.brand; i[2].value = m.qtd; i[3].value = m.value; });
             } else if (type === 'thirdParty') {
-                document.getElementById('formTitleThirdParty').textContent = "Editando Terceiro"; 
-                document.getElementById('btnSubmitThirdParty').innerHTML = "Salvar Alterações";
-                document.getElementById('tpCei').value = r.ceiId; 
-                document.getElementById('tpCompany').value = r.companyName; 
-                document.getElementById('tpDate').value = r.date; 
-                document.getElementById('tpStart').value = r.startTime; 
-                document.getElementById('tpEnd').value = r.endTime; 
-                document.getElementById('tpDesc').value = r.tpDesc; 
-                document.getElementById('tpObs').value = r.obs || '';
+                document.getElementById('formTitleThirdParty').textContent = "Editando Terceiro"; document.getElementById('btnSubmitThirdParty').innerHTML = "Salvar Alterações"; document.getElementById('tpCei').value = r.ceiId; document.getElementById('tpCompany').value = r.companyName; document.getElementById('tpDate').value = r.date; document.getElementById('tpStart').value = r.startTime; document.getElementById('tpEnd').value = r.endTime; document.getElementById('tpDesc').value = r.tpDesc; document.getElementById('tpObs').value = r.obs || '';
             }
         };
 
         window.deleteRecord = function(id, type) { 
-            if(confirm("Apagar este registro?")) { 
-                window.localData[type] = window.localData[type].filter(r => r.id !== id); 
-                window.saveData(); 
-                window.renderEmployeeHistory(); 
-                window.showToast("Apagado com sucesso.", "success"); 
+            if(confirm("Apagar este registro permanentemente?")) { 
+                db.collection(type).doc(id).delete();
+                window.showToast("Apagado.", "success"); 
                 window.logAudit(`Registro apagado (${type}): ${id}`);
             } 
         };
 
-        // Funções Completas do Administrador
-        window.renderAdminTables = function() { 
-            window.updateCeiDropdowns(); 
-            window.applyFilters(); 
-            window.renderConfigLists(); 
-            window.renderAuditTable(); 
-        };
-        
+        window.renderAdminTables = function() { window.updateCeiDropdowns(); window.applyFilters(); window.renderConfigLists(); window.renderAuditTable(); };
         window.applyFilters = function() {
-            const txt = (document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : '');
-            const ceiId = (document.getElementById('filterCei') ? document.getElementById('filterCei').value : '');
-            const dStart = document.getElementById('filterDateStart') ? document.getElementById('filterDateStart').value : '';
-            const dEnd = document.getElementById('filterDateEnd') ? document.getElementById('filterDateEnd').value : '';
-            
-            const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
-            
-            const fFn = (r) => { 
-                let m = true; 
-                if(ceiId && r.ceiId !== ceiId) m = false; 
-                if(dStart && r.date < dStart) m = false;
-                if(dEnd && r.date > dEnd) m = false;
-                if(txt && !`${r.userLogin} ${ceisMap[r.ceiId]||''} ${r.desc||''} ${r.companyName||''} ${r.tpDesc||''}`.toLowerCase().includes(txt)) m = false; 
-                return m; 
-            };
-            
-            if(document.getElementById('adminReportsTable')) document.getElementById('adminReportsTable').innerHTML = window.localData.reports.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${ceisMap[r.ceiId]||'Excluída'}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-xs">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'reports')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded font-medium"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
-            if(document.getElementById('adminQuotesTable')) document.getElementById('adminQuotesTable').innerHTML = window.localData.quotes.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${ceisMap[r.ceiId]||'Excluída'}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-xs">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'quotes')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded font-medium"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
-            if(document.getElementById('adminThirdPartyTable')) document.getElementById('adminThirdPartyTable').innerHTML = window.localData.thirdParty.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3 font-semibold">${r.companyName}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3 truncate max-w-xs">${r.tpDesc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'thirdParty')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded font-medium"><i class="fas fa-eye mr-1"></i>Ver</button></td></tr>`).join('');
+            const txt = (document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : ''); const ceiId = (document.getElementById('filterCei') ? document.getElementById('filterCei').value : ''); const dStart = document.getElementById('filterDateStart') ? document.getElementById('filterDateStart').value : ''; const dEnd = document.getElementById('filterDateEnd') ? document.getElementById('filterDateEnd').value : ''; const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
+            const fFn = (r) => { let m = true; if(ceiId && r.ceiId !== ceiId) m = false; if(dStart && r.date < dStart) m = false; if(dEnd && r.date > dEnd) m = false; if(txt && !`${r.userLogin} ${ceisMap[r.ceiId]||''} ${r.desc||''} ${r.companyName||''}`.toLowerCase().includes(txt)) m = false; return m; };
+            if(document.getElementById('adminReportsTable')) document.getElementById('adminReportsTable').innerHTML = window.localData.reports.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'reports')" class="text-blue-600 bg-blue-50 px-2 rounded">Ver</button></td></tr>`).join('');
+            if(document.getElementById('adminQuotesTable')) document.getElementById('adminQuotesTable').innerHTML = window.localData.quotes.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${ceisMap[r.ceiId]||''}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3">${r.desc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'quotes')" class="text-blue-600 bg-blue-50 px-2 rounded">Ver</button></td></tr>`).join('');
+            if(document.getElementById('adminThirdPartyTable')) document.getElementById('adminThirdPartyTable').innerHTML = window.localData.thirdParty.filter(fFn).sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `<tr class="border-b hover:bg-slate-50"><td class="p-3">${window.formatDateBR(r.date)}</td><td class="p-3">${r.companyName}</td><td class="p-3 capitalize">${r.userLogin}</td><td class="p-3">${r.tpDesc}</td><td class="p-3"><button onclick="window.viewDetails('${r.id}', 'thirdParty')" class="text-blue-600 bg-blue-50 px-2 rounded">Ver</button></td></tr>`).join('');
         };
         
         window.renderAuditTable = function() {
-            const tbody = document.getElementById('adminAuditTable');
-            if(tbody) tbody.innerHTML = window.localData.audit.map(a => `<tr class="border-b"><td class="p-3 text-xs text-slate-500">${a.date}</td><td class="p-3 capitalize font-semibold">${a.user}</td><td class="p-3">${a.action}</td></tr>`).join('');
+            const sortedAudit = [...window.localData.audit].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+            document.getElementById('adminAuditTable').innerHTML = sortedAudit.map(a => `<tr class="border-b"><td class="p-3 text-xs text-slate-500">${a.date}</td><td class="p-3 font-semibold">${a.user}</td><td class="p-3">${a.action}</td></tr>`).join('');
         };
         
         window.renderConfigLists = function() {
-            document.getElementById('adminCeiList').innerHTML = window.localData.ceis.map(c => `<li class="py-3 flex justify-between items-center border-b"><span class="font-bold">${c.name} <span class="text-xs text-slate-500 block">ID: ${c.telegramGroupId||'-'} | Tópico: ${c.telegramTopicId||'-'}</span></span><div><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></div></li>`).join('');
-            document.getElementById('adminUserList').innerHTML = window.localData.users.map(u => `<li class="py-3 flex justify-between items-center border-b"><span class="font-bold capitalize">${u.login} <span class="text-xs bg-slate-200 px-2 rounded">${u.role}</span></span><div><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></div></li>`).join('');
+            document.getElementById('adminCeiList').innerHTML = window.localData.ceis.map(c => `<li class="py-3 flex justify-between items-center border-b"><span class="font-bold">${c.name} (Tópico: ${c.telegramTopicId||'-'})</span><div><button onclick="window.editCei('${c.id}')" class="text-blue-500 mr-3">Editar</button><button onclick="window.deleteCei('${c.id}')" class="text-red-500">Apagar</button></div></li>`).join('');
+            document.getElementById('adminUserList').innerHTML = window.localData.users.map(u => `<li class="py-3 flex justify-between items-center border-b"><span class="font-bold capitalize">${u.login} (${u.role})</span><div><button onclick="window.editUser('${u.id}')" class="text-blue-500 mr-3">Editar</button><button onclick="window.deleteUser('${u.id}')" class="text-red-500">Apagar</button></div></li>`).join('');
         };
-        
+
         window.viewDetails = function(id, type) { 
-            const record = window.localData[type].find(r => r.id === id); 
-            const cei = window.localData.ceis.find(c => c.id === record.ceiId); 
-            
-            let html = `<div class="grid grid-cols-2 gap-4 border-b pb-4">
-                <div><p class="text-sm text-slate-500">Creche (CEI)</p><p class="font-bold text-lg">${cei ? cei.name : 'Excluída'}</p></div>
-                <div><p class="text-sm text-slate-500">Data</p><p class="font-bold text-lg">${window.formatDateBR(record.date)}</p></div>
-                <div><p class="text-sm text-slate-500">Lançado por</p><p class="font-bold capitalize">${record.userLogin}</p></div>
-                ${record.startTime ? `<div><p class="text-sm text-slate-500">Horário</p><p class="font-bold">${record.startTime} às ${record.endTime}</p></div>` : ''}
-            </div>`;
-
-            if(type === 'reports' || type === 'quotes') {
-                html += `<div class="mt-4"><p class="text-sm text-slate-500">Descrição / Serviço</p><p class="bg-slate-50 p-3 rounded mt-1 border">${record.desc}</p></div>`;
-                if(record.materials && record.materials.length > 0) {
-                    html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-2">Materiais Listados</p><table class="w-full text-sm border-collapse border border-slate-200"><tr class="bg-slate-100"><th class="border p-2 text-left">Qtd</th><th class="border p-2 text-left">Material/Marca</th><th class="border p-2 text-right">R$ Un.</th><th class="border p-2 text-right">R$ Total</th></tr>`;
-                    let sum = 0;
-                    record.materials.forEach(m => {
-                        let total = (parseFloat(m.value || 0) * m.qtd);
-                        sum += total;
-                        html += `<tr><td class="border p-2">${m.qtd}</td><td class="border p-2">${m.name} (${m.brand})</td><td class="border p-2 text-right">${parseFloat(m.value||0).toFixed(2)}</td><td class="border p-2 text-right font-bold">${total.toFixed(2)}</td></tr>`;
-                    });
-                    html += `<tr class="bg-blue-50"><td colspan="3" class="border p-2 text-right font-bold">Total Geral:</td><td class="border p-2 text-right font-bold text-blue-700">R$ ${sum.toFixed(2)}</td></tr></table></div>`;
-                }
-            } else if (type === 'thirdParty') {
-                html += `<div class="mt-4"><p class="text-sm text-slate-500">Empresa Terceira</p><p class="font-bold text-lg">${record.companyName}</p></div>`;
-                html += `<div class="mt-4"><p class="text-sm text-slate-500">Serviço Realizado</p><p class="bg-slate-50 p-3 rounded mt-1 border">${record.tpDesc}</p></div>`;
-            }
-
-            if(record.telegramSent) {
-                html += `<div class="mt-4 p-3 bg-green-50 text-green-700 rounded border border-green-200 text-sm font-medium"><i class="fas fa-check-circle mr-2"></i>Relatório e fotos enviados para o Telegram.</div>`;
-            } else if(record.photos && record.photos.length > 0) {
-                html += `<div class="mt-4"><p class="text-sm text-slate-500 mb-2">Fotos (Salvas no Banco Local)</p><div class="flex flex-wrap gap-2">`;
-                record.photos.forEach(p => html += `<a href="${p}" target="_blank"><img src="${p}" class="h-24 rounded border shadow-sm"></a>`);
-                html += `</div></div>`;
-            }
-
-            document.getElementById('modalDetailsContent').innerHTML = html; 
-            window.showElement('modalDetails'); 
+            const r = window.localData[type].find(r => r.id === id); const cei = window.localData.ceis.find(c => c.id === r.ceiId); 
+            let html = `<div class="grid grid-cols-2 gap-4 border-b pb-4"><div><b>Creche:</b> ${cei?cei.name:'-'}</div><div><b>Data:</b> ${window.formatDateBR(r.date)}</div></div><br><div><b>Info:</b> ${r.desc||r.tpDesc||''}</div>`; 
+            if(r.telegramSent) html += `<div class="mt-4 p-3 bg-green-50 text-green-700 rounded border border-green-200">✅ Enviado ao Telegram.</div>`; 
+            else if(r.photos && r.photos.length > 0) html += `<div class="mt-4"><b>Fotos:</b><div class="flex gap-2">${r.photos.map(p => `<img src="${p}" class="h-20 border">`).join('')}</div></div>`;
+            document.getElementById('modalDetailsContent').innerHTML = html; window.showElement('modalDetails'); 
         };
-        
-        // Exportação Completa de Excel (SheetJS)
+
         window.exportToExcel = function() {
-            window.showToast("Gerando planilha Excel...", "info");
-            const wb = XLSX.utils.book_new();
+            window.showToast("Gerando Excel..."); const wb = XLSX.utils.book_new();
+            const txt = (document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : ''); const ceiId = (document.getElementById('filterCei') ? document.getElementById('filterCei').value : ''); const dStart = document.getElementById('filterDateStart') ? document.getElementById('filterDateStart').value : ''; const dEnd = document.getElementById('filterDateEnd') ? document.getElementById('filterDateEnd').value : ''; const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
+            const fFn = (r) => { let m = true; if(ceiId && r.ceiId !== ceiId) m = false; if(dStart && r.date < dStart) m = false; if(dEnd && r.date > dEnd) m = false; if(txt && !`${r.userLogin} ${ceisMap[r.ceiId]||''} ${r.desc||''} ${r.companyName||''}`.toLowerCase().includes(txt)) m = false; return m; };
             
-            const txt = document.getElementById('filterSearch').value.toLowerCase();
-            const ceiId = document.getElementById('filterCei').value;
-            const dStart = document.getElementById('filterDateStart').value;
-            const dEnd = document.getElementById('filterDateEnd').value;
-            const ceisMap = window.localData.ceis.reduce((acc, c) => ({...acc, [c.id]: c.name}), {});
-
-            const filterFn = (r) => {
-                let match = true;
-                if(ceiId && r.ceiId !== ceiId) match = false;
-                if(dStart && r.date < dStart) match = false;
-                if(dEnd && r.date > dEnd) match = false;
-                if(txt) {
-                    const searchStr = `${r.userLogin} ${ceisMap[r.ceiId] || ''} ${r.desc||''} ${r.companyName||''} ${r.tpDesc||''}`.toLowerCase();
-                    if(!searchStr.includes(txt)) match = false;
-                }
-                return match;
-            };
-
-            const sheetReports = [["Data", "Creche", "Técnico", "Serviço", "Dificuldade", "Custo Materiais"]];
-            window.localData.reports.filter(filterFn).forEach(r => {
-                let sum = 0; if(r.materials) r.materials.forEach(m => sum += (parseFloat(m.value||0)*m.qtd));
-                sheetReports.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, r.difficulty, sum]);
-            });
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetReports), "Manutenções");
-
-            const sheetQuotes = [["Data", "Creche", "Técnico", "Orçamento", "Valor Estimado"]];
-            window.localData.quotes.filter(filterFn).forEach(r => {
-                let sum = 0; if(r.materials) r.materials.forEach(m => sum += (parseFloat(m.value||0)*m.qtd));
-                sheetQuotes.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, sum]);
-            });
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetQuotes), "Orçamentos");
-
-            const sheetThird = [["Data", "Creche", "Empresa", "Técnico Acomp.", "Serviço Terceiro"]];
-            window.localData.thirdParty.filter(filterFn).forEach(r => {
-                sheetThird.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.companyName, r.userLogin, r.tpDesc]);
-            });
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetThird), "Terceiros");
-
-            XLSX.writeFile(wb, "Relatorio_LYM.xlsx");
-            window.logAudit(`Gerou Relatório Excel Filtrado`);
+            const sheetR = [["Data", "Creche", "Técnico", "Serviço", "Custo Mat."]]; window.localData.reports.filter(fFn).forEach(r => { let sum=0; if(r.materials) r.materials.forEach(m => sum += (parseFloat(m.value||0)*m.qtd)); sheetR.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, sum]); }); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetR), "Manutenções");
+            const sheetQ = [["Data", "Creche", "Técnico", "Orçamento", "Estimativa"]]; window.localData.quotes.filter(fFn).forEach(r => { let sum=0; if(r.materials) r.materials.forEach(m => sum += (parseFloat(m.value||0)*m.qtd)); sheetQ.push([window.formatDateBR(r.date), ceisMap[r.ceiId], r.userLogin, r.desc, sum]); }); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetQ), "Orçamentos");
+            XLSX.writeFile(wb, "Relatorio_LYM.xlsx"); window.logAudit(`Gerou Relatório Excel Filtrado`);
         };
 
-        // Salvar CRECHES E USERS
-        window.saveCei = function(e) { 
-            e.preventDefault(); 
-            const n = document.getElementById('ceiName').value; 
-            const g = document.getElementById('ceiTelegramId').value; 
-            const t = document.getElementById('ceiTelegramTopicId').value; 
-            if(window.editingItemId) { 
-                const c = window.localData.ceis.find(x=>x.id===window.editingItemId); 
-                c.name=n; c.telegramGroupId=g; c.telegramTopicId=t; 
-                window.logAudit(`CEI Editado: ${n}`);
-            } else {
-                window.localData.ceis.push({id:Date.now().toString(), name:n, telegramGroupId:g, telegramTopicId:t}); 
-                window.logAudit(`CEI Criado: ${n}`);
-            }
-            window.saveData(); window.hideElement('modalCei'); window.renderConfigLists(); 
-        };
-        
-        window.editCei = function(id) { 
-            window.editingItemId = id; 
-            const c = window.localData.ceis.find(x=>x.id===id); 
-            document.getElementById('ceiName').value = c.name; 
-            document.getElementById('ceiTelegramId').value = c.telegramGroupId||''; 
-            document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId||''; 
-            document.getElementById('modalTitleCei').textContent = "Editar Creche";
-            window.showElement('modalCei'); 
-        };
-        
-        window.deleteCei = function(id) { 
-            if(confirm("Tem certeza que deseja apagar esta creche?")) {
-                window.localData.ceis = window.localData.ceis.filter(x=>x.id!==id); 
-                window.saveData(); window.renderConfigLists(); 
-                window.logAudit(`CEI Apagado: ${id}`);
-            }
-        };
-        
-        window.saveUser = function(e) { 
-            e.preventDefault(); 
-            const l = document.getElementById('userName').value; 
-            const p = document.getElementById('userPass').value; 
-            const r = document.getElementById('userRole').value; 
-            if(window.editingItemId) { 
-                const u = window.localData.users.find(x=>x.id===window.editingItemId); 
-                u.login=l; u.pass=p; u.role=r; 
-                window.logAudit(`User Editado: ${l}`);
-            } else {
-                window.localData.users.push({id:Date.now().toString(), login:l, pass:p, role:r}); 
-                window.logAudit(`User Criado: ${l}`);
-            }
-            window.saveData(); window.hideElement('modalUser'); window.renderConfigLists(); 
-        };
-        
-        window.editUser = function(id) { 
-            window.editingItemId = id; 
-            const u = window.localData.users.find(x=>x.id===id); 
-            document.getElementById('userName').value = u.login; 
-            document.getElementById('userPass').value = u.pass; 
-            document.getElementById('userRole').value = u.role; 
-            document.getElementById('modalTitleUser').textContent = "Editar Usuário";
-            window.showElement('modalUser'); 
-        };
-        
-        window.deleteUser = function(id) { 
-            if(confirm("Tem certeza que deseja apagar este usuário?")) {
-                window.localData.users = window.localData.users.filter(x=>x.id!==id); 
-                window.saveData(); window.renderConfigLists(); 
-                window.logAudit(`User Apagado: ${id}`);
-            }
-        };
+        window.saveCei = function(e) { e.preventDefault(); const n = document.getElementById('ceiName').value; const g = document.getElementById('ceiTelegramId').value; const t = document.getElementById('ceiTelegramTopicId').value; if(window.editingItemId) { db.collection('ceis').doc(window.editingItemId).set({name:n, telegramGroupId:g, telegramTopicId:t}, {merge:true}); } else db.collection('ceis').add({name:n, telegramGroupId:g, telegramTopicId:t}); window.hideElement('modalCei'); };
+        window.editCei = function(id) { window.editingItemId = id; const c = window.localData.ceis.find(x=>x.id===id); document.getElementById('ceiName').value = c.name; document.getElementById('ceiTelegramId').value = c.telegramGroupId||''; document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId||''; window.showElement('modalCei'); };
+        window.deleteCei = function(id) { if(confirm("Apagar?")) db.collection('ceis').doc(id).delete(); };
+        window.saveUser = function(e) { e.preventDefault(); const l = document.getElementById('userName').value; const p = document.getElementById('userPass').value; const r = document.getElementById('userRole').value; if(window.editingItemId) { db.collection('users').doc(window.editingItemId).set({login:l, pass:p, role:r}, {merge:true}); } else db.collection('users').add({login:l, pass:p, role:r}); window.hideElement('modalUser'); };
+        window.editUser = function(id) { window.editingItemId = id; const u = window.localData.users.find(x=>x.id===id); document.getElementById('userName').value = u.login; document.getElementById('userPass').value = u.pass; document.getElementById('userRole').value = u.role; window.showElement('modalUser'); };
+        window.deleteUser = function(id) { if(confirm("Apagar?")) db.collection('users').doc(id).delete(); };
 
-        // Resetar Variáveis ao fechar Modais
         document.getElementById('modalCei').addEventListener('click', (e) => { if(e.target.id==='modalCei'){ window.hideElement('modalCei'); window.editingItemId = null;} });
         document.getElementById('modalUser').addEventListener('click', (e) => { if(e.target.id==='modalUser'){ window.hideElement('modalUser'); window.editingItemId = null;} });
 
-        window.onload = window.loadInitialData;
+        window.onload = window.initFirebaseSync;
     </script>
 </body>
 </html>
