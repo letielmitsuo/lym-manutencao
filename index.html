@@ -14,14 +14,14 @@
         }
     </script>
     
-    <!-- Configuração de Tema Escuro Inicial -->
+    <!-- Tema Escuro Inicial -->
     <script>
         if (localStorage.getItem('lym_theme') === 'dark' || (!('lym_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
     </script>
 
-    <!-- Ícones e Bibliotecas PDF/Gráficos -->
+    <!-- Ícones e Bibliotecas -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
@@ -46,7 +46,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Configuração de Impressão (Navegador) */
+        /* Configuração de Impressão */
         @media print {
             body { background: white !important; color: black !important;}
             body * { visibility: hidden; }
@@ -64,14 +64,14 @@
 </head>
 <body class="text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 antialiased h-screen flex overflow-hidden transition-colors duration-300">
 
-    <!-- Área Oculta de Impressão HTML -->
+    <!-- Área de Impressão -->
     <div id="printArea" class="hidden bg-white absolute w-full min-h-screen z-50 p-6"></div>
     
-    <!-- Container Toasts e Autocompletar -->
+    <!-- Toasts e Datalist do Autocompletar -->
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
-    <datalist id="catalogList"></datalist>
+    <datalist id="catalogList"></datalist> <!-- Isso alimenta o autocompletar do funcionário -->
 
-    <!-- TELA DE LOGIN -->
+    <!-- ==================== TELA DE LOGIN ==================== -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
@@ -103,7 +103,7 @@
         </div>
     </div>
 
-    <!-- TELA FORÇAR NOVA SENHA -->
+    <!-- ==================== TELA FORÇAR NOVA SENHA ==================== -->
     <div id="modalForcePassword" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 hidden">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
@@ -143,7 +143,7 @@
         </div>
     </div>
 
-    <!-- TELA TROCAR SENHA (VOLUNTÁRIA) -->
+    <!-- ==================== MODAL TROCAR SENHA (VOLUNTÁRIA) ==================== -->
     <div id="modalChangePassword" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
@@ -180,74 +180,7 @@
         </div>
     </div>
 
-    <!-- MODAL: NOVA CRECHE -->
-    <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCei">Nova Creche</h3>
-                <button onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <form id="ceiForm" onsubmit="window.saveCei(event)" class="p-4 sm:p-5 space-y-3">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Creche</label>
-                    <input type="text" id="ceiName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center">
-                </div>
-                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 text-center">
-                    <p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-2"><i class="fab fa-telegram"></i> Integração Telegram</p>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ID do Grupo</label>
-                            <input type="text" id="ceiTelegramId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ID do Tópico (Opcional)</label>
-                            <input type="text" id="ceiTelegramTopicId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center">
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalCei')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: NOVO USUÁRIO -->
-    <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleUser">Novo Usuário</h3>
-                <button onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <form id="userForm" onsubmit="window.saveUser(event)" class="p-4 sm:p-5 space-y-3">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Login</label>
-                    <input type="text" id="newUsername" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Senha Inicial</label>
-                    <div class="relative">
-                        <input type="text" id="newPassword" value="123mudar" required class="w-full p-2 border dark:border-slate-600 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 rounded-lg outline-none text-center font-mono">
-                    </div>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 text-center mt-1">O usuário será forçado a trocar essa senha ao logar.</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Permissão</label>
-                    <select id="newRole" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center">
-                        <option value="funcionario">Funcionário (Apenas Registra)</option>
-                        <option value="admin">Administrador (Total Acesso)</option>
-                    </select>
-                </div>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: ALMOXARIFADO (ESTOQUE) -->
+    <!-- ==================== MODAL NOVO ALMOXARIFADO ==================== -->
     <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
@@ -282,8 +215,8 @@
                     </div>
                 </div>
                 <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800">
-                    <label class="block text-sm font-bold text-blue-800 dark:text-blue-300 mb-1 text-center">Quantidade em Estoque</label>
-                    <input type="number" id="catStock" value="0" step="0.1" class="w-full p-2 border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg">
+                    <label class="block text-sm font-bold text-blue-800 dark:text-blue-300 mb-1 text-center">Quantidade Atual em Estoque</label>
+                    <input type="number" id="catStock" value="0" step="0.1" class="w-full p-2 border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg text-blue-700 dark:text-blue-400">
                 </div>
                 <div class="flex justify-center gap-2 pt-3">
                     <button type="button" onclick="window.hideElement('modalCatalog')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
@@ -293,48 +226,48 @@
         </div>
     </div>
 
-    <!-- MODAL: VISUALIZAR REGISTRO -->
-    <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center sticky top-0 z-10">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="viewRecordTitle">Detalhes</h3>
-                <div class="flex gap-2 absolute right-4">
-                    <button id="btnPrintRecord" class="px-2 py-1 bg-slate-800 dark:bg-blue-600 text-white text-xs font-bold rounded hover:bg-slate-700 shadow-sm">
-                        <i class="fas fa-print mr-1"></i> Imprimir
-                    </button>
-                    <button onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white ml-2">
-                        <i class="fas fa-times text-lg"></i>
-                    </button>
-                </div>
+    <!-- OUTROS MODAIS BÁSICOS -->
+    <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
+                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCei">Nova Creche</h3>
+                <button onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <div id="viewRecordContent" class="p-4 sm:p-5"></div>
+            <form id="ceiForm" onsubmit="window.saveCei(event)" class="p-4 sm:p-5 space-y-3">
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Creche</label><input type="text" id="ceiName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div>
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 text-center"><p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-2"><i class="fab fa-telegram"></i> Integração Telegram</p><div class="space-y-2"><div><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ID do Grupo</label><input type="text" id="ceiTelegramId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center"></div><div><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ID do Tópico (Opcional)</label><input type="text" id="ceiTelegramTopicId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center"></div></div></div>
+                <div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalCei')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div>
+            </form>
         </div>
     </div>
 
-    <!-- MODAL: CONFIRMAÇÃO DE AÇÃO -->
-    <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-5">
-            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-                <i class="fas fa-exclamation-triangle"></i>
+    <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
+                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleUser">Novo Usuário</h3>
+                <button onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <h3 class="font-bold text-lg dark:text-white mb-1">Tem certeza?</h3>
-            <p class="text-slate-500 dark:text-slate-400 mb-5 text-sm">Esta ação não pode ser desfeita.</p>
-            <div class="flex justify-center gap-2">
-                <button onclick="window.hideElement('modalConfirm')" class="px-4 py-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-sm font-medium">Cancelar</button>
-                <button id="btnConfirmAction" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">Sim, Confirmar</button>
-            </div>
+            <form id="userForm" onsubmit="window.saveUser(event)" class="p-4 sm:p-5 space-y-3">
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Login</label><input type="text" id="newUsername" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div>
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Senha Inicial</label><div class="relative"><input type="text" id="newPassword" value="123mudar" required class="w-full p-2 border dark:border-slate-600 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 rounded-lg outline-none text-center font-mono"></div><p class="text-[10px] text-slate-500 dark:text-slate-400 text-center mt-1">O usuário será forçado a trocar essa senha ao logar.</p></div>
+                <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Permissão</label><select id="newRole" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="funcionario">Funcionário (Apenas Registra)</option><option value="admin">Administrador (Total Acesso)</option></select></div>
+                <div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div>
+            </form>
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER -->
+    <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8"><div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center sticky top-0 z-10"><h3 class="font-bold text-lg dark:text-white text-center w-full" id="viewRecordTitle">Detalhes</h3><div class="flex gap-2 absolute right-4"><button id="btnPrintRecord" class="px-2 py-1 bg-slate-800 dark:bg-blue-600 text-white text-xs font-bold rounded hover:bg-slate-700 shadow-sm"><i class="fas fa-print mr-1"></i> Imprimir</button><button onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white ml-2"><i class="fas fa-times text-lg"></i></button></div></div><div id="viewRecordContent" class="p-4 sm:p-5"></div></div></div>
+    <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-5"><div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-exclamation-triangle"></i></div><h3 class="font-bold text-lg dark:text-white mb-1">Tem certeza?</h3><p class="text-slate-500 dark:text-slate-400 mb-5 text-sm">Esta ação não pode ser desfeita.</p><div class="flex justify-center gap-2"><button onclick="window.hideElement('modalConfirm')" class="px-4 py-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-sm font-medium">Cancelar</button><button id="btnConfirmAction" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">Sim, Confirmar</button></div></div></div>
+
+    <!-- ==================== APLICATIVO PRINCIPAL ==================== -->
     <div id="appLayout" class="hidden w-full h-full flex flex-col md:flex-row">
         
-        <!-- BARRA LATERAL (SIDEBAR) -->
+        <!-- BARRA LATERAL -->
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
             <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-bolt text-blue-400 text-lg"></i>
-                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v8.0</span></h2>
+                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v8.1</span></h2>
                 </div>
                 <div class="flex items-center gap-2 md:hidden">
                     <button onclick="window.toggleDarkMode()" class="outline-none p-2">
@@ -393,12 +326,10 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- SCRIPTS E LÓGICA PRINCIPAL (SEM MINIFICAÇÃO PARA FACILITAR A LEITURA)     -->
+    <!-- SCRIPTS LÓGICOS                                                           -->
     <!-- ========================================================================= -->
     <script>
-        // Configurações e Firebase
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
-        
         const firebaseConfig = { 
             apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM", 
             authDomain: "lym-manutencao.firebaseapp.com", 
@@ -410,12 +341,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Modo Offline nativo do Firebase
-        db.enablePersistence({ synchronizeTabs: true }).catch(function(err) { 
-            console.log("Firebase Offline falhou: ", err); 
-        });
+        db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Firebase Offline:", err));
 
-        // Estado Global Atualizado
+        // COLEÇÕES DE DADOS ATUALIZADAS
         window.localData = { 
             ceis: [], users: [], reports: [], quotes: [], thirdParty: [], audit: [], 
             catalog: [], stockMovements: [] 
@@ -426,136 +354,7 @@
         window.materialCount = 0; 
         window.lymCharts = {};
 
-        // ----------------------------------------------------
-        // Helpers UI e Datas Seguras
-        // ----------------------------------------------------
-        window.showElement = (id) => {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('hidden');
-        };
-
-        window.hideElement = (id) => {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        };
-
-        window.escapeHtml = (text) => {
-            if (!text) return "";
-            return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        };
-
-        window.formatDateBR = (iso) => {
-            try {
-                if (!iso) return "";
-                let str = String(iso);
-                if (str.includes('-') && str.split('-').length >= 3) {
-                    return str.split('T')[0].split('-').reverse().join('/');
-                }
-                return str;
-            } catch(e) { return ""; }
-        };
-
-        window.formatMoney = (val) => {
-            try {
-                let v = parseFloat(val);
-                if (isNaN(v)) v = 0;
-                return v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-            } catch(e) { return "R$ 0,00"; }
-        };
-
-        window.getSafeTime = (obj) => {
-            try {
-                if (!obj) return 0;
-                if (obj.timestamp) { 
-                    let t = new Date(obj.timestamp).getTime(); 
-                    if (!isNaN(t)) return t; 
-                }
-                if (obj.date) { 
-                    let dStr = String(obj.date);
-                    let t = new Date(dStr).getTime(); 
-                    if (isNaN(t) && dStr.includes('/')) {
-                        t = new Date(dStr.split('/').reverse().join('-')).getTime();
-                    } 
-                    if (!isNaN(t)) return t; 
-                }
-                return 0;
-            } catch(e) { return 0; }
-        };
-        
-        window.showToast = (msg, type = 'success') => {
-            const container = document.getElementById('toastContainer'); 
-            const toast = document.createElement('div');
-            
-            let colorClass = 'bg-blue-600';
-            let iconClass = 'fa-info-circle';
-            
-            if (type === 'success') {
-                colorClass = 'bg-green-600';
-                iconClass = 'fa-check-circle';
-            } else if (type === 'error') {
-                colorClass = 'bg-red-600';
-                iconClass = 'fa-exclamation-triangle';
-            }
-
-            toast.className = `${colorClass} text-white px-5 py-2.5 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300 animate-fade-in z-50 text-sm`;
-            toast.innerHTML = `
-                <i class="fas ${iconClass}"></i> 
-                <span class="font-medium">${msg}</span>
-                <button type="button" onclick="this.parentElement.remove()" class="ml-3 opacity-75 hover:opacity-100">
-                    <i class="fas fa-times"></i>
-                </button>`;
-            
-            container.appendChild(toast);
-            setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10);
-            setTimeout(() => { 
-                toast.classList.add('translate-y-full', 'opacity-0'); 
-                setTimeout(() => toast.remove(), 600); 
-            }, 6000);
-        };
-
-        window.addEventListener('online', () => {
-            window.showToast('Conexão restabelecida. Processando pendências...', 'success');
-            window.processTelegramQueue();
-        });
-        
-        window.addEventListener('offline', () => window.showToast('Sem internet! Modo Offline ativado.', 'error'));
-
-        window.toggleDarkMode = () => { 
-            document.documentElement.classList.toggle('dark'); 
-            const isDark = document.documentElement.classList.contains('dark'); 
-            localStorage.setItem('lym_theme', isDark ? 'dark' : 'light'); 
-            window.updateDarkModeIcons(isDark); 
-            
-            if(window.activeTab === 'dashboard') {
-                setTimeout(window.initCharts, 100); 
-            }
-        };
-
-        window.updateDarkModeIcons = (isDark) => { 
-            ['darkModeIconDesktop', 'darkModeIconMobile'].forEach(id => { 
-                const icon = document.getElementById(id); 
-                if(icon) {
-                    icon.className = isDark ? 'fas fa-sun text-yellow-400 text-xl transition-colors' : 'fas fa-moon text-slate-300 text-xl transition-colors'; 
-                }
-            }); 
-        };
-
-        let confirmActionCallback = null; 
-        
-        window.confirmAction = (callback) => { 
-            confirmActionCallback = callback; 
-            window.showElement('modalConfirm'); 
-        };
-
-        document.getElementById('btnConfirmAction').addEventListener('click', () => { 
-            if(confirmActionCallback) confirmActionCallback(); 
-            window.hideElement('modalConfirm'); 
-            confirmActionCallback = null; 
-        });
-
-        // ----------------------------------------------------
-        // Banco de Dados e Fila do Telegram (Queue)
-        // ----------------------------------------------------
+        // Banco de Dados Principal
         window.initFirebaseSync = function() {
             const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements'];
             cols.forEach(col => {
@@ -566,276 +365,154 @@
                         db.collection('users').add({ login: 'admin', pass: 'admin123', role: 'admin' }); 
                         db.collection('users').add({ login: 'func', pass: 'func123', role: 'funcionario' }); 
                     }
-                    if (col === 'catalog') {
-                        window.updateCatalogDatalist();
-                    }
-                    if (window.currentSystemUser) {
-                        window.renderActiveTab();
-                    }
+                    if (col === 'catalog') window.updateCatalogDatalist();
+                    if (window.currentSystemUser) window.renderActiveTab();
                 });
             });
         };
 
         window.dbSave = async (colName, docId, data) => { 
             data.updatedAt = new Date().toISOString(); 
-            if(docId) { 
-                await db.collection(colName).doc(docId).set(data, { merge: true }); 
-            } else { 
-                await db.collection(colName).add(data); 
-            } 
+            if(docId) { await db.collection(colName).doc(docId).set(data, { merge: true }); } 
+            else { await db.collection(colName).add(data); } 
         };
+        window.dbDelete = async (colName, docId) => { await db.collection(colName).doc(docId).delete(); };
+        window.logAudit = async (actionDesc) => { await db.collection('audit').add({ user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: actionDesc, date: new Date().toLocaleString('pt-BR'), timestamp: Date.now() }); };
 
-        window.dbDelete = async (colName, docId) => { 
-            await db.collection(colName).doc(docId).delete(); 
-        };
-
-        window.logAudit = async (actionDesc) => { 
-            await db.collection('audit').add({ 
-                user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', 
-                action: actionDesc, 
-                date: new Date().toLocaleString('pt-BR'), 
-                timestamp: Date.now() 
-            }); 
-        };
-
+        // SISTEMA OFFLINE AVANÇADO (Fila do Telegram)
         window.isProcessingQueue = false;
         window.processTelegramQueue = async () => {
             if(!navigator.onLine || window.isProcessingQueue) return;
             window.isProcessingQueue = true;
             try {
-                const types = [
-                    {col: 'reports', label: 'Manutenção'}, 
-                    {col: 'quotes', label: 'Orçamento'}, 
-                    {col: 'thirdParty', label: 'Acompanhamento'}
-                ];
+                const types = [{col: 'reports', label: 'Manutenção'}, {col: 'quotes', label: 'Orçamento'}, {col: 'thirdParty', label: 'Acompanhamento'}];
                 let sentCount = 0;
-                
                 for(let t of types) {
                     let pending = (window.localData[t.col] || []).filter(r => r.pendingTelegram === true);
                     for(let p of pending) {
                         try {
                             await window.sendToTelegram(p.ceiId, p, p.photos || [], false, t.label);
-                            // Sucesso! Atualiza no banco: tira a flag e limpa as fotos pesadas
                             await window.dbSave(t.col, p.id, { pendingTelegram: false, telegramSent: true, photos: [] });
                             sentCount++;
-                        } catch(e) { 
-                            console.error("Falha ao reprocessar Telegram:", e); 
-                        }
+                        } catch(e) { console.error("Falha ao reprocessar Telegram:", e); }
                     }
                 }
-                if(sentCount > 0) {
-                    window.showToast(`${sentCount} relatórios pendentes enviados ao Telegram com sucesso!`);
-                }
-            } finally {
-                window.isProcessingQueue = false;
-            }
+                if(sentCount > 0) window.showToast(`${sentCount} relatórios pendentes enviados ao Telegram com sucesso!`);
+            } finally { window.isProcessingQueue = false; }
         };
 
-        // ----------------------------------------------------
-        // Senhas e Login
-        // ----------------------------------------------------
-        window.toggleEye = function(inputId, iconId) {
-            const pwd = document.getElementById(inputId); 
-            const icon = document.getElementById(iconId);
-            if (pwd.type === 'password') { 
-                pwd.type = 'text'; 
-                icon.classList.replace('fa-eye', 'fa-eye-slash'); 
-            } else { 
-                pwd.type = 'password'; 
-                icon.classList.replace('fa-eye-slash', 'fa-eye'); 
-            }
-        };
-
-        window.togglePassword = function() { 
-            window.toggleEye('loginPassword', 'eyeIcon'); 
-        };
-
-        window.handleLogin = function(e) {
-            e.preventDefault();
-            const u = document.getElementById('loginUsername').value.trim(); 
-            const p = document.getElementById('loginPassword').value.trim();
-            
-            let user = window.localData.users.find(x => (x.login === u && x.pass === p) || (x.username === u && x.password === p));
-            
-            if (!user) { 
-                if (u === 'admin' && p === 'admin123') { 
-                    user = { id: 'master_admin', login: 'admin', role: 'admin' }; 
-                } else if (u === 'func' && p === 'func123') { 
-                    user = { id: 'master_func', login: 'func', role: 'funcionario' }; 
-                } 
-            }
-            
-            if (user) {
-                window.currentSystemUser = { 
-                    id: user.id, 
-                    login: user.login || user.username, 
-                    role: user.role, 
-                    pass: p 
-                };
-                
-                if(p === '123mudar') {
-                    document.getElementById('forcePass1').value = ''; 
-                    document.getElementById('forcePass2').value = '';
-                    window.hideElement('loginScreen'); 
-                    window.showElement('modalForcePassword');
-                } else { 
-                    window.completeLogin(); 
-                }
-            } else { 
-                window.showToast("Usuário ou senha inválidos!", "error"); 
-            }
-        };
-
-        window.completeLogin = () => {
-            window.showToast(`Bem-vindo(a), ${window.currentSystemUser.login}!`); 
-            window.logAudit('Login realizado');
-            
-            window.hideElement('modalForcePassword'); 
-            window.hideElement('loginScreen'); 
-            window.showElement('appLayout');
-            
-            document.getElementById('userNameDisplay').textContent = window.currentSystemUser.login;
-            document.getElementById('userRoleDisplay').textContent = window.currentSystemUser.role === 'admin' ? 'Administrador' : 'Funcionário';
-            document.getElementById('userInitial').textContent = window.currentSystemUser.login.charAt(0).toUpperCase();
-            
-            window.buildMenu(); 
-            window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; 
-            window.renderActiveTab();
-
-            // Roda a fila do Telegram caso exista pendência offline e agora tenha internet
-            setTimeout(window.processTelegramQueue, 3000);
-        };
-
-        window.saveForcedPassword = async (e) => {
-            e.preventDefault();
-            const p1 = document.getElementById('forcePass1').value; 
-            const p2 = document.getElementById('forcePass2').value;
-            
-            if(p1 !== p2) return window.showToast("As senhas não coincidem!", "error");
-            if(p1 === '123mudar') return window.showToast("Escolha uma senha diferente da padrão.", "error");
-            if(window.currentSystemUser.id.startsWith('master_')) return window.showToast("Você não pode mudar a senha da Chave Mestra.", "error");
-            
-            try { 
-                await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); 
-                window.currentSystemUser.pass = p1; 
-                window.logAudit('Trocou a senha inicial obrigatória'); 
-                window.completeLogin(); 
-            } catch(err) { 
-                window.showToast("Erro ao salvar senha", "error"); 
-            }
-        };
-
-        window.openChangePassword = () => { 
-            document.getElementById('changePassForm').reset(); 
-            window.showElement('modalChangePassword'); 
-        };
-
-        window.saveChangePassword = async (e) => {
-            e.preventDefault();
-            const current = document.getElementById('changePassCurrent').value; 
-            const p1 = document.getElementById('changePassNew1').value; 
-            const p2 = document.getElementById('changePassNew2').value;
-            
-            if(window.currentSystemUser.id.startsWith('master_')) return window.showToast("Você não pode mudar a senha da Chave Mestra.", "error");
-            
-            const realUser = window.localData.users.find(u => u.id === window.currentSystemUser.id); 
-            const realPass = realUser.pass || realUser.password;
-            
-            if(current !== realPass) return window.showToast("Sua senha atual está incorreta!", "error");
-            if(p1 !== p2) return window.showToast("As novas senhas não coincidem!", "error");
-            if(p1 === '123mudar') return window.showToast("Escolha uma senha diferente de 123mudar.", "error");
-            
-            try { 
-                await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); 
-                window.currentSystemUser.pass = p1; 
-                window.logAudit('Alterou a própria senha voluntariamente'); 
-                window.showToast("Senha alterada com sucesso!"); 
-                window.hideElement('modalChangePassword'); 
-            } catch(err) { 
-                window.showToast("Erro ao alterar senha", "error"); 
-            }
-        };
-
-        window.resetUserPassword = (id) => { 
-            window.confirmAction(async () => { 
-                try { 
-                    await window.dbSave('users', id, { pass: '123mudar', password: '123mudar' }); 
-                    window.logAudit(`Resetou a senha do usuário ID: ${id}`); 
-                    window.showToast("Senha resetada para 123mudar!"); 
-                } catch(err) { 
-                    window.showToast("Erro ao resetar senha", "error"); 
-                } 
-            }); 
-        };
-
-        window.logout = () => { 
-            window.logAudit('Logout Efetuado'); 
-            window.currentSystemUser = null; 
-            window.hideElement('appLayout'); 
-            window.showElement('loginScreen'); 
-            document.getElementById('loginForm').reset(); 
-        };
-
-        // ----------------------------------------------------
-        // Menu e Navegação
-        // ----------------------------------------------------
+        // Renderização do Menu
         window.buildMenu = () => {
-            const navLinks = document.getElementById('navLinks'); 
-            navLinks.innerHTML = "";
-            
-            document.getElementById('mobileMenuBtn').onclick = () => { 
-                navLinks.classList.toggle('hidden'); 
-                navLinks.classList.toggle('flex'); 
-            };
+            const navLinks = document.getElementById('navLinks'); navLinks.innerHTML = "";
+            document.getElementById('mobileMenuBtn').onclick = () => { navLinks.classList.toggle('hidden'); navLinks.classList.toggle('flex'); };
             
             const role = window.currentSystemUser.role;
-            
-            let menuItems = [];
-            if (role === 'admin') {
-                menuItems = [
-                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' }, 
-                    { id: 'admin-catalog', icon: 'fa-box-open', label: 'Almoxarifado' }, // NOVO
-                    { id: 'admin-ceis', icon: 'fa-school', label: 'Creches (CEIs)' }, 
-                    { id: 'admin-users', icon: 'fa-users', label: 'Usuários' }, 
-                    { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços' }, 
-                    { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, 
-                    { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, 
-                    { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' }
-                ];
-            } else {
-                menuItems = [
-                    { id: 'func-stock', icon: 'fa-box-open', label: 'Meu Almoxarifado' }, // NOVO
-                    { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' }, 
-                    { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' }, 
-                    { id: 'func-thirdParty', icon: 'fa-eye', label: 'Acomp. Terceiro' }, 
-                    { id: 'func-history', icon: 'fa-history', label: 'Meus Registros' }
-                ];
-            }
+            let menuItems = role === 'admin' ? [
+                { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' }, 
+                { id: 'admin-catalog', icon: 'fa-box-open', label: 'Almoxarifado' }, // Almoxarifado Admin
+                { id: 'admin-ceis', icon: 'fa-school', label: 'Creches (CEIs)' }, 
+                { id: 'admin-users', icon: 'fa-users', label: 'Usuários' }, 
+                { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços' }, 
+                { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, 
+                { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, 
+                { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' }
+            ] : [
+                { id: 'func-stock', icon: 'fa-box-open', label: 'Meu Almoxarifado' }, // Estoque do Func
+                { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' }, 
+                { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' }, 
+                { id: 'func-thirdParty', icon: 'fa-eye', label: 'Acomp. Terceiro' }, 
+                { id: 'func-history', icon: 'fa-history', label: 'Meus Registros' }
+            ];
 
             menuItems.forEach(item => {
-                const a = document.createElement('a'); 
-                a.href = "#"; 
+                const a = document.createElement('a'); a.href = "#"; 
                 a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium";
                 a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`;
-                
                 a.onclick = (e) => { 
-                    e.preventDefault(); 
-                    window.activeTab = item.id; 
-                    
-                    if(window.innerWidth < 768) { 
-                        navLinks.classList.add('hidden'); 
-                        navLinks.classList.remove('flex'); 
-                    } 
-                    
+                    e.preventDefault(); window.activeTab = item.id; 
+                    if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } 
                     window.renderActiveTab(); 
                 };
-                
                 navLinks.appendChild(a);
             });
         };
 
+        // Renderização de Abas (Switch)
+        window.renderActiveTab = () => {
+            if(!window.currentSystemUser) return;
+            const role = window.currentSystemUser.role; let html = ""; let title = "";
+            
+            if(role === 'admin') {
+                switch(window.activeTab) { 
+                    case 'dashboard': title = "Resumo Geral"; html = renderAdminDashboard(); break; 
+                    case 'admin-ceis': title = "Gestão de Creches"; html = renderAdminCeis(); break; 
+                    case 'admin-users': title = "Gestão de Usuários"; html = renderAdminUsers(); break; 
+                    case 'admin-catalog': title = "Almoxarifado Geral"; html = renderAdminCatalog(); break; // RENDERIZA ALMOXARIFADO ADMIN
+                    case 'admin-reports': title = "Serviços Concluídos"; html = renderAdminReports(); break; 
+                    case 'admin-quotes': title = "Orçamentos Recebidos"; html = renderAdminQuotes(); break; 
+                    case 'admin-thirdParty': title = "Terceiros Acompanhados"; html = renderAdminThirdParty(); break; 
+                    case 'admin-audit': title = "Logs de Auditoria"; html = renderAdminAudit(); break;
+                    case 'func-reports': title = "Editar Manutenção"; html = renderFuncReportForm(); break; 
+                    case 'func-quotes': title = "Editar Orçamento"; html = renderFuncQuoteForm(); break; 
+                    case 'func-thirdParty': title = "Editar Acompanhamento"; html = renderFuncThirdPartyForm(); break; 
+                }
+            } else {
+                switch(window.activeTab) { 
+                    case 'func-stock': title = "Meu Almoxarifado"; html = renderFuncStockForm(); break; // RENDERIZA ESTOQUE FUNCIONÁRIO
+                    case 'func-reports': title = "Registrar Manutenção"; html = renderFuncReportForm(); break; 
+                    case 'func-quotes': title = "Novo Orçamento"; html = renderFuncQuoteForm(); break; 
+                    case 'func-thirdParty': title = "Acompanhar Terceiro"; html = renderFuncThirdPartyForm(); break; 
+                    case 'func-history': title = "Meus Registros"; html = renderFuncHistory(); break; 
+                }
+            }
+            
+            document.getElementById('mobilePageTitle').textContent = title;
+            document.getElementById('mainContent').innerHTML = (window.activeTab === 'func-history' || window.activeTab === 'admin-catalog' || window.activeTab === 'func-stock') ? html : `<div class="w-full flex justify-center mb-6 hidden md:flex"><h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 text-center">${title}</h2></div>${html}`;
+            
+            // Lógica de Preenchimento e Escuta de Eventos dos Formulários
+            if(['func-reports', 'func-quotes', 'func-thirdParty'].includes(window.activeTab)) {
+                const sffx = window.activeTab === 'func-reports' ? 'Rep' : (window.activeTab === 'func-quotes' ? 'Quote' : 'ThirdParty');
+                populateCeiSelect(`ceiSelect${sffx}`);
+                
+                if(!window.editingItemId) window.loadDraft(window.activeTab.split('-')[1]);
+                
+                const formObj = document.getElementById(window.activeTab === 'func-reports' ? 'reportForm' : (window.activeTab === 'func-quotes' ? 'quoteForm' : 'thirdPartyForm'));
+                if(formObj) { 
+                    formObj.addEventListener('input', () => window.saveDraft(window.activeTab.split('-')[1])); 
+                    formObj.addEventListener('change', () => window.saveDraft(window.activeTab.split('-')[1])); 
+                }
+
+                // Autocompletar mágico de preços na hora de digitar
+                const contId = window.activeTab === 'func-reports' ? 'materialsContainer' : 'quoMaterialsContainer';
+                const contElement = document.getElementById(contId);
+                if(contElement) {
+                    contElement.addEventListener('input', (e) => {
+                        if(e.target.classList.contains('mat-name') && e.target.hasAttribute('list')) {
+                            const val = e.target.value;
+                            const found = window.localData.catalog.find(c => c.name === val);
+                            if(found) {
+                                const parent = e.target.parentElement;
+                                parent.querySelector('.mat-brand').value = found.brand || "";
+                                parent.querySelector('.mat-price').value = found.price || "";
+                                window.saveDraft(window.activeTab.split('-')[1]);
+                            }
+                        }
+                    });
+                }
+            }
+            
+            if(window.activeTab === 'func-history') window.renderEmployeeHistory();
+            if(['admin-reports', 'admin-quotes', 'admin-thirdParty'].includes(window.activeTab)) window.setupAdminFilters();
+            if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100);
+        };
+
+        const populateCeiSelect = (id) => { 
+            const sel = document.getElementById(id); if(!sel) return; 
+            sel.innerHTML = '<option value="">Selecione a Creche...</option>' + window.localData.ceis.sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<option value="${c.id}" data-id="${c.id}">${window.escapeHtml(c.name)}</option>`).join(''); 
+        };
+
         // ----------------------------------------------------
-        // Lógica do Almoxarifado (Catálogo Admin e Estoque Func)
+        // Lógica do ALMOXARIFADO E CATÁLOGO
         // ----------------------------------------------------
         window.updateCatalogDatalist = () => {
             const dl = document.getElementById('catalogList');
@@ -844,7 +521,7 @@
         };
 
         window.getStockOptionsHtml = () => {
-            return '<option value="">Selecione o Item do Estoque...</option>' + 
+            return '<option value="">Selecione o Item...</option>' + 
                    window.localData.catalog.sort((a,b) => String(a.name).localeCompare(String(b.name)))
                    .map(c => `<option value="${c.id}">${window.escapeHtml(c.name)} (${window.escapeHtml(c.brand || '-')}) - Estoque: ${c.stock || 0}</option>`).join('');
         };
@@ -865,7 +542,7 @@
                 document.getElementById('catCategory').value = c.category || "Segurança Eletrônica";
                 document.getElementById('catPrice').value = c.price || "";
                 document.getElementById('catStock').value = c.stock || "0";
-                document.getElementById('modalTitleCatalog').textContent = "Editar Item de Estoque";
+                document.getElementById('modalTitleCatalog').textContent = "Editar Item";
                 window.showElement('modalCatalog');
             }
         };
@@ -881,9 +558,7 @@
             if(!n) return;
             
             const id = window.editingItemId || Date.now().toString();
-            await window.dbSave('catalog', id, { 
-                id: String(id), name: n, brand: b, category: cat, price: p, stock: parseFloat(s || 0) 
-            });
+            await window.dbSave('catalog', id, { id: String(id), name: n, brand: b, category: cat, price: p, stock: parseFloat(s || 0) });
             window.logAudit(window.editingItemId ? `Estoque Editado: ${n}` : `Estoque Criado: ${n}`);
             window.showToast("Material salvo no almoxarifado!");
             window.hideElement('modalCatalog');
@@ -897,6 +572,81 @@
             });
         };
 
+        // UI Admin Catalog
+        const renderAdminCatalog = () => { 
+            let trs = window.localData.catalog.sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `
+                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
+                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.category || 'Outros')}</td>
+                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.brand || '-')}</td>
+                    <td class="px-3 py-2 text-sm text-slate-600 dark:text-slate-300">${window.formatMoney(c.price)}</td>
+                    <td class="px-3 py-2 text-sm font-bold ${c.stock > 5 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${c.stock || 0}</td>
+                    <td class="px-3 py-2 text-right space-x-1">
+                        <button onclick="window.editCatalog('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button>
+                        <button onclick="window.deleteCatalog('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`).join(""); 
+
+            let historyTrs = window.localData.stockMovements.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 50).map(m => {
+                let badgeClass = m.type === 'Retirada' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300';
+                let itemsList = m.items.map(it => `${it.qtd}x ${it.name}`).join('<br>');
+                return `
+                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td>
+                    <td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td>
+                    <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td>
+                    <td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 leading-tight">${itemsList}</td>
+                </tr>`;
+            }).join("");
+
+            return `
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in">
+                <!-- Tabela de Produtos -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2">
+                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-box-open mr-2 text-blue-600"></i> Almoxarifado Geral</h3>
+                        <button onclick="window.openCatalogModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Novo Item</button>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm">
+                                    <th class="px-3 py-2 font-semibold">Material</th>
+                                    <th class="px-3 py-2 font-semibold">Categoria</th>
+                                    <th class="px-3 py-2 font-semibold">Marca</th>
+                                    <th class="px-3 py-2 font-semibold">Preço</th>
+                                    <th class="px-3 py-2 font-semibold">Estoque</th>
+                                    <th class="px-3 py-2 font-semibold text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>${trs || `<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum material cadastrado no almoxarifado.</td></tr>`}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tabela de Movimentações -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden max-h-[650px] flex flex-col">
+                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-amber-600"></i> Últimas Retiradas/Devoluções</h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm">
+                                    <th class="px-3 py-2 font-semibold">Data</th>
+                                    <th class="px-3 py-2 font-semibold">Técnico</th>
+                                    <th class="px-3 py-2 font-semibold">Ação</th>
+                                    <th class="px-3 py-2 font-semibold">Itens</th>
+                                </tr>
+                            </thead>
+                            <tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação ainda.</td></tr>`}</tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>`; 
+        };
+
+        // Lógica de Estoque para o Funcionário
         window.addStockMovementRow = (containerId) => {
             const container = document.getElementById(containerId);
             if(container.querySelector('.italic')) container.innerHTML = "";
@@ -954,14 +704,13 @@
                     id: recordId,
                     userId: window.currentSystemUser.id,
                     userName: window.currentSystemUser.login,
-                    type: type, // 'Retirada' ou 'Devolução'
+                    type: type, 
                     date: date,
                     obs: obs,
                     items: items,
                     timestamp: new Date().toISOString()
                 };
 
-                // Atualiza o banco do Almoxarifado
                 for(let it of items) {
                     const catItem = window.localData.catalog.find(c => c.id === it.id);
                     if(catItem) {
@@ -975,7 +724,6 @@
                 window.logAudit(`Movimentou Estoque (${type}): ${items.length} itens`);
                 window.showToast("Movimentação registrada com sucesso!");
                 
-                // Limpa formulário
                 document.getElementById('stockForm').reset();
                 document.getElementById('stockMovementsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center p-2">Nenhum material adicionado.</p>';
                 window.renderActiveTab();
@@ -984,80 +732,6 @@
             } finally {
                 btn.innerHTML = origText; btn.disabled = false;
             }
-        };
-
-        // Renderizadores de Telas (Admin Catalog e Func Stock)
-        const renderAdminCatalog = () => { 
-            let trs = window.localData.catalog.sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `
-                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
-                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.category || 'Outros')}</td>
-                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.brand || '-')}</td>
-                    <td class="px-3 py-2 text-sm text-slate-600 dark:text-slate-300">${window.formatMoney(c.price)}</td>
-                    <td class="px-3 py-2 text-sm font-bold ${c.stock > 5 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${c.stock || 0}</td>
-                    <td class="px-3 py-2 text-right space-x-1">
-                        <button onclick="window.editCatalog('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button>
-                        <button onclick="window.deleteCatalog('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`).join(""); 
-
-            let historyTrs = window.localData.stockMovements.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 50).map(m => {
-                let badgeClass = m.type === 'Retirada' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300';
-                let itemsList = m.items.map(it => `${it.qtd}x ${it.name}`).join('<br>');
-                return `
-                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td>
-                    <td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td>
-                    <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td>
-                    <td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 leading-tight">${itemsList}</td>
-                </tr>`;
-            }).join("");
-
-            return `
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in">
-                <!-- Tabela Principal do Estoque -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2">
-                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
-                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-box-open mr-2 text-blue-600"></i> Meu Almoxarifado</h3>
-                        <button onclick="window.openCatalogModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Novo Item</button>
-                    </div>
-                    <div class="overflow-x-auto h-[600px]">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
-                            <thead>
-                                <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm">
-                                    <th class="px-3 py-2 font-semibold">Material</th>
-                                    <th class="px-3 py-2 font-semibold">Cat.</th>
-                                    <th class="px-3 py-2 font-semibold">Marca</th>
-                                    <th class="px-3 py-2 font-semibold">R$ Padrão</th>
-                                    <th class="px-3 py-2 font-semibold">Estoque</th>
-                                    <th class="px-3 py-2 font-semibold text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>${trs || `<tr><td colspan="6" class="p-6 text-center text-slate-400">Almoxarifado vazio.</td></tr>`}</tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Painel de Movimentações Recentes -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden h-[650px] flex flex-col">
-                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
-                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-amber-600"></i> Movimentações Recentes</h3>
-                    </div>
-                    <div class="overflow-x-auto flex-grow">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
-                            <thead>
-                                <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm">
-                                    <th class="px-3 py-2 font-semibold">Data</th>
-                                    <th class="px-3 py-2 font-semibold">Técnico</th>
-                                    <th class="px-3 py-2 font-semibold">Ação</th>
-                                    <th class="px-3 py-2 font-semibold">Itens</th>
-                                </tr>
-                            </thead>
-                            <tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação ainda.</td></tr>`}</tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>`; 
         };
 
         const renderFuncStockForm = () => {
@@ -1082,18 +756,18 @@
 
             return `
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-                <!-- Formulário de Nova Movimentação -->
+                <!-- Formulário de Movimentação -->
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5">
                     <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                        <h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-box-open mr-2"></i> Movimentar Almoxarifado</h3>
+                        <h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-box-open mr-2"></i> Pegar ou Devolver no Almoxarifado</h3>
                     </div>
                     <form id="stockForm" onsubmit="window.saveStockMovement(event)" class="space-y-4">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Tipo *</label>
+                                <label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">O que vai fazer? *</label>
                                 <select id="stkType" required class="w-full p-2 border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold">
-                                    <option value="Retirada">Saída (Retirada)</option>
-                                    <option value="Devolução">Entrada (Devolução)</option>
+                                    <option value="Retirada">Retirar (Levar pro CEI)</option>
+                                    <option value="Devolução">Devolver (Sobrou)</option>
                                 </select>
                             </div>
                             <div>
@@ -1120,12 +794,12 @@
                     </form>
                 </div>
 
-                <!-- Histórico Pessoal de Movimentações -->
+                <!-- Histórico do Funcionario -->
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
                     <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
-                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-history mr-2 text-amber-600"></i> Minhas Movimentações (Hoje)</h3>
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-history mr-2 text-amber-600"></i> Minhas Últimas Movimentações</h3>
                     </div>
-                    <div class="overflow-x-auto flex-grow h-[400px]">
+                    <div class="overflow-x-auto flex-grow max-h-[400px]">
                         <table class="w-full text-left border-collapse whitespace-nowrap">
                             <thead>
                                 <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm">
@@ -1142,99 +816,207 @@
         };
 
         // ----------------------------------------------------
-        // Controle de Abas Dinâmicas
+        // Renderizadores Tradicionais (Dashboard e Listas)
         // ----------------------------------------------------
-        window.renderActiveTab = () => {
-            if(!window.currentSystemUser) return;
-            const role = window.currentSystemUser.role; 
-            let html = ""; let title = "";
-            
-            if(role === 'admin') {
-                switch(window.activeTab) { 
-                    case 'dashboard': title = "Resumo Geral"; html = renderAdminDashboard(); break; 
-                    case 'admin-ceis': title = "Gestão de Creches"; html = renderAdminCeis(); break; 
-                    case 'admin-users': title = "Gestão de Usuários"; html = renderAdminUsers(); break; 
-                    case 'admin-catalog': title = "Almoxarifado"; html = renderAdminCatalog(); break;
-                    case 'admin-reports': title = "Serviços Concluídos"; html = renderAdminReports(); break; 
-                    case 'admin-quotes': title = "Orçamentos Recebidos"; html = renderAdminQuotes(); break; 
-                    case 'admin-thirdParty': title = "Terceiros Acompanhados"; html = renderAdminThirdParty(); break; 
-                    case 'admin-audit': title = "Logs de Auditoria"; html = renderAdminAudit(); break;
-                    case 'func-reports': title = "Editar Manutenção"; html = renderFuncReportForm(); break; 
-                    case 'func-quotes': title = "Editar Orçamento"; html = renderFuncQuoteForm(); break; 
-                    case 'func-thirdParty': title = "Editar Acompanhamento"; html = renderFuncThirdPartyForm(); break; 
-                }
-            } else {
-                switch(window.activeTab) { 
-                    case 'func-stock': title = "Meu Almoxarifado"; html = renderFuncStockForm(); break;
-                    case 'func-reports': title = "Registrar Manutenção"; html = renderFuncReportForm(); break; 
-                    case 'func-quotes': title = "Novo Orçamento"; html = renderFuncQuoteForm(); break; 
-                    case 'func-thirdParty': title = "Acompanhar Terceiro"; html = renderFuncThirdPartyForm(); break; 
-                    case 'func-history': title = "Meus Registros"; html = renderFuncHistory(); break; 
-                }
-            }
-            
-            document.getElementById('mobilePageTitle').textContent = title;
-            
-            if (html.includes('flex justify-between') || html.includes('flex justify-center')) {
-                document.getElementById('mainContent').innerHTML = html;
-            } else {
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="w-full flex justify-center mb-6 hidden md:flex">
-                        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 text-center">${title}</h2>
-                    </div>
-                    ${html}
-                `;
-            }
-            
-            // Popula os Selects de CEI e aciona o Rascunho, SE a aba for um formulário
-            if(['func-reports', 'func-quotes', 'func-thirdParty'].includes(window.activeTab)) {
-                const sffx = window.activeTab === 'func-reports' ? 'Rep' : (window.activeTab === 'func-quotes' ? 'Quote' : 'ThirdParty');
-                populateCeiSelect(`ceiSelect${sffx}`);
-                
-                if(!window.editingItemId) {
-                    window.loadDraft(window.activeTab.split('-')[1]);
-                }
-                
-                const formObj = document.getElementById(window.activeTab === 'func-reports' ? 'reportForm' : (window.activeTab === 'func-quotes' ? 'quoteForm' : 'thirdPartyForm'));
-                
-                if(formObj) { 
-                    formObj.addEventListener('input', () => window.saveDraft(window.activeTab.split('-')[1])); 
-                    formObj.addEventListener('change', () => window.saveDraft(window.activeTab.split('-')[1])); 
-                }
+        const renderAdminDashboard = () => `
+            <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in mb-6">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fas fa-tools"></i></div>
+                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Serviços</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.reports.length}</p></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center text-lg"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Orçamentos</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.quotes.length}</p></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg"><i class="fas fa-handshake"></i></div>
+                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Terceiros</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.thirdParty.length}</p></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-lg"><i class="fas fa-school"></i></div>
+                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Creches</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.ceis.length}</p></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1">
+                    <h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3>
+                    <div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2">
+                    <h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume (Serviços x Orçamentos)</h3>
+                    <div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div>
+                </div>
+            </div>`;
 
-                // Listener para Autocompletar dos Materiais no Relatório
-                const contId = window.activeTab === 'func-reports' ? 'materialsContainer' : 'quoMaterialsContainer';
-                const contElement = document.getElementById(contId);
-                if(contElement) {
-                    contElement.addEventListener('input', (e) => {
-                        if(e.target.classList.contains('mat-name')) {
-                            const val = e.target.value;
-                            const found = window.localData.catalog.find(c => c.name === val);
-                            if(found) {
-                                const parent = e.target.parentElement;
-                                parent.querySelector('.mat-brand').value = found.brand || "";
-                                parent.querySelector('.mat-price').value = found.price || "";
-                                window.saveDraft(window.activeTab.split('-')[1]);
-                            }
-                        }
-                    });
-                }
-            }
+        window.initCharts = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const fontColor = isDark ? '#cbd5e1' : '#475569';
             
-            if(window.activeTab === 'func-history') {
-                window.renderEmployeeHistory();
+            if(document.getElementById('chartDifficulty')) {
+                const diffCounts = {'Fácil': 0, 'Médio': 0, 'Difícil': 0};
+                window.localData.reports.forEach(r => { 
+                    if(r.difficulty && diffCounts[r.difficulty] !== undefined) diffCounts[r.difficulty]++; 
+                });
+                
+                if(window.lymCharts.diff) window.lymCharts.diff.destroy();
+                
+                window.lymCharts.diff = new Chart(document.getElementById('chartDifficulty'), {
+                    type: 'doughnut',
+                    data: { 
+                        labels: ['Fácil', 'Médio', 'Difícil'], 
+                        datasets: [{ 
+                            data: [diffCounts['Fácil'], diffCounts['Médio'], diffCounts['Difícil']], 
+                            backgroundColor: ['#22c55e', '#eab308', '#ef4444'], 
+                            borderWidth: isDark ? 0 : 2 
+                        }] 
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font: { size: 10 } } } } }
+                });
             }
-            if(['admin-reports', 'admin-quotes', 'admin-thirdParty'].includes(window.activeTab)) {
-                window.setupAdminFilters();
-            }
-            if(window.activeTab === 'dashboard') {
-                setTimeout(window.initCharts, 100);
+
+            if(document.getElementById('chartMonths')) {
+                const monthsMap = {};
+                const addMonth = (dateStr, type) => { 
+                    if(!dateStr) return; 
+                    const ym = dateStr.substring(0, 7); 
+                    if(!monthsMap[ym]) monthsMap[ym] = {rep: 0, quo: 0}; 
+                    monthsMap[ym][type]++; 
+                };
+                
+                window.localData.reports.forEach(r => addMonth(r.date, 'rep'));
+                window.localData.quotes.forEach(r => addMonth(r.date, 'quo'));
+                
+                const sortedMonths = Object.keys(monthsMap).sort();
+                const repData = sortedMonths.map(m => monthsMap[m].rep);
+                const quoData = sortedMonths.map(m => monthsMap[m].quo);
+                
+                if(window.lymCharts.months) window.lymCharts.months.destroy();
+                
+                window.lymCharts.months = new Chart(document.getElementById('chartMonths'), {
+                    type: 'line',
+                    data: { 
+                        labels: sortedMonths.map(m => m.split('-').reverse().join('/')), 
+                        datasets: [
+                            { label: 'Serviços', data: repData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }, 
+                            { label: 'Orçamentos', data: quoData, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.2)', fill: true, tension: 0.3 }
+                        ] 
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: fontColor, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }, y: { ticks: { color: fontColor, stepSize: 1, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } } }, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font:{size:10} } } } }
+                });
             }
         };
 
-        // ----------------------------------------------------
-        // Lógica de Renderização e Exportação de Tabelas
-        // ----------------------------------------------------
+        const renderAdminCeis = () => { 
+            let trs = window.localData.ceis.map(c => `
+                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
+                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.telegramGroupId || '-')} / ${window.escapeHtml(c.telegramTopicId || '-')}</td>
+                    <td class="px-3 py-2 text-right space-x-1">
+                        <button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button>
+                        <button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`).join(""); 
+            return `
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
+                <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                    <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3>
+                    <button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
+                                <th class="px-3 py-2 font-semibold">Nome</th><th class="px-3 py-2 font-semibold">Telegram (Grupo/Tópico)</th><th class="px-3 py-2 font-semibold text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody>
+                    </table>
+                </div>
+            </div>`; 
+        };
+
+        const renderAdminUsers = () => { 
+            let trs = window.localData.users.map(u => `
+                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td>
+                    <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}">${String(u.role).toUpperCase()}</span></td>
+                    <td class="px-3 py-2 text-right space-x-1">
+                        <button onclick="window.resetUserPassword('${u.id}')" title="Resetar Senha" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded"><i class="fas fa-key"></i></button>
+                        <button onclick="window.editUser('${u.id}')" title="Editar" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button>
+                        <button onclick="window.deleteUser('${u.id}')" title="Apagar" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`).join(""); 
+            return `
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
+                <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                    <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários do Sistema</h3>
+                    <button onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
+                                <th class="px-3 py-2 font-semibold">Login</th><th class="px-3 py-2 font-semibold">Nível</th><th class="px-3 py-2 font-semibold text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>${trs}</tbody>
+                    </table>
+                </div>
+            </div>`; 
+        };
+
+        const renderFilterBar = (type) => `
+            <div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-4 animate-fade-in">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label>
+                        <input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI...">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label>
+                        <input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label>
+                        <input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900 dark:hover:bg-slate-500"><i class="fas fa-filter"></i> Filtrar</button>
+                        <button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button>
+                    </div>
+                </div>
+            </div>`;
+
+        const renderAdminReports = () => renderFilterBar('reports') + `
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Técnico</th><th class="px-3 py-2 text-right">Ações</th></tr></thead>
+                        <tbody id="tableBodyReports"></tbody>
+                    </table>
+                </div>
+            </div>`;
+
+        const renderAdminQuotes = () => renderFilterBar('quotes') + `
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Total Orçado</th><th class="px-3 py-2 text-right">Ações</th></tr></thead>
+                        <tbody id="tableBodyQuotes"></tbody>
+                    </table>
+                </div>
+            </div>`;
+
+        const renderAdminThirdParty = () => renderFilterBar('thirdParty') + `
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Empresa</th><th class="px-3 py-2 text-right">Ações</th></tr></thead>
+                        <tbody id="tableBodyThirdParty"></tbody>
+                    </table>
+                </div>
+            </div>`;
+
         window.applyFilters = (type) => {
             try {
                 const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
@@ -1276,7 +1058,7 @@
                         if (isNaN(totalVal)) totalVal = 0;
                         
                         let col3 = type === 'reports' ? uName : (type === 'quotes' ? window.formatMoney(totalVal) : String(item.companyName || ""));
-                        let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500" title="Aguardando internet para enviar"></i> ' : '';
+                        let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Aguardando internet para enviar"></i>' : '';
 
                         htmlRows.push(`
                         <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
@@ -1300,80 +1082,419 @@
             }
         };
 
-        window.exportToExcel = (type) => {
-            if(currentFilteredData.length === 0) return window.showToast("Nenhum dado para exportar", "error");
-            let exportData = []; 
-            let colWidths = [];
+        // ----------------------------------------------------
+        // Componente de Envio / Salvamento de Serviços
+        // ----------------------------------------------------
+        window.addMaterialRow = (containerId, triggerSave = true) => {
+            const container = document.getElementById(containerId);
+            if(container.querySelector('.italic')) container.innerHTML = "";
+            window.materialCount++; 
+            const id = `mat_${window.materialCount}`; 
+            const div = document.createElement('div');
+            div.id = id; 
+            div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in";
             
-            if(type === 'reports') {
-                exportData = currentFilteredData.map(r => ({ 
-                    'Data': window.formatDateBR(r.date), 
-                    'Creche (CEI)': r.cei || r.ceiId, 
-                    'Técnico': r.userName || r.userLogin, 
-                    'Início': r.timeStart, 
-                    'Término': r.timeEnd, 
-                    'Dificuldade': r.difficulty, 
-                    'Serviço Realizado': (r.workDone || r.desc || "").replace(/\\n/g, '\n'), 
-                    'Materiais Utilizados': r.materials ? r.materials.map(m => `${m.qtd || m.q || 1}x ${m.name} (${m.brand||''}) R$${m.price || m.v || 0}`).join("\n") : "", 
-                    'Total Gasto (R$)': r.materials ? r.materials.reduce((acc, m) => acc + (parseFloat(m.qtd || m.q || 1)*parseFloat(m.price || m.v || 0)), 0) : 0, 
-                    'Observação': (r.obs || "").replace(/\\n/g, '\n'), 
-                    'Enviado Telegram': r.telegramSent ? "Sim" : (r.pendingTelegram ? "Pendente WiFi" : "Não") 
-                }));
-                colWidths = [{wch:12}, {wch:25}, {wch:20}, {wch:10}, {wch:10}, {wch:12}, {wch:50}, {wch:40}, {wch:15}, {wch:40}, {wch:15}];
-            } else if (type === 'quotes') {
-                exportData = currentFilteredData.map(r => ({ 
-                    'Data': window.formatDateBR(r.date), 
-                    'Creche (CEI)': r.cei || r.ceiId, 
-                    'Técnico': r.userName || r.userLogin, 
-                    'Diagnóstico/Escopo': (r.workDone || r.desc || "").replace(/\\n/g, '\n'), 
-                    'Materiais Necessários': r.materials ? r.materials.map(m => `${m.qtd || m.q || 1}x ${m.name} R$${m.price || m.v || 0}`).join("\n") : "", 
-                    'Total Orçado (R$)': r.materials ? r.materials.reduce((acc, m) => acc + (parseFloat(m.qtd || m.q || 1)*parseFloat(m.price || m.v || 0)), 0) : 0, 
-                    'Observação': (r.obs || "").replace(/\\n/g, '\n') 
-                }));
-                colWidths = [{wch:12}, {wch:25}, {wch:20}, {wch:50}, {wch:40}, {wch:18}, {wch:40}];
-            } else if (type === 'thirdParty') {
-                exportData = currentFilteredData.map(r => ({ 
-                    'Data': window.formatDateBR(r.date), 
-                    'Creche (CEI)': r.cei || r.ceiId, 
-                    'Técnico Acompanhante': r.userName || r.userLogin, 
-                    'Empresa Terceirizada': r.companyName, 
-                    'Início': r.timeStart, 
-                    'Término': r.timeEnd, 
-                    'Serviço Realizado': (r.workDone || r.tpDesc || "").replace(/\\n/g, '\n'), 
-                    'Observação': (r.obs || "").replace(/\\n/g, '\n') 
-                }));
-                colWidths = [{wch:12}, {wch:25}, {wch:25}, {wch:25}, {wch:10}, {wch:10}, {wch:50}, {wch:40}];
+            div.innerHTML = `
+                <input type="text" list="catalogList" class="mat-name flex-grow p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center sm:text-left" placeholder="Material (Digite p/ buscar)" required>
+                <input type="text" class="mat-brand w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Marca">
+                <input type="number" class="mat-qtd w-full sm:w-16 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required>
+                <input type="number" class="mat-price w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="R$ Un." step="0.01">
+                <button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200">X</button>`;
+            
+            container.appendChild(div);
+
+            const nameInput = div.querySelector('.mat-name');
+            nameInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                const found = window.localData.catalog.find(c => c.name === val);
+                if(found) {
+                    div.querySelector('.mat-brand').value = found.brand || "";
+                    div.querySelector('.mat-price').value = found.price || "";
+                    window.saveDraft(window.activeTab.split('-')[1]);
+                }
+            });
+
+            if(triggerSave) window.saveDraft(window.activeTab.split('-')[1]);
+        };
+
+        window.saveRecord = async (e, type) => {
+            e.preventDefault();
+            const btnId = type === 'reports' ? 'btnSubmitReport' : (type === 'quotes' ? 'btnSubmitQuote' : 'btnSubmitThirdParty');
+            const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
+            const btn = document.getElementById(btnId);
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; 
+            btn.disabled = true;
+
+            try {
+                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                
+                const editId = document.getElementById(`editId${type}`)?.value || "";
+                const isEdit = editId !== "";
+                const recordId = isEdit ? editId : Date.now().toString();
+                
+                const selectElement = document.getElementById(`ceiSelect${sffx}`);
+                const ceiId = selectElement?.options[selectElement.selectedIndex]?.getAttribute('data-id') || "";
+                
+                const recordData = {
+                    id: String(recordId), 
+                    userId: String(window.currentSystemUser?.id || "anon"), 
+                    userName: String(window.currentSystemUser?.login || "Usuário"),
+                    cei: String(selectElement?.options[selectElement.selectedIndex]?.text || "CEI Não Informada"), 
+                    ceiId: String(ceiId), 
+                    date: String(document.getElementById(`date${sffx}`)?.value || ""),
+                    workDone: String(document.getElementById(`workDone${sffx}`)?.value || ""), 
+                    obs: String(document.getElementById(`obs${sffx}`)?.value || ""), 
+                    timestamp: new Date().toISOString()
+                };
+
+                if(type === 'reports' || type === 'thirdParty') { 
+                    recordData.timeStart = String(document.getElementById(`timeStart${sffx}`)?.value || ""); 
+                    recordData.timeEnd = String(document.getElementById(`timeEnd${sffx}`)?.value || ""); 
+                }
+                if(type === 'thirdParty') { 
+                    recordData.companyName = String(document.getElementById('companyNameThirdParty')?.value || ""); 
+                }
+                if(type === 'reports') { 
+                    recordData.difficulty = String(document.getElementById('diffRep')?.value || "Médio"); 
+                }
+
+                if(type === 'reports' || type === 'quotes') {
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
+                    const mats = [];
+                    document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => {
+                        mats.push({ 
+                            name: String(row.querySelector('.mat-name')?.value || ""), 
+                            brand: String(row.querySelector('.mat-brand')?.value || ""), 
+                            qtd: String(row.querySelector('.mat-qtd')?.value || "1"), 
+                            price: String(row.querySelector('.mat-price')?.value || "0") 
+                        });
+                    });
+                    recordData.materials = mats;
+                }
+
+                let base64Photos = [];
+                const fileInput = document.getElementById(type === 'reports' ? 'photosRep' : (type === 'quotes' ? 'photosQuote' : 'photosThirdParty'));
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    for(let file of fileInput.files) { 
+                        if (file.type.startsWith('image/')) {
+                            base64Photos.push(await window.compressImage(file)); 
+                        }
+                    }
+                }
+                
+                if (ceiId !== "") {
+                    if (navigator.onLine) {
+                        try {
+                            await window.sendToTelegram(ceiId, recordData, base64Photos, isEdit, typeLabel);
+                            recordData.telegramSent = true;
+                            recordData.pendingTelegram = false;
+                        } catch(errTg) {
+                            console.error("Erro no envio do Telegram:", errTg);
+                            recordData.telegramSent = false;
+                            recordData.pendingTelegram = true;
+                            recordData.photos = base64Photos; // Salva para enviar depois
+                            window.showToast("Falha no Telegram. Entrou na fila de reenvio.", "error");
+                        }
+                    } else {
+                        recordData.telegramSent = false;
+                        recordData.pendingTelegram = true;
+                        recordData.photos = base64Photos; // Salva para enviar depois
+                        window.showToast("Sem Internet: Registro salvo localmente. Entrou na fila de reenvio.", "info");
+                    }
+                } else { 
+                    throw new Error("Selecione uma Creche (CEI) com o Telegram configurado."); 
+                }
+                
+                if(recordData.telegramSent) {
+                    recordData.photos = []; // Não pesa o banco se já mandou
+                }
+
+                await window.dbSave(type, recordId, recordData);
+                window.logAudit(`${isEdit ? 'Editou' : 'Registrou'} ${typeLabel} ID: ${recordId}`);
+                if(recordData.telegramSent) window.showToast("Salvo e Enviado com sucesso!", "success");
+                
+                window.clearDraft(type);
+
+                if (isEdit) {
+                    window.cancelEdit();
+                } else {
+                    document.getElementById(type === 'reports' ? 'reportForm' : (type==='quotes'?'quoteForm':'thirdPartyForm')).reset();
+                    if(type === 'reports') { 
+                        document.getElementById('materialsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; 
+                        document.getElementById('repPhotoPreview').innerHTML = ''; 
+                    }
+                    if(type === 'quotes') { 
+                        document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; 
+                        document.getElementById('quoPhotoPreview').innerHTML = ''; 
+                    }
+                    if(type === 'thirdParty') {
+                        document.getElementById('tpPhotoPreview').innerHTML = '';
+                    }
+                }
+            } catch (err) { 
+                console.error("ERRO COMPLETO AO SALVAR:", err); 
+                window.showToast("Falha: " + (err.message || "Erro técnico"), "error"); 
+            } finally { 
+                btn.innerHTML = originalBtnText; 
+                btn.disabled = false; 
+            }
+        };
+
+        window.sendToTelegram = async (ceiId, dataObj, base64Photos, isEdit, typeLabel) => {
+            const cei = window.localData.ceis.find(c => c.id === ceiId);
+            if(!cei || !cei.telegramGroupId || cei.telegramGroupId.trim() === "") { 
+                throw new Error("A Creche selecionada não tem Grupo do Telegram cadastrado."); 
             }
             
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            ws['!cols'] = colWidths;
+            const chatId = cei.telegramGroupId.trim(); 
+            const topicId = cei.telegramTopicId ? cei.telegramTopicId.trim() : null;
+            let totalValue = 0; 
+            let materialText = "";
             
-            for (let cell in ws) {
-                if (cell[0] === '!') continue;
-                if (typeof ws[cell].v === 'string' && ws[cell].v.includes('\n')) {
-                    if(!ws[cell].s) ws[cell].s = {};
-                    if(!ws[cell].s.alignment) ws[cell].s.alignment = {};
-                    ws[cell].s.alignment.wrapText = true;
+            if(dataObj.materials) {
+                dataObj.materials.forEach(m => {
+                    let v = parseFloat(m.price || 0); 
+                    let q = parseFloat(m.qtd || 1);
+                    totalValue += (v * q); 
+                    materialText += `- ${q}x ${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand)}) - R$ ${(v * q).toFixed(2)}\n`;
+                });
+            }
+
+            let uName = dataObj.userName || dataObj.userLogin || "Usuário";
+            let wDone = dataObj.workDone || dataObj.desc || dataObj.tpDesc || "Sem descrição";
+
+            let tgText = `${isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>\n" : `🛠 <b>NOVO: ${typeLabel}</b>\n`}🏫 <b>CEI:</b> ${window.escapeHtml(dataObj.cei || cei.name)}\n👨‍🔧 <b>Técnico:</b> ${window.escapeHtml(uName).toUpperCase()}\n📅 <b>Data:</b> ${window.formatDateBR(dataObj.date)}\n`;
+            if (dataObj.timeStart) tgText += `🕒 <b>Horário:</b> ${dataObj.timeStart} às ${dataObj.timeEnd}\n`;
+            if (wDone) tgText += `\n🛠 <b>Descrição/Serviço:</b>\n${window.escapeHtml(wDone)}\n`;
+            if (dataObj.materials && dataObj.materials.length > 0) tgText += `\n📦 <b>Materiais:</b>\n${materialText}<b>TOTAL: R$ ${totalValue.toFixed(2)}</b>\n`;
+            if (dataObj.obs) tgText += `\n📌 <b>Obs:</b> ${window.escapeHtml(dataObj.obs)}\n`;
+
+            const payload = { chat_id: chatId, text: tgText, parse_mode: 'HTML' };
+            if (topicId) payload.message_thread_id = topicId;
+            const rTxt = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const rTxtJson = await rTxt.json();
+            if (!rTxtJson.ok) throw new Error("Erro Telegram (Texto): " + rTxtJson.description);
+
+            if (base64Photos && base64Photos.length > 0) {
+                for (let b64 of base64Photos) {
+                    try {
+                        const blob = dataURItoBlob(b64);
+                        const fdPhoto = new FormData(); 
+                        fdPhoto.append('chat_id', chatId);
+                        if (topicId) fdPhoto.append('message_thread_id', topicId);
+                        fdPhoto.append('photo', blob, 'foto.jpg');
+                        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fdPhoto });
+                    } catch(e) { console.warn("Erro ao enviar foto", e); }
                 }
             }
 
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Relatório LYM");
+            let matsHtml = '';
+            if(dataObj.materials && dataObj.materials.length > 0) {
+                matsHtml = `
+                <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Materiais / Custos</h4>
+                <table style="width:100%; text-align:left; border-collapse:collapse; font-size:14px; margin-bottom:20px; border:1px solid #e2e8f0; table-layout: fixed; word-wrap: break-word;">
+                    <thead style="background-color:#f1f5f9;">
+                        <tr>
+                            <th style="padding:10px; border:1px solid #e2e8f0; color:#334155; width: 10%;">Qtd</th>
+                            <th style="padding:10px; border:1px solid #e2e8f0; color:#334155; width: 50%;">Material</th>
+                            <th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155; width: 20%;">R$ Un.</th>
+                            <th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155; width: 20%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #e2e8f0; color:#334155;">${m.qtd}</td><td style="padding:10px; border:1px solid #e2e8f0; color:#334155; word-break: break-word; white-space: pre-wrap;">${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand) || '-'})</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.price)}</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.qtd * m.price)}</td></tr>`).join('')}
+                        <tr style="background-color:#eff6ff;"><td colspan="3" style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#334155;">TOTAL:</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#1d4ed8;">${window.formatMoney(totalValue)}</td></tr>
+                    </tbody>
+                </table>`;
+            }
+
+            let imgsHtml = '';
+            if(base64Photos && base64Photos.length > 0) {
+                imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`;
+            }
+
+            const pdfContentString = `
+            <div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;">
+                <div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;">
+                    <h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p>
+                </div>
+                ${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                    <div style="width:48%; word-wrap: break-word;">
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p>
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>
+                        ${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}
+                    </div>
+                    <div style="width:48%; word-wrap: break-word;">
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>
+                        ${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}
+                        ${dataObj.companyName ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}
+                    </div>
+                </div>
+                <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4>
+                <div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                    <p style="margin:0; line-height:1.5; color:#334155; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${wDone ? window.escapeHtml(wDone).replace(/\n/g, '<br>') : 'Sem descrição.'}</p>
+                </div>
+                ${matsHtml}
+                ${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; color:#334155; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}
+                ${imgsHtml}
+            </div>`;
+
+            const opt = { 
+                margin: 10, 
+                filename: `Relatorio.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
             
-            const dateNow = new Date();
-            const mes = String(dateNow.getMonth() + 1).padStart(2, '0');
-            const ano = dateNow.getFullYear();
-            XLSX.writeFile(wb, `LYM_${type}_${mes}_${ano}.xlsx`);
-            window.logAudit(`Exportou Excel: ${type}`);
+            let pdfBlob = await html2pdf().set(opt).from(pdfContentString).output('blob');
+
+            const fData = new FormData();
+            fData.append('chat_id', chatId);
+            if (topicId) fData.append('message_thread_id', topicId);
+            fData.append('document', pdfBlob, `Relatorio_${typeLabel}.pdf`);
+            
+            const rDoc = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: fData });
+            const rDocJson = await rDoc.json();
+            if (!rDocJson.ok) throw new Error("Erro Telegram (PDF): " + rDocJson.description);
+
+            return true;
         };
 
-        // ----------------------------------------------------
-        // Inicialização Final
-        // ----------------------------------------------------
+        window.viewRecord = (type, id) => {
+            const record = window.localData[type].find(r => r.id === id); 
+            if(!record) return;
+            
+            const btnPrint = document.getElementById('btnPrintRecord');
+            btnPrint.onclick = () => window.printRecord(type, record);
+
+            const uName = record.userName || record.userLogin || "Usuário";
+            const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+
+            let html = `
+            <div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 dark:bg-slate-700/50 p-4 rounded border dark:border-slate-600">
+                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Data:</span> ${window.formatDateBR(record.date)}</div>
+                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">CEI:</span> ${window.escapeHtml(record.cei || record.ceiId || '')}</div>
+                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Registro por:</span> <span class="capitalize">${window.escapeHtml(uName)}</span></div>`;
+            
+            if(type === 'reports' || type === 'thirdParty') {
+                html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Horário:</span> ${record.timeStart || '--'} às ${record.timeEnd || '--'}</div>`;
+            }
+            if(type === 'thirdParty') {
+                html += `<div class="col-span-2 dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Empresa:</span> ${window.escapeHtml(record.companyName || '')}</div>`;
+            }
+            if(type === 'reports') {
+                html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Dificuldade:</span> ${window.escapeHtml(record.difficulty || '-')}</div>`;
+            }
+            html += `</div>`;
+
+            html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Serviço Realizado / Descrição</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded border dark:border-slate-600 break-words">${window.escapeHtml(desc)}</p>`;
+
+            if(record.materials && record.materials.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Materiais / Custos</h4>
+                <table class="w-full text-sm text-left mb-6 border dark:border-slate-600 table-fixed">
+                    <thead class="bg-slate-100 dark:bg-slate-700">
+                        <tr><th class="p-2 border dark:border-slate-600 dark:text-slate-200 w-1/6">Qtd</th><th class="p-2 border dark:border-slate-600 dark:text-slate-200 w-3/6">Material</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200 w-1/6">R$ Un.</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200 w-1/6">Total</th></tr>
+                    </thead>
+                    <tbody>`;
+                let totalGeral = 0;
+                record.materials.forEach(m => {
+                    const price = parseFloat(m.price || m.v || 0); 
+                    const q = parseFloat(m.qtd || m.q || 1); 
+                    const total = price * q; 
+                    totalGeral += total;
+                    html += `<tr><td class="p-2 border dark:border-slate-600 dark:text-slate-300">${q}</td><td class="p-2 border dark:border-slate-600 dark:text-slate-300 break-words">${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand)||'-'})</td><td class="p-2 border dark:border-slate-600 text-right dark:text-slate-300">${window.formatMoney(price)}</td><td class="p-2 border dark:border-slate-600 font-medium text-right dark:text-slate-300">${window.formatMoney(total)}</td></tr>`;
+                });
+                if(type === 'reports' || type === 'quotes') {
+                    html += `<tr class="bg-blue-50 dark:bg-blue-900/30"><td colspan="3" class="p-2 border dark:border-slate-600 text-right font-bold dark:text-slate-200">TOTAL:</td><td class="p-2 border dark:border-slate-600 font-bold text-blue-700 dark:text-blue-400 text-right text-lg">${window.formatMoney(totalGeral)}</td></tr>`;
+                }
+                html += `</tbody></table>`;
+            }
+
+            if(record.obs) {
+                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Observações</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 dark:bg-yellow-900/20 p-3 border border-yellow-200 dark:border-yellow-700/50 rounded break-words">${window.escapeHtml(record.obs)}</p>`;
+            }
+            
+            if(record.telegramSent) {
+                html += `<div class="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 dark:border-green-800 font-medium"><i class="fab fa-telegram text-xl"></i> Enviado ao Telegram da creche.</div>`;
+            } else if(record.pendingTelegram) {
+                html += `<div class="bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-amber-200 dark:border-amber-800 font-medium"><i class="fas fa-wifi text-xl"></i> Na fila para envio (Offline).</div>`;
+            } else if(record.photos && record.photos.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`;
+                record.photos.forEach(b64 => { 
+                    html += `<a href="${b64}" target="_blank" class="block border dark:border-slate-600 rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; 
+                });
+                html += `</div>`;
+            }
+
+            document.getElementById('viewRecordContent').innerHTML = html; 
+            window.showElement('modalViewRecord');
+        };
+
+        window.printRecord = (type, record) => {
+            const printArea = document.getElementById('printArea');
+            const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
+            const uName = record.userName || record.userLogin || "Usuário";
+            const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+            
+            let matsHtml = ''; 
+            let totalValue = 0;
+            if(record.materials && record.materials.length > 0) {
+                matsHtml = `
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word;">
+                    <thead>
+                        <tr style="background: #1e293b; color: white; text-align: left;">
+                            <th style="padding: 10px; width: 10%;">Qtd</th>
+                            <th style="padding: 10px; width: 50%;">Material</th>
+                            <th style="padding: 10px; text-align:right; width: 20%;">R$ Un.</th>
+                            <th style="padding: 10px; text-align:right; width: 20%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                record.materials.forEach(m => {
+                    const price = parseFloat(m.price || m.v || 0); 
+                    const q = parseFloat(m.qtd || m.q || 1); 
+                    const total = price * q; 
+                    totalValue += total;
+                    matsHtml += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px;">${q}</td><td style="padding: 10px; word-break: break-word; white-space: pre-wrap;">${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand)||'-'})</td><td style="padding: 10px; text-align:right;">${window.formatMoney(price)}</td><td style="padding: 10px; text-align:right;">${window.formatMoney(total)}</td></tr>`;
+                });
+                matsHtml += `<tr style="background: #f1f5f9; font-weight: bold;"><td colspan="3" style="padding: 10px; text-align: right;">TOTAL:</td><td style="padding: 10px; text-align:right; color: #1d4ed8;">${window.formatMoney(totalValue)}</td></tr></tbody></table>`;
+            }
+
+            printArea.innerHTML = `
+                <div style="font-family: Arial, sans-serif; color: #334155; max-width: 800px; margin: 0 auto; word-wrap: break-word;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #1d4ed8; padding-bottom: 20px; margin-bottom: 20px;">
+                        <div><h1 style="margin:0; font-size: 24px; color:#1d4ed8;">LYM Eletrônicos</h1><p style="margin:5px 0 0; color:#64748b; font-size:14px;">Documento de ${typeLabel}</p></div>
+                        <div style="text-align: right; font-size:14px; color:#64748b;"><p style="margin:0;">Data: <strong>${window.formatDateBR(record.date)}</strong></p><p style="margin:0;">Ref: #LYM-${record.id.substring(record.id.length-6)}</p></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 14px;">
+                        <div style="width:48%; word-wrap: break-word;">
+                            <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Técnico / Responsável:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>
+                            ${record.difficulty ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${record.difficulty}</p>` : ''}
+                        </div>
+                        <div style="width:48%; word-wrap: break-word;">
+                            <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Cliente / Local:</span> ${window.escapeHtml(record.cei || record.ceiId || '')}</p>
+                            ${record.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${record.timeStart} às ${record.timeEnd}</p>` : ''}
+                            ${record.companyName ? `<p style="margin:0;">color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa Terceira:</span> ${window.escapeHtml(record.companyName)}</p>` : ''}
+                        </div>
+                    </div>
+                    <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(desc).replace(/\n/g, '<br>')}</p></div>
+                    ${matsHtml}
+                    ${record.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(record.obs).replace(/\n/g, '<br>')}</p></div>` : ''}
+                    <div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div>
+                </div>`;
+            
+            document.getElementById('printArea').classList.remove('hidden');
+            window.print();
+            setTimeout(() => { document.getElementById('printArea').classList.add('hidden'); }, 1000);
+        };
+
         window.onload = () => { 
             window.initFirebaseSync(); 
         };
-
     </script>
 </body>
 </html>
