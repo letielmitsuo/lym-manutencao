@@ -66,7 +66,9 @@
         window.materialCount = 0; 
         window.lymCharts = {};
 
-        // Funções UI
+        // ----------------------------------------------------
+        // Helpers UI
+        // ----------------------------------------------------
         window.showElement = id => document.getElementById(id)?.classList.remove('hidden');
         window.hideElement = id => document.getElementById(id)?.classList.add('hidden');
         window.formatDateBR = iso => iso ? iso.split('-').reverse().join('/') : "";
@@ -90,6 +92,9 @@
         let confirmActionCallback = null; window.confirmAction = (callback) => { confirmActionCallback = callback; window.showElement('modalConfirm'); };
         document.getElementById('btnConfirmAction').addEventListener('click', () => { if(confirmActionCallback) confirmActionCallback(); window.hideElement('modalConfirm'); confirmActionCallback = null; });
 
+        // ----------------------------------------------------
+        // DB e Sincronização
+        // ----------------------------------------------------
         window.initFirebaseSync = function() {
             const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit'];
             cols.forEach(col => {
@@ -105,6 +110,9 @@
         window.dbDelete = async (colName, docId) => { await db.collection(colName).doc(docId).delete(); };
         window.logAudit = async (actionDesc) => { await db.collection('audit').add({ user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: actionDesc, date: new Date().toLocaleString('pt-BR'), timestamp: Date.now() }); };
 
+        // ----------------------------------------------------
+        // Login
+        // ----------------------------------------------------
         window.toggleEye = function(inputId, iconId) { const pwd = document.getElementById(inputId); const icon = document.getElementById(iconId); if (pwd.type === 'password') { pwd.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } else { pwd.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); } };
         window.togglePassword = function() { window.toggleEye('loginPassword', 'eyeIcon'); };
 
@@ -152,6 +160,9 @@
         window.resetUserPassword = (id) => { window.confirmAction(async () => { try { await window.dbSave('users', id, { pass: '123mudar', password: '123mudar' }); window.logAudit(`Resetou a senha do usuário ID: ${id}`); window.showToast("Senha resetada para 123mudar!"); } catch(err) { window.showToast("Erro ao resetar senha", "error"); } }); };
         window.logout = () => { window.logAudit('Logout Efetuado'); window.currentSystemUser = null; window.hideElement('appLayout'); window.showElement('loginScreen'); document.getElementById('loginForm').reset(); };
 
+        // ----------------------------------------------------
+        // Menu e Renderização de Abas
+        // ----------------------------------------------------
         window.buildMenu = () => {
             const navLinks = document.getElementById('navLinks'); navLinks.innerHTML = "";
             document.getElementById('mobileMenuBtn').onclick = () => { navLinks.classList.toggle('hidden'); navLinks.classList.toggle('flex'); };
@@ -167,59 +178,6 @@
                 a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); };
                 navLinks.appendChild(a);
             });
-        };
-
-        // ----------------------------------------------------
-        // Componentes UI HTML
-        // ----------------------------------------------------
-        const renderAdminDashboard = () => `<div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in mb-6"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Serviços</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.reports.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center text-lg"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Orçamentos</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.quotes.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Terceiros</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.thirdParty.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-lg"><i class="fas fa-school"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Creches</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.ceis.length}</p></div></div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3><div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume (Serviços x Orçamentos)</h3><div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div></div></div>`;
-        const renderAdminCeis = () => { let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${c.name}</td><td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="px-3 py-2 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Nome</th><th class="px-3 py-2 font-semibold">Telegram (Grupo/Tópico)</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
-        const renderAdminUsers = () => { let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${u.login || u.username}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}">${u.role.toUpperCase()}</span></td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.resetUserPassword('${u.id}')" title="Resetar Senha" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded"><i class="fas fa-key"></i></button><button onclick="window.editUser('${u.id}')" title="Editar" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" title="Apagar" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Login</th><th class="px-3 py-2 font-semibold">Nível</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
-        const renderFilterBar = (type) => `<div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-4 animate-fade-in"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end"><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI..."></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div><div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900 dark:hover:bg-slate-500"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div></div></div>`;
-        const renderAdminReports = () => renderFilterBar('reports') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Técnico</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
-        const renderAdminQuotes = () => renderFilterBar('quotes') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Total Orçado</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
-        const renderAdminThirdParty = () => renderFilterBar('thirdParty') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Empresa</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
-        const renderAdminAudit = () => `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center border-b dark:border-slate-700"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full">Logs de Auditoria</h3><button onclick="window.clearAuditLogs()" class="bg-red-100 dark:bg-red-900/30 hover:bg-red-200 text-red-700 dark:text-red-400 px-2 py-1 rounded text-xs font-medium absolute right-3"><i class="fas fa-trash-alt mr-1"></i> Limpar</button></div><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data/Hora</th><th class="px-3 py-2">Usuário</th><th class="px-3 py-2">Ação Realizada</th></tr></thead><tbody>${[...window.localData.audit].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 100).map(a => `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm"><td class="px-3 py-2">${a.date}</td><td class="px-3 py-2 font-medium capitalize text-slate-700 dark:text-slate-300">${a.user}</td><td class="px-3 py-2 text-slate-600 dark:text-slate-400">${a.action}</td></tr>`).join("")}</tbody></table></div></div>`;
-
-        const renderFormFieldsCommon = (typeId) => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelect${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="date${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div>`;
-        const renderTimeFields = (typeId) => `<div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div></div>`;
-        const renderMaterialInputs = (containerId) => `<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3"><div class="relative flex justify-center items-center mb-3"><h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('${containerId}')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs font-medium absolute right-0">+ Mat.</button></div><div id="${containerId}" class="space-y-2"><p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p></div></div>`;
-        
-        const renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-3"><input type="hidden" id="editIdreports">${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Dificuldade *</label><select id="diffRep" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="Fácil">Fácil</option><option value="Médio" selected>Médio</option><option value="Difícil">Difícil</option></select></div>${renderMaterialInputs('materialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Serviço (Telegram)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Serviço</button></form></div>`;
-        const renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-green-700 dark:text-green-400 text-center w-full"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-3"><input type="hidden" id="editIdquotes">${renderFormFieldsCommon('Quote')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div>${renderMaterialInputs('quoMaterialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Problema (Telegram)</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Orçamento</button></form></div>`;
-        const renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-purple-700 dark:text-purple-400 text-center w-full"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-3"><input type="hidden" id="editIdthirdParty">${renderFormFieldsCommon('ThirdParty')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div>${renderTimeFields('ThirdParty')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos (Telegram/PDF)</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Acompanhamento</button></form></div>`;
-        
-        window.renderEmployeeHistory = () => {
-            if(!window.currentSystemUser) return;
-            const uid = window.currentSystemUser.id;
-            const uname = window.currentSystemUser.login;
-            
-            const renderRows = (type, tbodyId) => {
-                const tbody = document.getElementById(tbodyId); if(!tbody) return;
-                
-                const getSafeTime = (obj) => {
-                    if(obj.timestamp) { let t = new Date(obj.timestamp).getTime(); if(!isNaN(t)) return t; }
-                    if(obj.date) { let t = new Date(obj.date).getTime(); if(isNaN(t) && obj.date.includes('/')) t = new Date(obj.date.split('/').reverse().join('-')).getTime(); if(!isNaN(t)) return t; }
-                    return 0;
-                };
-
-                const myData = window.localData[type].filter(r => r.userId === uid || r.userName === uname || r.userLogin === uname).sort((a,b) => getSafeTime(b) - getSafeTime(a));
-                
-                tbody.innerHTML = myData.map(r => `
-                    <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                        <td class="p-3">${window.formatDateBR(r.date)}</td>
-                        <td class="p-3 font-medium">${r.cei || r.ceiId || ''}</td>
-                        <td class="p-3 text-right flex justify-end gap-1">
-                            <button type="button" onclick="window.viewRecord('${type}','${r.id}')" title="Visualizar" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 p-1.5 rounded shadow-sm"><i class="fas fa-eye"></i></button>
-                            <button type="button" onclick="window.editFuncRecord('${type}','${r.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 p-1.5 rounded shadow-sm"><i class="fas fa-edit"></i></button>
-                            <button type="button" onclick="window.deleteFuncRecord('${type}','${r.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 p-1.5 rounded shadow-sm"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`).join("") || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
-            };
-            
-            renderRows('reports', 'empHistoryReports'); 
-            renderRows('quotes', 'empHistoryQuotes'); 
-            renderRows('thirdParty', 'empHistoryThirdParty');
         };
 
         window.renderActiveTab = () => {
@@ -248,6 +206,30 @@
             if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100);
         };
 
+        const populateCeiSelect = (id) => { const sel = document.getElementById(id); if(!sel) return; sel.innerHTML = '<option value="">Selecione a Creche...</option>' + window.localData.ceis.sort((a,b)=>a.name.localeCompare(b.name)).map(c => `<option value="${c.name}" data-id="${c.id}">${c.name}</option>`).join(''); };
+
+        // ----------------------------------------------------
+        // Templates de UI (Admin e Funcionário)
+        // ----------------------------------------------------
+        const renderAdminDashboard = () => `<div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in mb-6"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Serviços</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.reports.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center text-lg"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Orçamentos</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.quotes.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Terceiros</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.thirdParty.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-lg"><i class="fas fa-school"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Creches</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.ceis.length}</p></div></div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3><div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume (Serviços x Orçamentos)</h3><div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div></div></div>`;
+        const renderAdminCeis = () => { let trs = window.localData.ceis.map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${c.name}</td><td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${c.telegramGroupId || '-'} / ${c.telegramTopicId || '-'}</td><td class="px-3 py-2 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Nome</th><th class="px-3 py-2 font-semibold">Telegram (Grupo/Tópico)</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
+        const renderAdminUsers = () => { let trs = window.localData.users.map(u => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${u.login || u.username}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}">${u.role.toUpperCase()}</span></td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.resetUserPassword('${u.id}')" title="Resetar Senha" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded"><i class="fas fa-key"></i></button><button onclick="window.editUser('${u.id}')" title="Editar" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" title="Apagar" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Login</th><th class="px-3 py-2 font-semibold">Nível</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
+        const renderFilterBar = (type) => `<div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-4 animate-fade-in"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end"><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI..."></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div><div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900 dark:hover:bg-slate-500"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div></div></div>`;
+        const renderAdminReports = () => renderFilterBar('reports') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Técnico</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
+        const renderAdminQuotes = () => renderFilterBar('quotes') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Total Orçado</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
+        const renderAdminThirdParty = () => renderFilterBar('thirdParty') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Empresa</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
+        const renderAdminAudit = () => `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center border-b dark:border-slate-700"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full">Logs de Auditoria</h3><button onclick="window.clearAuditLogs()" class="bg-red-100 dark:bg-red-900/30 hover:bg-red-200 text-red-700 dark:text-red-400 px-2 py-1 rounded text-xs font-medium absolute right-3"><i class="fas fa-trash-alt mr-1"></i> Limpar</button></div><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data/Hora</th><th class="px-3 py-2">Usuário</th><th class="px-3 py-2">Ação Realizada</th></tr></thead><tbody>${[...window.localData.audit].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 100).map(a => `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm"><td class="px-3 py-2">${a.date}</td><td class="px-3 py-2 font-medium capitalize text-slate-700 dark:text-slate-300">${a.user}</td><td class="px-3 py-2 text-slate-600 dark:text-slate-400">${a.action}</td></tr>`).join("")}</tbody></table></div></div>`;
+
+        const renderFormFieldsCommon = (typeId) => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelect${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="date${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div>`;
+        const renderTimeFields = (typeId) => `<div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Início *</label><input type="time" id="timeStart${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Término *</label><input type="time" id="timeEnd${typeId}" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div></div>`;
+        const renderMaterialInputs = (containerId) => `<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3"><div class="relative flex justify-center items-center mb-3"><h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('${containerId}')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs font-medium absolute right-0">+ Mat.</button></div><div id="${containerId}" class="space-y-2"><p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p></div></div>`;
+        
+        const renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-3"><input type="hidden" id="editIdreports">${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Dificuldade *</label><select id="diffRep" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="Fácil">Fácil</option><option value="Médio" selected>Médio</option><option value="Difícil">Difícil</option></select></div>${renderMaterialInputs('materialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Serviço (Telegram/PDF)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Serviço</button></form></div>`;
+        const renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-green-700 dark:text-green-400 text-center w-full"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-3"><input type="hidden" id="editIdquotes">${renderFormFieldsCommon('Quote')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div>${renderMaterialInputs('quoMaterialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Problema (Telegram/PDF)</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Orçamento</button></form></div>`;
+        const renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-purple-700 dark:text-purple-400 text-center w-full"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><button id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-3"><input type="hidden" id="editIdthirdParty">${renderFormFieldsCommon('ThirdParty')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div>${renderTimeFields('ThirdParty')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos (Telegram/PDF)</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Acompanhamento</button></form></div>`;
+        
+        const renderFuncHistory = () => `<div class="max-w-4xl mx-auto animate-fade-in space-y-6"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-3 bg-blue-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-blue-800 dark:text-blue-300 text-center text-sm"><i class="fas fa-wrench mr-2"></i> Minhas Manutenções</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-3 bg-green-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-green-800 dark:text-green-300 text-center text-sm"><i class="fas fa-file-invoice mr-2"></i> Meus Orçamentos</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-3 bg-purple-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-purple-800 dark:text-purple-300 text-center text-sm"><i class="fas fa-handshake mr-2"></i> Meus Terceiros</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div></div>`;
+
         window.initCharts = () => {
             const isDark = document.documentElement.classList.contains('dark'); const fontColor = isDark ? '#cbd5e1' : '#475569';
             if(document.getElementById('chartDifficulty')) {
@@ -264,45 +246,191 @@
             }
         };
 
-        window.editFuncRecord = (type, id) => {
-            const record = window.localData[type].find(r => r.id === id); if(!record) return;
-            
-            window.editingItemId = record.id; // PREVINE O AUTOSAVE DE SOBRESCREVER A TELA
-            
-            const isAdmin = window.currentSystemUser.role === 'admin';
-            if(type === 'reports') window.activeTab = isAdmin ? 'func-reports' : 'func-reports';
-            if(type === 'quotes') window.activeTab = isAdmin ? 'func-quotes' : 'func-quotes';
-            if(type === 'thirdParty') window.activeTab = isAdmin ? 'func-thirdParty' : 'func-thirdParty';
-            window.renderActiveTab();
-            
-            setTimeout(() => {
-                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                document.getElementById(`editId${type}`).value = record.id;
-                
-                const selectCei = document.getElementById(`ceiSelect${sffx}`);
-                const opt = Array.from(selectCei.options).find(o => o.value === record.cei);
-                if(opt) selectCei.value = opt.value;
-                
-                document.getElementById(`date${sffx}`).value = record.date;
-                document.getElementById(`workDone${sffx}`).value = record.workDone || record.desc || record.tpDesc || "";
-                if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
-                
-                if(type === 'reports' || type === 'thirdParty') { document.getElementById(`timeStart${sffx}`).value = record.timeStart || ""; document.getElementById(`timeEnd${sffx}`).value = record.timeEnd || ""; }
-                if(type === 'thirdParty') document.getElementById('companyNameThirdParty').value = record.companyName || "";
-                if(type === 'reports') { document.getElementById('diffRep').value = record.difficulty || "Médio"; }
-                
-                if((type === 'reports' || type === 'quotes') && record.materials) {
-                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
-                    document.getElementById(contId).innerHTML = '';
-                    record.materials.forEach(m => {
-                        window.addMaterialRow(contId, false); const lastRow = document.getElementById(`mat_${window.materialCount}`);
-                        lastRow.querySelector('.mat-name').value = m.name; if(m.brand) lastRow.querySelector('.mat-brand').value = m.brand;
-                        lastRow.querySelector('.mat-qtd').value = m.qtd; if(m.price) lastRow.querySelector('.mat-price').value = m.price;
-                    });
+        window.saveDraft = (type) => {
+            if(window.editingItemId) return;
+            const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+            const draft = { cei: document.getElementById(`ceiSelect${sffx}`)?.value || "", date: document.getElementById(`date${sffx}`)?.value || "", workDone: document.getElementById(`workDone${sffx}`)?.value || "", obs: document.getElementById(`obs${sffx}`)?.value || "" };
+            if(type === 'reports' || type === 'thirdParty') { draft.timeStart = document.getElementById(`timeStart${sffx}`)?.value || ""; draft.timeEnd = document.getElementById(`timeEnd${sffx}`)?.value || ""; }
+            if(type === 'thirdParty') draft.companyName = document.getElementById('companyNameThirdParty')?.value || "";
+            if(type === 'reports') draft.difficulty = document.getElementById('diffRep')?.value || "Médio";
+
+            if(type === 'reports' || type === 'quotes') {
+                const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; const mats = [];
+                document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => { mats.push({ name: row.querySelector('.mat-name')?.value || "", brand: row.querySelector('.mat-brand')?.value || "", qtd: row.querySelector('.mat-qtd')?.value || "1", price: row.querySelector('.mat-price')?.value || "" }); });
+                draft.materials = mats;
+            }
+            localStorage.setItem(`lym_draft_${type}`, JSON.stringify(draft));
+        };
+
+        window.loadDraft = (type) => {
+            if(window.editingItemId) return; const draftStr = localStorage.getItem(`lym_draft_${type}`); if(!draftStr) return;
+            try {
+                const draft = JSON.parse(draftStr); const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                setTimeout(() => {
+                    if(draft.cei) document.getElementById(`ceiSelect${sffx}`).value = draft.cei; if(draft.date) document.getElementById(`date${sffx}`).value = draft.date; if(draft.workDone) document.getElementById(`workDone${sffx}`).value = draft.workDone; if(draft.obs) document.getElementById(`obs${sffx}`).value = draft.obs;
+                    if(type === 'reports' || type === 'thirdParty') { if(draft.timeStart) document.getElementById(`timeStart${sffx}`).value = draft.timeStart; if(draft.timeEnd) document.getElementById(`timeEnd${sffx}`).value = draft.timeEnd; }
+                    if(type === 'thirdParty' && draft.companyName) document.getElementById('companyNameThirdParty').value = draft.companyName; if(type === 'reports' && draft.difficulty) document.getElementById('diffRep').value = draft.difficulty;
+
+                    if((type === 'reports' || type === 'quotes') && draft.materials) {
+                        const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; document.getElementById(contId).innerHTML = '';
+                        if(draft.materials.length === 0) { document.getElementById(contId).innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; } 
+                        else { draft.materials.forEach(m => { window.addMaterialRow(contId, false); const lastRow = document.getElementById(`mat_${window.materialCount}`); lastRow.querySelector('.mat-name').value = m.name; lastRow.querySelector('.mat-brand').value = m.brand; lastRow.querySelector('.mat-qtd').value = m.qtd; lastRow.querySelector('.mat-price').value = m.price; }); }
+                    }
+                }, 100);
+            } catch(e) { console.error("Erro rascunho", e); }
+        };
+
+        window.clearDraft = (type) => { localStorage.removeItem(`lym_draft_${type}`); };
+
+        window.addMaterialRow = (containerId, triggerSave = true) => {
+            const container = document.getElementById(containerId);
+            if(container.querySelector('.italic')) container.innerHTML = "";
+            window.materialCount++; const id = `mat_${window.materialCount}`; const div = document.createElement('div');
+            div.id = id; div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in";
+            div.innerHTML = `<input type="text" class="mat-name flex-grow p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center sm:text-left" placeholder="Material" required><input type="text" class="mat-brand w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Marca"><input type="number" class="mat-qtd w-full sm:w-16 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required><input type="number" class="mat-price w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="R$ Un." step="0.01"><button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200">X</button>`;
+            container.appendChild(div); if(triggerSave) window.saveDraft(window.activeTab.split('-')[1]);
+        };
+
+        window.compressImage = (file, maxWidth = 800, quality = 0.7) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image(); img.src = event.target.result;
+                    img.onload = () => {
+                        try {
+                            const canvas = document.createElement('canvas'); let width = img.width; let height = img.height;
+                            if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                            canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', quality));
+                        } catch(e) { reject(e); }
+                    }; img.onerror = () => reject("Erro img");
+                }; reader.onerror = () => reject("Erro file");
+            });
+        };
+
+        window.handlePhotoSelection = (e, previewId) => {
+            const c = document.getElementById(previewId); c.innerHTML = "";
+            Array.from(e.target.files).forEach(file => {
+                if(file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { c.innerHTML += `<img src="${ev.target.result}" class="h-14 w-14 object-cover rounded shadow border dark:border-slate-600">`; };
+                    reader.readAsDataURL(file);
                 }
-                document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`).textContent = `Editando ${type === 'reports' ? 'Serviço' : (type==='quotes'?'Orçamento':'Acompanhamento')}`;
-                window.showElement('cancelEditBtn');
-            }, 100);
+            });
+        };
+
+        const escapeHtml = (text) => { return (text || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
+        const dataURItoBlob = (dataURI) => {
+            let byteString = atob(dataURI.split(',')[1]); let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            let ab = new ArrayBuffer(byteString.length); let ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
+            return new Blob([ab], {type: mimeString});
+        };
+
+        window.sendToTelegram = async (ceiId, dataObj, base64Photos, isEdit, typeLabel) => {
+            const cei = window.localData.ceis.find(c => c.id === ceiId);
+            if(!cei || !cei.telegramGroupId || cei.telegramGroupId.trim() === "") { throw new Error("A Creche selecionada não tem Grupo do Telegram cadastrado."); }
+            
+            const chatId = cei.telegramGroupId.trim(); const topicId = cei.telegramTopicId ? cei.telegramTopicId.trim() : null;
+            let totalValue = 0; let materialText = "";
+            
+            if(dataObj.materials) {
+                dataObj.materials.forEach(m => {
+                    let v = parseFloat(m.price || 0); let q = parseFloat(m.qtd || 1); totalValue += (v * q);
+                    materialText += `- ${q}x ${escapeHtml(m.name)} (${escapeHtml(m.brand)}) - R$ ${(v * q).toFixed(2)}\n`;
+                });
+            }
+
+            let uName = dataObj.userName || dataObj.userLogin || "Usuário";
+            let wDone = dataObj.workDone || dataObj.desc || dataObj.tpDesc || "Sem descrição";
+
+            let tgText = `${isEdit ? "🔄 <b>[CORREÇÃO DE SERVIÇO]</b>\n" : `🛠 <b>NOVO: ${typeLabel}</b>\n`}🏫 <b>CEI:</b> ${escapeHtml(cei.name)}\n👨‍🔧 <b>Técnico:</b> ${escapeHtml(uName).toUpperCase()}\n📅 <b>Data:</b> ${window.formatDateBR(dataObj.date)}\n`;
+            if (dataObj.timeStart) tgText += `🕒 <b>Horário:</b> ${dataObj.timeStart} às ${dataObj.timeEnd}\n`;
+            if (wDone) tgText += `\n🛠 <b>Descrição/Serviço:</b>\n${escapeHtml(wDone)}\n`;
+            if (dataObj.materials && dataObj.materials.length > 0) tgText += `\n📦 <b>Materiais:</b>\n${materialText}<b>TOTAL: R$ ${totalValue.toFixed(2)}</b>\n`;
+            if (dataObj.obs) tgText += `\n📌 <b>Obs:</b> ${escapeHtml(dataObj.obs)}\n`;
+
+            const payload = { chat_id: chatId, text: tgText, parse_mode: 'HTML' };
+            if (topicId) payload.message_thread_id = topicId;
+            const rTxt = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const rTxtJson = await rTxt.json();
+            if (!rTxtJson.ok) throw new Error("Erro Telegram (Texto): " + rTxtJson.description);
+
+            if (base64Photos && base64Photos.length > 0) {
+                for (let b64 of base64Photos) {
+                    try {
+                        const blob = dataURItoBlob(b64);
+                        const fdPhoto = new FormData(); fdPhoto.append('chat_id', chatId);
+                        if (topicId) fdPhoto.append('message_thread_id', topicId);
+                        fdPhoto.append('photo', blob, 'foto.jpg');
+                        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fdPhoto });
+                    } catch(e) { console.warn("Erro ao enviar foto individual", e); }
+                }
+            }
+
+            let matsHtml = '';
+            if(dataObj.materials && dataObj.materials.length > 0) {
+                matsHtml = `
+                <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Materiais / Custos</h4>
+                <table style="width:100%; text-align:left; border-collapse:collapse; font-size:14px; margin-bottom:20px; border:1px solid #e2e8f0;">
+                    <thead style="background-color:#f1f5f9;"><tr><th style="padding:10px; border:1px solid #e2e8f0; color:#334155;">Qtd</th><th style="padding:10px; border:1px solid #e2e8f0; color:#334155;">Material</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">R$ Un.</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">Total</th></tr></thead>
+                    <tbody>
+                        ${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #e2e8f0; color:#334155;">${m.qtd}</td><td style="padding:10px; border:1px solid #e2e8f0; color:#334155;">${escapeHtml(m.name)} (${escapeHtml(m.brand) || '-'})</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.price)}</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.qtd * m.price)}</td></tr>`).join('')}
+                        <tr style="background-color:#eff6ff;"><td colspan="3" style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#334155;">TOTAL:</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#1d4ed8;">${window.formatMoney(totalValue)}</td></tr>
+                    </tbody>
+                </table>`;
+            }
+
+            let imgsHtml = '';
+            if(base64Photos && base64Photos.length > 0) {
+                imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`;
+            }
+
+            const pdfDiv = document.createElement('div');
+            pdfDiv.style.position = 'absolute'; pdfDiv.style.top = '0'; pdfDiv.style.left = '0'; pdfDiv.style.width = '800px'; pdfDiv.style.zIndex = '-9999'; pdfDiv.style.background = '#ffffff';
+            document.body.appendChild(pdfDiv);
+
+            pdfDiv.innerHTML = `
+            <div style="padding:30px; font-family:Arial, sans-serif; color:#334155; background:#ffffff;">
+                <div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;">
+                    <h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p>
+                </div>
+                ${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                    <div style="width:48%;">
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p>
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${escapeHtml(uName)}</span></p>
+                        ${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}
+                    </div>
+                    <div style="width:48%;">
+                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${escapeHtml(cei.name)}</p>
+                        ${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}
+                        ${dataObj.companyName ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${escapeHtml(dataObj.companyName)}</p>` : ''}
+                    </div>
+                </div>
+                <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4>
+                <div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                    <p style="margin:0; line-height:1.5; color:#334155;">${wDone ? escapeHtml(wDone).replace(/\n/g, '<br>') : 'Sem descrição.'}</p>
+                </div>
+                ${matsHtml}
+                ${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; color:#334155;">${escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}
+                ${imgsHtml}
+            </div>`;
+
+            const opt = { margin: 10, filename: `Relatorio.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            let pdfBlob = await html2pdf().set(opt).from(pdfDiv).output('blob');
+            document.body.removeChild(pdfDiv); 
+
+            const fData = new FormData();
+            fData.append('chat_id', chatId);
+            if (topicId) fData.append('message_thread_id', topicId);
+            fData.append('document', pdfBlob, `Relatorio_${typeLabel}.pdf`);
+            
+            const rDoc = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: fData });
+            const rDocJson = await rDoc.json();
+            if (!rDocJson.ok) throw new Error("Erro Telegram (PDF): " + rDocJson.description);
+
+            return true;
         };
 
         window.saveRecord = async (e, type) => {
@@ -383,43 +511,129 @@
             finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
         };
 
-        window.viewRecord = (type, id) => {
-            const record = window.localData[type].find(r => r.id === id); if(!record) return;
-            const btnPrint = document.getElementById('btnPrintRecord');
-            btnPrint.onclick = () => window.printRecord(type, record);
-
-            const uName = record.userName || record.userLogin || "Usuário";
-            const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
-
-            let html = `
-            <div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 dark:bg-slate-700/50 p-4 rounded border dark:border-slate-600">
-                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Data:</span> ${window.formatDateBR(record.date)}</div>
-                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">CEI:</span> ${record.cei || record.ceiId || ''}</div>
-                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Registro por:</span> <span class="capitalize">${uName}</span></div>`;
+        window.applyFilters = (type) => {
+            const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
+            const start = document.getElementById('filterDateStart')?.value || "";
+            const end = document.getElementById('filterDateEnd')?.value || "";
             
-            if(type === 'reports' || type === 'thirdParty') { html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Horário:</span> ${record.timeStart || '--'} às ${record.timeEnd || '--'}</div>`; }
-            if(type === 'thirdParty') { html += `<div class="col-span-2 dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Empresa:</span> ${record.companyName || ''}</div>`; }
-            if(type === 'reports') { html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Dificuldade:</span> ${record.difficulty || '-'}</div>`; }
-            html += `</div>`;
-
-            html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Serviço Realizado / Descrição</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded border dark:border-slate-600">${desc}</p>`;
-
-            if(record.materials && record.materials.length > 0) {
-                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Materiais / Custos</h4><table class="w-full text-sm text-left mb-6 border dark:border-slate-600"><thead class="bg-slate-100 dark:bg-slate-700"><tr><th class="p-2 border dark:border-slate-600 dark:text-slate-200">Qtd</th><th class="p-2 border dark:border-slate-600 dark:text-slate-200">Material</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200">R$ Un.</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200">Total</th></tr></thead><tbody>`;
-                let totalGeral = 0;
-                record.materials.forEach(m => {
-                    const price = parseFloat(m.price || m.v || 0); const q = parseFloat(m.qtd || m.q || 1); const total = price * q; totalGeral += total;
-                    html += `<tr><td class="p-2 border dark:border-slate-600 dark:text-slate-300">${m.qtd || q}</td><td class="p-2 border dark:border-slate-600 dark:text-slate-300">${m.name} (${m.brand||'-'})</td><td class="p-2 border dark:border-slate-600 text-right dark:text-slate-300">${window.formatMoney(price)}</td><td class="p-2 border dark:border-slate-600 font-medium text-right dark:text-slate-300">${window.formatMoney(total)}</td></tr>`;
+            let data = [...window.localData[type]];
+            if(search) {
+                data = data.filter(item => {
+                    const ceiStr = (item.cei || item.ceiId || "").toLowerCase();
+                    const userStr = (item.userName || item.userLogin || "").toLowerCase();
+                    const compStr = (item.companyName || "").toLowerCase();
+                    const workStr = (item.workDone || item.desc || item.tpDesc || "").toLowerCase();
+                    return ceiStr.includes(search) || userStr.includes(search) || compStr.includes(search) || workStr.includes(search);
                 });
-                if(type === 'reports' || type === 'quotes') { html += `<tr class="bg-blue-50 dark:bg-blue-900/30"><td colspan="3" class="p-2 border dark:border-slate-600 text-right font-bold dark:text-slate-200">TOTAL:</td><td class="p-2 border dark:border-slate-600 font-bold text-blue-700 dark:text-blue-400 text-right text-lg">${window.formatMoney(totalGeral)}</td></tr>`; }
-                html += `</tbody></table>`;
             }
+            if(start) data = data.filter(item => item.date >= start);
+            if(end) data = data.filter(item => item.date <= end);
+            
+            const getSafeTime = (obj) => {
+                if(obj.timestamp) { let t = new Date(obj.timestamp).getTime(); if(!isNaN(t)) return t; }
+                if(obj.date) { let t = new Date(obj.date).getTime(); if(isNaN(t) && obj.date.includes('/')) { t = new Date(obj.date.split('/').reverse().join('-')).getTime(); } if(!isNaN(t)) return t; }
+                return 0;
+            };
 
-            if(record.obs) { html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Observações</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 dark:bg-yellow-900/20 p-3 border border-yellow-200 dark:border-yellow-700/50 rounded">${record.obs}</p>`; }
-            if(record.telegramSent) { html += `<div class="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 dark:border-green-800 font-medium"><i class="fab fa-telegram text-xl"></i> PDF e Fotos enviados com sucesso para o Telegram da creche.</div>`; } else if(record.photos && record.photos.length > 0) { html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`; record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border dark:border-slate-600 rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; }); html += `</div>`; }
-
-            document.getElementById('viewRecordContent').innerHTML = html; window.showElement('modalViewRecord');
+            data.sort((a,b) => getSafeTime(b) - getSafeTime(a));
+            currentFilteredData = data; 
+            
+            const tbody = document.getElementById(`tableBody${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            if(!tbody) return;
+            
+            tbody.innerHTML = data.map(item => {
+                let uName = item.userName || item.userLogin || "Usuário";
+                let mats = Array.isArray(item.materials) ? item.materials : [];
+                let totalVal = mats.reduce((acc, m) => acc + (parseFloat(m.qtd || m.q || 1) * parseFloat(m.price || m.v || 0)), 0);
+                let col3 = type === 'reports' ? uName : (type === 'quotes' ? window.formatMoney(totalVal) : (item.companyName || ""));
+                
+                return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-4">${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${item.cei || item.ceiId || ''}</td><td class="p-4 text-slate-600 dark:text-slate-400 capitalize">${col3}</td><td class="p-4 text-right flex justify-end gap-1"><button onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button><button onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button><button onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`;
+            }).join("") || `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
         };
+
+        window.renderEmployeeHistory = () => {
+            if(!window.currentSystemUser) return;
+            const uid = window.currentSystemUser.id;
+            const uname = window.currentSystemUser.login;
+            
+            const renderRows = (type, tbodyId) => {
+                const tbody = document.getElementById(tbodyId); if(!tbody) return;
+                
+                const getSafeTime = (obj) => {
+                    if(obj.timestamp) { let t = new Date(obj.timestamp).getTime(); if(!isNaN(t)) return t; }
+                    if(obj.date) { let t = new Date(obj.date).getTime(); if(isNaN(t) && obj.date.includes('/')) t = new Date(obj.date.split('/').reverse().join('-')).getTime(); if(!isNaN(t)) return t; }
+                    return 0;
+                };
+
+                const myData = window.localData[type].filter(r => r.userId === uid || r.userName === uname || r.userLogin === uname).sort((a,b) => getSafeTime(b) - getSafeTime(a));
+                
+                // O BOTÃO DE VISUALIZAR (OLHINHO) FOI ADICIONADO AQUI!
+                tbody.innerHTML = myData.map(r => `
+                    <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td class="p-3">${window.formatDateBR(r.date)}</td>
+                        <td class="p-3 font-medium">${r.cei || r.ceiId || ''}</td>
+                        <td class="p-3 text-right flex justify-end gap-1">
+                            <button type="button" onclick="window.viewRecord('${type}', '${r.id}')" title="Visualizar" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button>
+                            <button type="button" onclick="window.editFuncRecord('${type}','${r.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button>
+                            <button type="button" onclick="window.deleteFuncRecord('${type}','${r.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`).join("") || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+            };
+            
+            renderRows('reports', 'empHistoryReports'); 
+            renderRows('quotes', 'empHistoryQuotes'); 
+            renderRows('thirdParty', 'empHistoryThirdParty');
+        };
+
+        window.cancelEdit = () => { 
+            const type = window.activeTab.split('-')[1];
+            window.editingItemId = null; 
+            window.activeTab = window.currentSystemUser.role === 'admin' ? `admin-${type}` : 'func-history';
+            window.renderActiveTab(); 
+        };
+
+        window.editFuncRecord = (type, id) => {
+            const record = window.localData[type].find(r => r.id === id); if(!record) return;
+            
+            window.editingItemId = record.id; // PREVINE O AUTOSAVE DE SOBRESCREVER A TELA
+            
+            const isAdmin = window.currentSystemUser.role === 'admin';
+            if(type === 'reports') window.activeTab = isAdmin ? 'func-reports' : 'func-reports';
+            if(type === 'quotes') window.activeTab = isAdmin ? 'func-quotes' : 'func-quotes';
+            if(type === 'thirdParty') window.activeTab = isAdmin ? 'func-thirdParty' : 'func-thirdParty';
+            window.renderActiveTab();
+            
+            setTimeout(() => {
+                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                document.getElementById(`editId${type}`).value = record.id;
+                
+                const selectCei = document.getElementById(`ceiSelect${sffx}`);
+                const opt = Array.from(selectCei.options).find(o => o.value === record.cei);
+                if(opt) selectCei.value = opt.value;
+                
+                document.getElementById(`date${sffx}`).value = record.date;
+                document.getElementById(`workDone${sffx}`).value = record.workDone || record.desc || record.tpDesc || "";
+                if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
+                
+                if(type === 'reports' || type === 'thirdParty') { document.getElementById(`timeStart${sffx}`).value = record.timeStart || ""; document.getElementById(`timeEnd${sffx}`).value = record.timeEnd || ""; }
+                if(type === 'thirdParty') document.getElementById('companyNameThirdParty').value = record.companyName || "";
+                if(type === 'reports') { document.getElementById('diffRep').value = record.difficulty || "Médio"; }
+                
+                if((type === 'reports' || type === 'quotes') && record.materials) {
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer';
+                    document.getElementById(contId).innerHTML = '';
+                    record.materials.forEach(m => {
+                        window.addMaterialRow(contId, false); const lastRow = document.getElementById(`mat_${window.materialCount}`);
+                        lastRow.querySelector('.mat-name').value = m.name; if(m.brand) lastRow.querySelector('.mat-brand').value = m.brand;
+                        lastRow.querySelector('.mat-qtd').value = m.qtd; if(m.price) lastRow.querySelector('.mat-price').value = m.price;
+                    });
+                }
+                document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`).textContent = `Editando ${type === 'reports' ? 'Serviço' : (type==='quotes'?'Orçamento':'Acompanhamento')}`;
+                window.showElement('cancelEditBtn');
+            }, 100);
+        };
+
+        window.deleteFuncRecord = (type, id) => { window.confirmAction(async () => { await window.dbDelete(type, id); window.logAudit(`${window.currentSystemUser.role === 'admin' ? 'Admin' : 'Funcionário'} excluiu ${type} ID: ${id}`); window.showToast("Registro excluído!"); if (window.currentSystemUser.role === 'admin') { window.setupAdminFilters(); } else { window.renderEmployeeHistory(); } }); };
 
         window.onload = () => { window.initFirebaseSync(); };
     </script>
