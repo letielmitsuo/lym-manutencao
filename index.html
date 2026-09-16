@@ -859,6 +859,103 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
             document.getElementById('viewRecordContent').innerHTML = html; window.showElement('modalViewRecord');
         };
 
+// ----------------------------------------------------
+        // Lógica de Gestão de Usuários e Creches (CEIs)
+        // ----------------------------------------------------
+        window.openUserModal = () => {
+            window.editingItemId = null;
+            document.getElementById('userForm').reset();
+            document.getElementById('newUsername').readOnly = false;
+            document.getElementById('modalTitleUser').textContent = "Novo Usuário";
+            window.showElement('modalUser');
+        };
+
+        window.editUser = (id) => {
+            const u = window.localData.users.find(x => x.id === id);
+            if(u) {
+                window.editingItemId = id;
+                document.getElementById('newUsername').value = u.login || u.username;
+                document.getElementById('newUsername').readOnly = true; // Impede mudar o login na edição
+                document.getElementById('newPassword').value = u.pass || u.password;
+                document.getElementById('newRole').value = u.role || 'funcionario';
+                document.getElementById('modalTitleUser').textContent = "Editar Usuário";
+                window.showElement('modalUser');
+            }
+        };
+
+        window.saveUser = async (e) => {
+            e.preventDefault();
+            const login = document.getElementById('newUsername').value.trim();
+            const pass = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+            if(!login) return;
+            
+            // Impede criar usuário com login duplicado
+            if(!window.editingItemId && window.localData.users.find(u => (u.login === login || u.username === login))) {
+                return window.showToast("Este login já existe!", "error");
+            }
+            
+            const id = window.editingItemId || Date.now().toString();
+            await window.dbSave('users', id, { id: String(id), login: login, pass: pass, password: pass, role: role });
+            window.logAudit(window.editingItemId ? `Usuário Editado: ${login}` : `Usuário Criado: ${login}`);
+            window.showToast("Usuário salvo com sucesso!");
+            window.hideElement('modalUser');
+            if(window.activeTab === 'admin-users') window.renderActiveTab();
+        };
+
+        window.deleteUser = (id) => {
+            if(id === window.currentSystemUser.id) return window.showToast("Não é possível excluir o próprio usuário logado!", "error");
+            window.confirmAction(async () => {
+                await window.dbDelete('users', id);
+                window.logAudit(`Usuário Excluído ID: ${id}`);
+                window.showToast("Usuário excluído!");
+                if(window.activeTab === 'admin-users') window.renderActiveTab();
+            });
+        };
+
+        window.openCeiModal = () => {
+            window.editingItemId = null;
+            document.getElementById('ceiForm').reset();
+            document.getElementById('modalTitleCei').textContent = "Nova Creche";
+            window.showElement('modalCei');
+        };
+
+        window.editCei = (id) => {
+            const c = window.localData.ceis.find(x => x.id === id);
+            if(c) {
+                window.editingItemId = id;
+                document.getElementById('ceiName').value = c.name || "";
+                document.getElementById('ceiTelegramId').value = c.telegramGroupId || "";
+                document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId || "";
+                document.getElementById('modalTitleCei').textContent = "Editar Creche";
+                window.showElement('modalCei');
+            }
+        };
+
+        window.saveCei = async (e) => {
+            e.preventDefault();
+            const n = document.getElementById('ceiName').value.trim();
+            const tgId = document.getElementById('ceiTelegramId').value.trim();
+            const tgTopic = document.getElementById('ceiTelegramTopicId').value.trim();
+            if(!n) return;
+            
+            const id = window.editingItemId || Date.now().toString();
+            await window.dbSave('ceis', id, { id: String(id), name: n, telegramGroupId: tgId, telegramTopicId: tgTopic });
+            window.logAudit(window.editingItemId ? `Creche Editada: ${n}` : `Creche Criada: ${n}`);
+            window.showToast("Creche salva com sucesso!");
+            window.hideElement('modalCei');
+            if(window.activeTab === 'admin-ceis') window.renderActiveTab();
+        };
+
+        window.deleteCei = (id) => {
+            window.confirmAction(async () => {
+                await window.dbDelete('ceis', id);
+                window.logAudit(`Creche Excluída ID: ${id}`);
+                window.showToast("Creche excluída!");
+                if(window.activeTab === 'admin-ceis') window.renderActiveTab();
+            });
+        };
+
         window.onload = () => { window.initFirebaseSync(); };
 
     </script>
