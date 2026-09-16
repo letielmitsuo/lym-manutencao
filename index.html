@@ -403,29 +403,33 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
             const navLinks = document.getElementById('navLinks'); navLinks.innerHTML = "";
             document.getElementById('mobileMenuBtn').onclick = () => { navLinks.classList.toggle('hidden'); navLinks.classList.toggle('flex'); };
             const role = window.currentSystemUser.role;
-            let menuItems = role === 'admin' ? [
-                { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' }, 
-                { id: 'admin-catalog', icon: 'fa-box-open', label: 'Almoxarifado' },
-                { id: 'admin-ceis', icon: 'fa-school', label: 'Creches (CEIs)' }, 
-                { id: 'admin-users', icon: 'fa-users', label: 'Usuários' }, 
-                { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços' }, 
-                { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, 
-                { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, 
-                { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' }
-            ] : [
-                { id: 'func-stock', icon: 'fa-box-open', label: 'Meu Almoxarifado' },
-                { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' }, 
-                { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' }, 
-                { id: 'func-thirdParty', icon: 'fa-eye', label: 'Acomp. Terceiro' }, 
-                { id: 'func-history', icon: 'fa-history', label: 'Meus Registros' }
-            ];
+            
+            let menuItems = [];
+            if (role === 'admin') {
+                menuItems = [
+                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' }, 
+                    { id: 'admin-catalog', icon: 'fa-box-open', label: 'Almoxarifado' },
+                    { id: 'admin-ceis', icon: 'fa-school', label: 'Creches (CEIs)' }, 
+                    { id: 'admin-users', icon: 'fa-users', label: 'Usuários' }, 
+                    { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços' }, 
+                    { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, 
+                    { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, 
+                    { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' }
+                ];
+            } else {
+                menuItems = [
+                    { id: 'func-stock', icon: 'fa-box-open', label: 'Meu Almoxarifado' },
+                    { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' }, 
+                    { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' }
+                ];
+                // Só adiciona a aba Terceiros se NÃO for a equipe de CFTV
+                if (role !== 'func_cftv') {
+                    menuItems.push({ id: 'func-thirdParty', icon: 'fa-eye', label: 'Acomp. Terceiro' });
+                }
+                menuItems.push({ id: 'func-history', icon: 'fa-history', label: 'Meus Registros' });
+            }
 
-            menuItems.forEach(item => {
-                const a = document.createElement('a'); a.href = "#"; a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium";
-                a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`;
-                a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); };
-                navLinks.appendChild(a);
-            });
+            menuItems.forEach(item => { const a = document.createElement('a'); a.href = "#"; a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium"; a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`; a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); }; navLinks.appendChild(a); });
         };
 
         window.renderActiveTab = () => {
@@ -541,7 +545,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                     <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI..."></div>
                     <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div>
                     <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div>
-                    ${type === 'reports' ? `<div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Equipe</label><select id="filterSector" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"><option value="">Todas</option><option value="geral">Manutenção Geral</option><option value="func_cftv">Equipe CFTV</option></select></div>` : '<div class="hidden md:block"></div>'}
+                    ${(type === 'reports' || type === 'quotes') ? `<div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Equipe</label><select id="filterSector" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"><option value="">Todas</option><option value="geral">Manutenção Geral</option><option value="func_cftv">Equipe CFTV</option></select></div>` : '<div class="hidden md:block"></div>'}
                     <div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900 dark:hover:bg-slate-500"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div>
                 </div>
             </div>`;
@@ -557,7 +561,9 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
             const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
             const start = document.getElementById('filterDateStart')?.value || "";
             const end = document.getElementById('filterDateEnd')?.value || "";
+            
             let data = [...(window.localData[type] || [])];
+            
             if(search) {
                 data = data.filter(item => {
                     const ceiStr = String(item.cei || item.ceiId || "").toLowerCase();
@@ -570,25 +576,8 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
             if(start) data = data.filter(item => item.date >= start);
             if(end) data = data.filter(item => item.date <= end);
             
-            if(type === 'reports') {
-                const sector = document.getElementById('filterSector')?.value || "";
-                if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv');
-                else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
-            }
-            
-            data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
-            if(end) data = data.filter(item => item.date <= end);
-            
-            if(type === 'reports') {
-                const sector = document.getElementById('filterSector')?.value || "";
-                if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv');
-                else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
-            }
-            
-            data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
-            if(end) data = data.filter(item => item.date <= end);
-            
-            if(type === 'reports') {
+            // FILTRO DE EQUIPE PARA SERVIÇOS E ORÇAMENTOS
+            if(type === 'reports' || type === 'quotes') {
                 const sector = document.getElementById('filterSector')?.value || "";
                 if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv');
                 else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
@@ -597,16 +586,22 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
             data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
             window.currentFilteredData = data; 
             
-            let tbodyId = type === 'reports' ? 'tableBodyReports' : (type === 'quotes' ? 'tableBodyQuotes' : 'tableBodyThirdParty');
-            const tbody = document.getElementById(tbodyId); if(!tbody) return;
+            let tbodyId = '';
+            if(type === 'reports') tbodyId = 'tableBodyReports';
+            else if(type === 'quotes') tbodyId = 'tableBodyQuotes';
+            else if(type === 'thirdParty') tbodyId = 'tableBodyThirdParty';
+            
+            const tbody = document.getElementById(tbodyId);
+            if(!tbody) return;
             
             tbody.innerHTML = data.map(item => {
                 let uName = item.userName || item.userLogin || "Usuário";
                 let mats = Array.isArray(item.materials) ? item.materials : [];
                 let totalVal = mats.reduce((acc, m) => acc + (parseFloat(m.qtd || m.q || 1) * parseFloat(m.price || m.v || 0)), 0);
                 if (isNaN(totalVal)) totalVal = 0;
+                
                 let col3 = type === 'reports' ? uName : (type === 'quotes' ? window.formatMoney(totalVal) : String(item.companyName || ""));
-                let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Pendente Telegram"></i>' : '';
+                let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Pendente Telegram WiFi"></i>' : '';
 
                 return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-4">${badgeTg}${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${window.escapeHtml(item.cei || item.ceiId || '')}</td><td class="p-4 text-slate-600 dark:text-slate-400 capitalize">${window.escapeHtml(col3)}</td><td class="p-4 text-right flex justify-end gap-1"><button onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button><button onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button><button onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`;
             }).join("") || `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
