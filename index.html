@@ -173,7 +173,7 @@
                     <input type="text" id="newPassword" value="123mudar" required class="w-full p-2 border dark:border-slate-600 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 rounded-lg outline-none text-center font-mono">
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 text-center mt-1">O usuário será forçado a trocar essa senha ao logar.</p>
                 </div>
-                <select id="newRole" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="funcionario">Funcionário</option><option value="admin">Administrador</option></select>
+                <select id="newRole" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="funcionario">Funcionário Geral</option><option value="func_cftv">Técnico CFTV</option><option value="admin">Administrador</option></select>
                 <div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div>
             </form>
         </div>
@@ -366,7 +366,10 @@
             window.hideElement('modalForcePassword'); window.hideElement('loginScreen'); window.showElement('appLayout');
             
             document.getElementById('userNameDisplay').textContent = window.currentSystemUser.login;
-            document.getElementById('userRoleDisplay').textContent = window.currentSystemUser.role === 'admin' ? 'Administrador' : 'Funcionário';
+            let roleDisplay = 'Funcionário Geral';
+if(window.currentSystemUser.role === 'admin') roleDisplay = 'Administrador';
+if(window.currentSystemUser.role === 'func_cftv') roleDisplay = 'Técnico CFTV';
+document.getElementById('userRoleDisplay').textContent = roleDisplay;
             document.getElementById('userInitial').textContent = window.currentSystemUser.login.charAt(0).toUpperCase();
             
             window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; window.renderActiveTab();
@@ -532,7 +535,16 @@
         const renderAdminCeis = () => { let trs = [...window.localData.ceis].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.telegramGroupId || '-')} / ${window.escapeHtml(c.telegramTopicId || '-')}</td><td class="px-3 py-2 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Nome</th><th class="px-3 py-2 font-semibold">Telegram (Grupo/Tópico)</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
         const renderAdminUsers = () => { let trs = [...window.localData.users].sort((a,b)=>String(a.login).localeCompare(String(b.login))).map(u => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}">${String(u.role).toUpperCase()}</span></td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.resetUserPassword('${u.id}')" title="Resetar Senha" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded"><i class="fas fa-key"></i></button><button onclick="window.editUser('${u.id}')" title="Editar" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" title="Apagar" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Login</th><th class="px-3 py-2 font-semibold">Nível</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
 
-        const renderFilterBar = (type) => `<div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-4 animate-fade-in"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end"><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI..."></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div><div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900 dark:hover:bg-slate-500"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div></div></div>`;
+        const renderFilterBar = (type) => `
+            <div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-4 animate-fade-in">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+                    <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI..."></div>
+                    <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div>
+                    <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div>
+                    ${type === 'reports' ? `<div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Equipe</label><select id="filterSector" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"><option value="">Todas</option><option value="geral">Manutenção Geral</option><option value="func_cftv">Equipe CFTV</option></select></div>` : '<div class="hidden md:block"></div>'}
+                    <div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900 dark:hover:bg-slate-500"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div>
+                </div>
+            </div>`;
         const renderAdminReports = () => renderFilterBar('reports') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Técnico</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
         const renderAdminQuotes = () => renderFilterBar('quotes') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Total Orçado</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
         const renderAdminThirdParty = () => renderFilterBar('thirdParty') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Empresa</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
@@ -557,6 +569,30 @@
             }
             if(start) data = data.filter(item => item.date >= start);
             if(end) data = data.filter(item => item.date <= end);
+            
+            if(type === 'reports') {
+                const sector = document.getElementById('filterSector')?.value || "";
+                if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv');
+                else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
+            }
+            
+            data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
+            if(end) data = data.filter(item => item.date <= end);
+            
+            if(type === 'reports') {
+                const sector = document.getElementById('filterSector')?.value || "";
+                if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv');
+                else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
+            }
+            
+            data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
+            if(end) data = data.filter(item => item.date <= end);
+            
+            if(type === 'reports') {
+                const sector = document.getElementById('filterSector')?.value || "";
+                if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv');
+                else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
+            }
             
             data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
             window.currentFilteredData = data; 
@@ -698,7 +734,12 @@
                 const editId = document.getElementById(`editId${type}`)?.value || ""; const isEdit = editId !== ""; const recordId = isEdit ? editId : Date.now().toString();
                 const selectElement = document.getElementById(`ceiSelect${sffx}`); const ceiId = selectElement?.options[selectElement.selectedIndex]?.getAttribute('data-id') || "";
                 
-                const recordData = { id: String(recordId), userId: String(window.currentSystemUser?.id || "anon"), userName: String(window.currentSystemUser?.login || "Usuário"), cei: String(selectElement?.options[selectElement.selectedIndex]?.text || "CEI Não Informada"), ceiId: String(ceiId), date: String(document.getElementById(`date${sffx}`)?.value || ""), workDone: String(document.getElementById(`workDone${sffx}`)?.value || ""), obs: String(document.getElementById(`obs${sffx}`)?.value || ""), timestamp: new Date().toISOString() };
+                const recordData = {
+                    id: String(recordId), 
+                    userId: String(window.currentSystemUser?.id || "anon"), 
+                    userName: String(window.currentSystemUser?.login || "Usuário"),
+                    userRole: String(window.currentSystemUser?.role || "funcionario"),
+                    cei: String(selectElement?.options[selectElement.selectedIndex]?.text || "CEI Não Informada"), ceiId: String(ceiId), date: String(document.getElementById(`date${sffx}`)?.value || ""), workDone: String(document.getElementById(`workDone${sffx}`)?.value || ""), obs: String(document.getElementById(`obs${sffx}`)?.value || ""), timestamp: new Date().toISOString() };
                 if(type === 'reports' || type === 'thirdParty') { recordData.timeStart = String(document.getElementById(`timeStart${sffx}`)?.value || ""); recordData.timeEnd = String(document.getElementById(`timeEnd${sffx}`)?.value || ""); }
                 if(type === 'thirdParty') { recordData.companyName = String(document.getElementById('companyNameThirdParty')?.value || ""); }
                 if(type === 'reports') { recordData.difficulty = String(document.getElementById('diffRep')?.value || "Médio"); }
