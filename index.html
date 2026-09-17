@@ -155,6 +155,37 @@
         </div>
     </div>
 
+<!-- MODAL FERRAMENTAS -->
+    <div id="modalTool" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
+            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
+                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleTool">Nova Ferramenta</h3>
+                <button type="button" onclick="window.hideElement('modalTool')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <form id="toolForm" onsubmit="window.saveTool(event)" class="p-4 sm:p-5 space-y-3">
+                <input type="text" id="toolName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome da Ferramenta *">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Cód. Barras/Patrimônio</label>
+                        <div class="flex">
+                            <input type="text" id="toolBarcode" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-l-lg outline-none text-xs text-center" placeholder="Ex: 12345">
+                            <button type="button" onclick="window.scanForInput('toolBarcode')" class="bg-blue-600 text-white px-2 rounded-r-lg hover:bg-blue-700"><i class="fas fa-camera"></i></button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Marca/Modelo</label>
+                        <input type="text" id="toolBrand" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center">
+                    </div>
+                </div>
+                <div class="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-100 dark:border-amber-800 text-center">
+                    <label class="block text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">Quantidade Total Adquirida</label>
+                    <input type="number" id="toolTotal" value="1" min="1" step="1" class="w-full p-2 border border-amber-200 dark:border-amber-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg text-amber-700 dark:text-amber-400">
+                </div>
+                <div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalTool')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
     <!-- TELA DA CÂMERA (OCULTA) -->
     <div id="modalScanner" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-[100] p-4">
         <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl animate-fade-in">
@@ -259,7 +290,7 @@
         db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Firebase Offline falhou: ", err));
 
         // 2. Estado Global
-        window.localData = { ceis: [], users: [], reports: [], quotes: [], thirdParty: [], audit: [], catalog: [], stockMovements: [] };
+        window.localData = { ceis: [], users: [], reports: [], quotes: [], thirdParty: [], audit: [], catalog: [], stockMovements: [], tools: [], toolMovements: [] };
         window.currentSystemUser = null; 
         window.activeTab = 'dashboard'; 
         window.editingItemId = null; 
@@ -333,7 +364,7 @@
         // 4. Sync do Banco
         window.initFirebaseSync = function() {
             try {
-                const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements'];
+                const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements', 'tools', 'toolMovements'];
                 cols.forEach(col => {
                     db.collection(col).onSnapshot(snap => {
                         window.localData[col] = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -441,7 +472,8 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                     { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, 
                     { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, 
                     { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' },
-                    { id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' }
+                    { id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' },
+                    { id: 'admin-tools', icon: 'fa-toolbox', label: 'Ferramentas' }
                 ];
             } else {
                 menuItems = [
@@ -454,6 +486,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                 } else {
                     menuItems.push({ id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' });
                 }
+                menuItems.push({ id: 'func-tools', icon: 'fa-toolbox', label: 'Cautela Ferramentas' });
                 menuItems.push({ id: 'func-history', icon: 'fa-history', label: 'Meus Registros' });
             }
 
@@ -471,6 +504,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                         case 'admin-ceis': title = "Gestão de Creches"; html = renderAdminCeis(); break; 
                         case 'admin-users': title = "Gestão de Usuários"; html = renderAdminUsers(); break; 
                         case 'admin-catalog': title = "Almoxarifado Geral"; html = renderAdminCatalog(); break;
+                        case 'admin-tools': title = "Gestão de Ferramentas"; html = renderAdminTools(); break;
                         case 'admin-reports': title = "Serviços Concluídos"; html = renderAdminReports(); break; 
                         case 'admin-quotes': title = "Orçamentos Recebidos"; html = renderAdminQuotes(); break; 
                         case 'admin-thirdParty': title = "Terceiros Acompanhados"; html = renderAdminThirdParty(); break; 
@@ -483,6 +517,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                 } else {
                     switch(window.activeTab) { 
                         case 'func-stock': title = "Meu Almoxarifado"; html = renderFuncStockForm(); break;
+                        case 'func-tools': title = "Cautela de Ferramentas"; html = renderFuncTools(); break;
                         case 'func-reports': title = "Registrar Manutenção"; html = renderFuncReportForm(); break; 
                         case 'func-quotes': title = "Novo Orçamento"; html = renderFuncQuoteForm(); break; 
                         case 'func-thirdParty': title = "Acompanhar Terceiro"; html = renderFuncThirdPartyForm(); break; 
@@ -1017,6 +1052,65 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
         });
 
 // ----------------------------------------------------
+        // MÓDULO DE CAUTELA (FERRAMENTAS)
+        // ----------------------------------------------------
+        window.openToolModal = () => { window.editingItemId = null; document.getElementById('toolForm').reset(); document.getElementById('modalTitleTool').textContent = "Nova Ferramenta"; window.showElement('modalTool'); };
+        window.editTool = (id) => { const c = window.localData.tools.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('toolName').value = c.name || ""; document.getElementById('toolBrand').value = c.brand || ""; document.getElementById('toolBarcode').value = c.barcode || ""; document.getElementById('toolTotal').value = c.totalStock || "1"; document.getElementById('modalTitleTool').textContent = "Editar Ferramenta"; window.showElement('modalTool'); } };
+        
+        window.saveTool = async (e) => { 
+            e.preventDefault(); const n = document.getElementById('toolName').value.trim(); const b = document.getElementById('toolBrand').value.trim(); const tot = parseInt(document.getElementById('toolTotal').value) || 1; const bc = document.getElementById('toolBarcode').value.trim(); if(!n) return; 
+            const id = window.editingItemId || Date.now().toString(); 
+            let existing = window.localData.tools.find(x => x.id === id);
+            let available = existing ? existing.availableStock + (tot - existing.totalStock) : tot;
+            if(available < 0) available = 0;
+            await window.dbSave('tools', id, { id: String(id), name: n, brand: b, totalStock: tot, availableStock: available, barcode: bc }); 
+            window.logAudit(window.editingItemId ? `Ferramenta Editada: ${n}` : `Ferramenta Criada: ${n}`); window.showToast("Ferramenta salva!"); window.hideElement('modalTool'); 
+        };
+        window.deleteTool = (id) => { window.confirmAction(async () => { await window.dbDelete('tools', id); window.logAudit(`Ferramenta Excluída ID: ${id}`); window.showToast("Excluída!"); }); };
+
+        window.saveToolMovement = async (e) => {
+            e.preventDefault(); const type = document.getElementById('tType').value; const date = document.getElementById('tDate').value; const obs = document.getElementById('tObs').value.trim(); const toolId = document.getElementById('tToolSelect').value; const qtd = parseInt(document.getElementById('tQtd').value) || 1;
+            if(!toolId) return window.showToast("Selecione uma ferramenta.", "error"); 
+            const btn = document.getElementById('btnSubmitTool'); const origText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Registrando...'; btn.disabled = true; 
+            try { 
+                const toolItem = window.localData.tools.find(c => c.id === toolId);
+                if(!toolItem) throw new Error("Ferramenta não encontrada");
+                let currentStock = parseInt(toolItem.availableStock || 0);
+                if(type === 'Retirada' && currentStock < qtd) { window.showToast("Quantidade indisponível na base!", "error"); btn.innerHTML = origText; btn.disabled = false; return; }
+                let newStock = type === 'Retirada' ? currentStock - qtd : currentStock + qtd; 
+                if (type === 'Devolução' && newStock > toolItem.totalStock) newStock = toolItem.totalStock; // Proteção
+                await window.dbSave('tools', toolItem.id, { availableStock: newStock }); 
+                const recordId = Date.now().toString(); 
+                const recordData = { id: recordId, userId: window.currentSystemUser.id, userName: window.currentSystemUser.login, type: type, date: date, obs: obs, toolId: toolItem.id, toolName: toolItem.name, qtd: qtd, timestamp: new Date().toISOString() }; 
+                await window.dbSave('toolMovements', recordId, recordData); 
+                window.logAudit(`Cautela (${type}): ${qtd}x ${toolItem.name}`); window.showToast("Cautela registrada com sucesso!"); 
+                document.getElementById('toolMovementForm').reset(); window.renderActiveTab(); 
+            } catch(err) { window.showToast("Erro ao salvar.", "error"); } finally { btn.innerHTML = origText; btn.disabled = false; } 
+        };
+
+        const renderAdminTools = () => {
+            let trs = [...window.localData.tools].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => {
+                let statusClass = c.availableStock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.brand || '-')}</td><td class="px-3 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 text-center">${c.totalStock}</td><td class="px-3 py-2 text-sm font-bold ${statusClass} text-center">${c.availableStock}</td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.editTool('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteTool('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`;
+            }).join(""); 
+            let historyTrs = [...window.localData.toolMovements].sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 50).map(m => { 
+                let badgeClass = m.type === 'Retirada' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'; 
+                return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400">${m.qtd}x ${window.escapeHtml(m.toolName)}</td></tr>`; 
+            }).join("");
+            return `<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-toolbox mr-2 text-amber-600"></i> Inventário de Ferramentas</h3><button onclick="window.openToolModal()" class="bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto max-h-[600px]"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Ferramenta</th><th class="px-3 py-2 font-semibold">Marca/Patrimônio</th><th class="px-3 py-2 font-semibold text-center">Total da Empresa</th><th class="px-3 py-2 font-semibold text-center">Na Base (Livre)</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="5" class="p-6 text-center text-slate-400">Nenhuma ferramenta cadastrada.</td></tr>`}</tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden max-h-[650px] flex flex-col"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-amber-600"></i> Cautelas (Empréstimos)</h3></div><div class="overflow-x-auto flex-grow"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Técnico</th><th class="px-3 py-2 font-semibold">Ação</th><th class="px-3 py-2 font-semibold">Item</th></tr></thead><tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação.</td></tr>`}</tbody></table></div></div></div>`;
+        };
+
+        const renderFuncTools = () => {
+            const uid = String(window.currentSystemUser.id);
+            let myTools = [...window.localData.toolMovements].filter(r => r.userId === uid).sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 50).map(m => { 
+                let badgeClass = m.type === 'Retirada' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'; 
+                return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 leading-tight">${m.qtd}x ${window.escapeHtml(m.toolName)}</td></tr>`; 
+            }).join("");
+            let options = '<option value="">Selecione a ferramenta...</option>' + window.localData.tools.sort((a,b) => String(a.name).localeCompare(String(b.name))).map(c => `<option value="${c.id}">${window.escapeHtml(c.name)} (Livre: ${c.availableStock})</option>`).join('');
+            return `<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-amber-700 dark:text-amber-400 text-center w-full"><i class="fas fa-toolbox mr-2"></i> Cautela de Ferramentas</h3></div><form id="toolMovementForm" onsubmit="window.saveToolMovement(event)" class="space-y-4"><div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Ação *</label><select id="tType" required class="w-full p-2 border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold"><option value="Retirada">Pegar Emprestado</option><option value="Devolução">Devolver à Base</option></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="tDate" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Ferramenta *</label><div class="flex gap-1"><button type="button" onclick="window.scanForTool()" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700" title="Ler Código"><i class="fas fa-barcode"></i></button><select id="tToolSelect" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm">${options}</select></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Quantidade *</label><input type="number" id="tQtd" required min="1" step="1" value="1" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observação / Estado</label><textarea id="tObs" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none text-sm" placeholder="Ex: Furadeira entregue sem a broca 6"></textarea></div><button type="submit" id="btnSubmitTool" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-2">Registrar</button></form></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-history mr-2 text-blue-600"></i> Meu Histórico de Ferramentas</h3></div><div class="overflow-x-auto flex-grow max-h-[400px]"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Ação</th><th class="px-3 py-2 font-semibold">Ferramenta</th></tr></thead><tbody>${myTools || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma cautela.</td></tr>`}</tbody></table></div></div></div>`;
+        };
+
+// ----------------------------------------------------
         // LÓGICA DO LEITOR DE CÓDIGO DE BARRAS / CÂMERA
         // ----------------------------------------------------
         window.html5QrcodeScanner = null;
@@ -1045,6 +1139,18 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                 }).catch(err => console.log(err));
             }
             window.hideElement('modalScanner');
+        };
+
+window.scanForTool = () => {
+            window.startScanner((code) => {
+                const found = window.localData.tools.find(c => c.barcode === code);
+                if (found) {
+                    document.getElementById('tToolSelect').value = found.id;
+                    window.showToast("Ferramenta Localizada: " + found.name);
+                } else {
+                    window.showToast("Ferramenta não encontrada no sistema.", "error");
+                }
+            });
         };
 
         // Admin: Grava o código de barras no Cadastro
