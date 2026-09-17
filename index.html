@@ -129,19 +129,41 @@
                 <select id="catCategory" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center">
                     <option value="Segurança Eletrônica">Segurança Eletrônica</option><option value="Redes e Informática">Redes e Informática</option><option value="Elétrica">Elétrica</option><option value="Hidráulica">Hidráulica</option><option value="Ferramentas">Ferramentas</option><option value="Consumíveis">Consumíveis</option><option value="Outros">Outros</option>
                 </select>
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="text" id="catBrand" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Marca">
-                    <input type="number" id="catPrice" step="0.01" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Preço (R$)">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Cód. Barras</label>
+                        <div class="flex">
+                            <input type="text" id="catBarcode" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-l-lg outline-none text-xs text-center" placeholder="Ex: 789...">
+                            <button type="button" onclick="window.scanForInput('catBarcode')" class="bg-blue-600 text-white px-2 rounded-r-lg hover:bg-blue-700"><i class="fas fa-camera"></i></button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Marca</label>
+                        <input type="text" id="catBrand" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Preço (R$)</label>
+                        <input type="number" id="catPrice" step="0.01" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center">
+                    </div>
                 </div>
                 <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 text-center">
                     <label class="block text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Quantidade no Estoque</label>
                     <input type="number" id="catStock" value="0" step="0.1" class="w-full p-2 border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg text-blue-700 dark:text-blue-400">
                 </div>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalCatalog')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
+                <div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalCatalog')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div>
             </form>
+        </div>
+    </div>
+
+    <!-- TELA DA CÂMERA (OCULTA) -->
+    <div id="modalScanner" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-[100] p-4">
+        <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl animate-fade-in">
+            <div class="p-3 bg-slate-100 dark:bg-slate-700 flex justify-between items-center border-b dark:border-slate-600">
+                <h3 class="font-bold dark:text-white"><i class="fas fa-barcode mr-2 text-blue-500"></i> Escanear Código</h3>
+                <button type="button" onclick="window.stopScanner()" class="text-red-500 text-xl font-bold px-2"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="reader" class="w-full bg-black" style="min-height: 300px;"></div>
+            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras do produto.</div>
         </div>
     </div>
 
@@ -501,12 +523,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
         window.updateCatalogDatalist = () => { const dl = document.getElementById('catalogList'); if(!dl) return; dl.innerHTML = window.localData.catalog.map(c => `<option value="${window.escapeHtml(c.name)}">`).join(''); };
         window.getStockOptionsHtml = () => { return '<option value="">Selecione o Item...</option>' + [...window.localData.catalog].sort((a,b) => String(a.name).localeCompare(String(b.name))).map(c => `<option value="${c.id}">${window.escapeHtml(c.name)} (${window.escapeHtml(c.brand || '-')}) - Estoque: ${c.stock || 0}</option>`).join(''); };
         window.openCatalogModal = () => { window.editingItemId = null; document.getElementById('catalogForm').reset(); document.getElementById('modalTitleCatalog').textContent = "Novo Item"; window.showElement('modalCatalog'); };
-        window.editCatalog = (id) => { const c = window.localData.catalog.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('catName').value = c.name || ""; document.getElementById('catBrand').value = c.brand || ""; document.getElementById('catCategory').value = c.category || "Segurança Eletrônica"; document.getElementById('catPrice').value = c.price || ""; document.getElementById('catStock').value = c.stock || "0"; document.getElementById('catBarcode').value = c.barcode || ""; document.getElementById('modalTitleCatalog').textContent = "Editar Item de Estoque"; window.showElement('modalCatalog'); } };
-        
-        window.saveCatalog = async (e) => { 
-            e.preventDefault(); const n = document.getElementById('catName').value.trim(); const b = document.getElementById('catBrand').value.trim(); const cat = document.getElementById('catCategory').value; const p = document.getElementById('catPrice').value; const s = document.getElementById('catStock').value; const bc = document.getElementById('catBarcode').value.trim(); if(!n) return; 
-            const id = window.editingItemId || Date.now().toString(); await window.dbSave('catalog', id, { id: String(id), name: n, brand: b, category: cat, price: p, stock: parseFloat(s || 0), barcode: bc }); window.logAudit(window.editingItemId ? `Estoque Editado: ${n}` : `Estoque Criado: ${n}`); window.showToast("Material salvo!"); window.hideElement('modalCatalog'); 
-        };
+        window.editCatalog = (id) => { const c = window.localData.catalog.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('catName').value = c.name || ""; document.getElementById('catBrand').value = c.brand || ""; document.getElementById('catCategory').value = c.category || "Segurança Eletrônica"; document.getElementById('catPrice').value = c.price || ""; document.getElementById('catStock').value = c.stock || "0"; document.getElementById('catBarcode').value = c.barcode || ""; document.getElementById('modalTitleCatalog').textContent = "Editar Item"; window.showElement('modalCatalog'); } };
         
         window.saveCatalog = async (e) => { 
             e.preventDefault(); const n = document.getElementById('catName').value.trim(); const b = document.getElementById('catBrand').value.trim(); const cat = document.getElementById('catCategory').value; const p = document.getElementById('catPrice').value; const s = document.getElementById('catStock').value; const bc = document.getElementById('catBarcode').value.trim(); if(!n) return; 
