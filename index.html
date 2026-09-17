@@ -440,7 +440,8 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                     { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços' }, 
                     { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, 
                     { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, 
-                    { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' }
+                    { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' },
+                    { id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' }
                 ];
             } else {
                 menuItems = [
@@ -448,9 +449,10 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                     { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' }, 
                     { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' }
                 ];
-                // Só adiciona a aba Terceiros se NÃO for a equipe de CFTV
                 if (role !== 'func_cftv') {
                     menuItems.push({ id: 'func-thirdParty', icon: 'fa-eye', label: 'Acomp. Terceiro' });
+                } else {
+                    menuItems.push({ id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' });
                 }
                 menuItems.push({ id: 'func-history', icon: 'fa-history', label: 'Meus Registros' });
             }
@@ -473,7 +475,8 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                         case 'admin-quotes': title = "Orçamentos Recebidos"; html = renderAdminQuotes(); break; 
                         case 'admin-thirdParty': title = "Terceiros Acompanhados"; html = renderAdminThirdParty(); break; 
                         case 'admin-audit': title = "Logs de Auditoria"; html = renderAdminAudit(); break;
-                        case 'func-reports': title = "Editar Manutenção"; html = renderFuncReportForm(); break; 
+                        case 'cftv-vault': title = "Cofre de Redes"; html = renderCftvVault(); break;
+                        case 'func-reports': title = "Editar Manutenção"; html = renderFuncReportForm(); break;
                         case 'func-quotes': title = "Editar Orçamento"; html = renderFuncQuoteForm(); break; 
                         case 'func-thirdParty': title = "Editar Acompanhamento"; html = renderFuncThirdPartyForm(); break; 
                     }
@@ -483,6 +486,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                         case 'func-reports': title = "Registrar Manutenção"; html = renderFuncReportForm(); break; 
                         case 'func-quotes': title = "Novo Orçamento"; html = renderFuncQuoteForm(); break; 
                         case 'func-thirdParty': title = "Acompanhar Terceiro"; html = renderFuncThirdPartyForm(); break; 
+                        case 'cftv-vault': title = "Cofre de Redes"; html = renderCftvVault(); break;
                         case 'func-history': title = "Meus Registros"; html = renderFuncHistory(); break; 
                     }
                 }
@@ -1084,6 +1088,79 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                     window.showToast("Este código não está no catálogo.", "error");
                 }
             });
+        };
+
+// ----------------------------------------------------
+        // COFRE DE REDES (Acesso Admin e CFTV)
+        // ----------------------------------------------------
+        const renderCftvVault = () => `
+            <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in">
+                <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white text-center w-full"><i class="fas fa-network-wired text-blue-500 mr-2"></i> Cofre de Redes e Acessos</h3>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Selecione a Creche (CEI)</label>
+                    <select id="vaultCeiSelect" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-900 dark:text-white rounded-lg outline-none text-center" onchange="window.loadVaultData(this.value)">
+                        <option value="">Selecione...</option>
+                        ${window.localData.ceis.sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<option value="${c.id}">${window.escapeHtml(c.name)}</option>`).join('')}
+                    </select>
+                </div>
+                <div id="vaultFormContainer" class="hidden">
+                    <form onsubmit="window.saveVaultData(event)" class="space-y-3">
+                        <input type="hidden" id="vaultCeiId">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">IP do DVR / Acesso Remoto</label><input type="text" id="vIp" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 192.168.1.108"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Portas (HTTP / Serviço)</label><input type="text" id="vPorts" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 80 / 37777"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Usuário do DVR</label><input type="text" id="vUser" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: admin"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha do DVR</label><div class="relative"><input type="password" id="vPass" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vPass', 'eyeVault1')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault1" class="fas fa-eye text-sm"></i></button></div></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha Roteador / WiFi</label><div class="relative"><input type="password" id="vWifi" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vWifi', 'eyeVault2')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault2" class="fas fa-eye text-sm"></i></button></div></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Canais / Qtd Câmeras</label><input type="text" id="vCams" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 16 canais (12 ativas)"></div>
+                        </div>
+                        <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Observações de Rede / Layout</label><textarea id="vObs" rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded resize-none outline-none text-sm" placeholder="Qualquer anotação sobre a posição do rack, switch, etc."></textarea></div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded shadow transition text-sm mt-3"><i class="fas fa-save mr-2"></i> Salvar no Cofre</button>
+                    </form>
+                </div>
+            </div>`;
+
+        window.loadVaultData = (ceiId) => {
+            const container = document.getElementById('vaultFormContainer');
+            if(!ceiId) { container.classList.add('hidden'); return; }
+            const cei = window.localData.ceis.find(c => c.id === ceiId);
+            if(!cei) return;
+            
+            document.getElementById('vaultCeiId').value = ceiId;
+            const v = cei.vault || {};
+            document.getElementById('vIp').value = v.ip || "";
+            document.getElementById('vPorts').value = v.ports || "";
+            document.getElementById('vUser').value = v.user || "";
+            document.getElementById('vPass').value = v.pass || "";
+            document.getElementById('vWifi').value = v.wifi || "";
+            document.getElementById('vCams').value = v.cams || "";
+            document.getElementById('vObs').value = v.obs || "";
+            
+            container.classList.remove('hidden');
+        };
+
+        window.saveVaultData = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('vaultCeiId').value;
+            if(!id) return;
+            const vaultData = {
+                ip: document.getElementById('vIp').value,
+                ports: document.getElementById('vPorts').value,
+                user: document.getElementById('vUser').value,
+                pass: document.getElementById('vPass').value,
+                wifi: document.getElementById('vWifi').value,
+                cams: document.getElementById('vCams').value,
+                obs: document.getElementById('vObs').value
+            };
+            try {
+                await window.dbSave('ceis', id, { vault: vaultData });
+                window.logAudit(`Atualizou o Cofre de Redes da CEI ID: ${id}`);
+                window.showToast("Cofre atualizado e protegido!");
+            } catch(err) {
+                window.showToast("Erro ao salvar no cofre.", "error");
+            }
         };
 
         window.onload = () => { window.initFirebaseSync(); };
