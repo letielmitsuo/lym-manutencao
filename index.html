@@ -19,6 +19,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leitor de Código de Barras -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -499,16 +501,21 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
         window.updateCatalogDatalist = () => { const dl = document.getElementById('catalogList'); if(!dl) return; dl.innerHTML = window.localData.catalog.map(c => `<option value="${window.escapeHtml(c.name)}">`).join(''); };
         window.getStockOptionsHtml = () => { return '<option value="">Selecione o Item...</option>' + [...window.localData.catalog].sort((a,b) => String(a.name).localeCompare(String(b.name))).map(c => `<option value="${c.id}">${window.escapeHtml(c.name)} (${window.escapeHtml(c.brand || '-')}) - Estoque: ${c.stock || 0}</option>`).join(''); };
         window.openCatalogModal = () => { window.editingItemId = null; document.getElementById('catalogForm').reset(); document.getElementById('modalTitleCatalog').textContent = "Novo Item"; window.showElement('modalCatalog'); };
-        window.editCatalog = (id) => { const c = window.localData.catalog.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('catName').value = c.name || ""; document.getElementById('catBrand').value = c.brand || ""; document.getElementById('catCategory').value = c.category || "Segurança Eletrônica"; document.getElementById('catPrice').value = c.price || ""; document.getElementById('catStock').value = c.stock || "0"; document.getElementById('modalTitleCatalog').textContent = "Editar Item"; window.showElement('modalCatalog'); } };
+        window.editCatalog = (id) => { const c = window.localData.catalog.find(x => x.id === id); if(c) { window.editingItemId = id; document.getElementById('catName').value = c.name || ""; document.getElementById('catBrand').value = c.brand || ""; document.getElementById('catCategory').value = c.category || "Segurança Eletrônica"; document.getElementById('catPrice').value = c.price || ""; document.getElementById('catStock').value = c.stock || "0"; document.getElementById('catBarcode').value = c.barcode || ""; document.getElementById('modalTitleCatalog').textContent = "Editar Item de Estoque"; window.showElement('modalCatalog'); } };
         
         window.saveCatalog = async (e) => { 
-            e.preventDefault(); const n = document.getElementById('catName').value.trim(); const b = document.getElementById('catBrand').value.trim(); const cat = document.getElementById('catCategory').value; const p = document.getElementById('catPrice').value; const s = document.getElementById('catStock').value; if(!n) return; 
-            const id = window.editingItemId || Date.now().toString(); await window.dbSave('catalog', id, { id: String(id), name: n, brand: b, category: cat, price: p, stock: parseFloat(s || 0) }); window.logAudit(window.editingItemId ? `Estoque Editado: ${n}` : `Estoque Criado: ${n}`); window.showToast("Material salvo!"); window.hideElement('modalCatalog'); 
+            e.preventDefault(); const n = document.getElementById('catName').value.trim(); const b = document.getElementById('catBrand').value.trim(); const cat = document.getElementById('catCategory').value; const p = document.getElementById('catPrice').value; const s = document.getElementById('catStock').value; const bc = document.getElementById('catBarcode').value.trim(); if(!n) return; 
+            const id = window.editingItemId || Date.now().toString(); await window.dbSave('catalog', id, { id: String(id), name: n, brand: b, category: cat, price: p, stock: parseFloat(s || 0), barcode: bc }); window.logAudit(window.editingItemId ? `Estoque Editado: ${n}` : `Estoque Criado: ${n}`); window.showToast("Material salvo!"); window.hideElement('modalCatalog'); 
+        };
+        
+        window.saveCatalog = async (e) => { 
+            e.preventDefault(); const n = document.getElementById('catName').value.trim(); const b = document.getElementById('catBrand').value.trim(); const cat = document.getElementById('catCategory').value; const p = document.getElementById('catPrice').value; const s = document.getElementById('catStock').value; const bc = document.getElementById('catBarcode').value.trim(); if(!n) return; 
+            const id = window.editingItemId || Date.now().toString(); await window.dbSave('catalog', id, { id: String(id), name: n, brand: b, category: cat, price: p, stock: parseFloat(s || 0), barcode: bc }); window.logAudit(window.editingItemId ? `Estoque Editado: ${n}` : `Estoque Criado: ${n}`); window.showToast("Material salvo!"); window.hideElement('modalCatalog'); 
         };
 
         window.deleteCatalog = (id) => { window.confirmAction(async () => { await window.dbDelete('catalog', id); window.logAudit(`Material Excluído ID: ${id}`); window.showToast("Excluído!"); }); };
 
-        window.addStockMovementRow = (containerId) => { const container = document.getElementById(containerId); if(container.querySelector('.italic')) container.innerHTML = ""; window.materialCount++; const id = `stk_${window.materialCount}`; const div = document.createElement('div'); div.id = id; div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in mb-2"; div.innerHTML = `<select class="stk-item flex-grow p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" required>${window.getStockOptionsHtml()}</select><input type="number" class="stk-qtd w-full sm:w-20 p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required><button type="button" onclick="document.getElementById('${id}').remove();" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-2 rounded font-bold hover:bg-red-200">X</button>`; container.appendChild(div); };
+        window.addStockMovementRow = (containerId) => { const container = document.getElementById(containerId); if(container.querySelector('.italic')) container.innerHTML = ""; window.materialCount++; const id = `stk_${window.materialCount}`; const div = document.createElement('div'); div.id = id; div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in mb-2"; div.innerHTML = `<div class="flex flex-grow gap-1"><button type="button" onclick="window.scanForStock('${id}')" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700" title="Ler Código"><i class="fas fa-barcode"></i></button><select class="stk-item flex-grow p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none w-full" required>${window.getStockOptionsHtml()}</select></div><input type="number" class="stk-qtd w-full sm:w-20 p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required><button type="button" onclick="document.getElementById('${id}').remove();" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-2 rounded font-bold hover:bg-red-200">X</button>`; container.appendChild(div); };
 
         window.saveStockMovement = async (e) => { 
             e.preventDefault(); const type = document.getElementById('stkType').value; const date = document.getElementById('stkDate').value; const obs = document.getElementById('stkObs').value.trim(); const container = document.getElementById('stockMovementsContainer'); const items = []; 
@@ -676,8 +683,18 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
         window.addMaterialRow = (containerId, triggerSave = true) => {
             const container = document.getElementById(containerId);
             if(container.querySelector('.italic')) container.innerHTML = "";
-            window.materialCount++; const id = `mat_${window.materialCount}`; const div = document.createElement('div'); div.id = id; div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in";
-            div.innerHTML = `<input type="text" list="catalogList" class="mat-name flex-grow p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center sm:text-left" placeholder="Material (Digite p/ buscar)" required><input type="text" class="mat-brand w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Marca"><input type="number" class="mat-qtd w-full sm:w-16 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required><input type="number" class="mat-price w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="R$ Un." step="0.01"><button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200">X</button>`;
+            window.materialCount++; 
+            const id = `mat_${window.materialCount}`; 
+            const div = document.createElement('div');
+            div.id = id; 
+            div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in";
+            
+            div.innerHTML = `
+                <div class="flex flex-grow gap-1">
+                    <button type="button" onclick="window.scanForMaterialRow('${id}')" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700" title="Ler Código"><i class="fas fa-barcode"></i></button>
+                    <input type="text" list="catalogList" class="mat-name w-full p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" placeholder="Material (Digite ou Leia)" required>
+                </div>
+                <input type="text" class="mat-brand w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Marca"><input type="number" class="mat-qtd w-full sm:w-16 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required><input type="number" class="mat-price w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="R$ Un." step="0.01"><button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200">X</button>`;
             container.appendChild(div);
             if(triggerSave) window.saveDraft(window.activeTab.split('-')[1]);
         };
@@ -961,6 +978,80 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                 window.renderActiveTab();
             }
         });
+
+// ----------------------------------------------------
+        // LÓGICA DO LEITOR DE CÓDIGO DE BARRAS / CÂMERA
+        // ----------------------------------------------------
+        window.html5QrcodeScanner = null;
+        
+        window.startScanner = (onScanSuccess) => {
+            window.showElement('modalScanner');
+            window.html5QrcodeScanner = new Html5Qrcode("reader");
+            
+            window.html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } }, 
+                (decodedText) => {
+                    window.stopScanner();
+                    onScanSuccess(decodedText);
+                }, 
+                (errorMessage) => { /* Ignora erros quadro-a-quadro da câmera */ }
+            ).catch(err => {
+                window.showToast("Erro ao abrir câmera. Verifique as permissões do navegador.", "error");
+                window.stopScanner();
+            });
+        };
+
+        window.stopScanner = () => {
+            if (window.html5QrcodeScanner) {
+                window.html5QrcodeScanner.stop().then(() => {
+                    window.html5QrcodeScanner.clear();
+                    window.html5QrcodeScanner = null;
+                }).catch(err => console.log(err));
+            }
+            window.hideElement('modalScanner');
+        };
+
+        // Admin: Grava o código de barras no Cadastro
+        window.scanForInput = (inputId) => {
+            window.startScanner((code) => {
+                document.getElementById(inputId).value = code;
+                window.showToast("Código vinculado: " + code);
+            });
+        };
+
+        // Funcionário: Lê a caixa para a aba "Meu Almoxarifado" (Retirada/Devolução)
+        window.scanForStock = (rowId) => {
+            window.startScanner((code) => {
+                const found = window.localData.catalog.find(c => c.barcode === code);
+                if (found) {
+                    const row = document.getElementById(rowId);
+                    if(row) {
+                        row.querySelector('.stk-item').value = found.id;
+                        window.showToast("Localizado: " + found.name);
+                    }
+                } else {
+                    window.showToast("Este código não está no catálogo.", "error");
+                }
+            });
+        };
+
+        // Funcionário: Lê a caixa no formulário de Serviços/Orçamentos
+        window.scanForMaterialRow = (rowId) => {
+            window.startScanner((code) => {
+                const found = window.localData.catalog.find(c => c.barcode === code);
+                if (found) {
+                    const row = document.getElementById(rowId);
+                    if(row) {
+                        row.querySelector('.mat-name').value = found.name;
+                        row.querySelector('.mat-brand').value = found.brand || "";
+                        row.querySelector('.mat-price').value = found.price || "";
+                        window.saveDraft(window.activeTab.split('-')[1]);
+                        window.showToast("Localizado: " + found.name);
+                    }
+                } else {
+                    window.showToast("Este código não está no catálogo.", "error");
+                }
+            });
+        };
 
         window.onload = () => { window.initFirebaseSync(); };
 
