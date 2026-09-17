@@ -543,8 +543,18 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                     if(contElement) {
                         contElement.oninput = (e) => {
                             if(e.target.classList.contains('mat-name') && e.target.hasAttribute('list')) {
-                                const val = e.target.value; const found = window.localData.catalog.find(c => c.name === val);
-                                if(found) { const parent = e.target.parentElement; parent.querySelector('.mat-brand').value = found.brand || ""; parent.querySelector('.mat-price').value = found.price || ""; window.saveDraft(window.activeTab.split('-')[1]); }
+                                const val = e.target.value; 
+                                // Busca no catálogo (ignorando letras maiúsculas e minúsculas)
+                                const found = window.localData.catalog.find(c => String(c.name).toLowerCase() === String(val).toLowerCase());
+                                if(found) { 
+                                    // Puxa a linha completa do material, em vez da mini-caixinha
+                                    const parentRow = e.target.closest('[id^="mat_"]'); 
+                                    if(parentRow) {
+                                        parentRow.querySelector('.mat-brand').value = found.brand || ""; 
+                                        parentRow.querySelector('.mat-price').value = found.price || ""; 
+                                        window.saveDraft(window.activeTab.split('-')[1]); 
+                                    }
+                                }
                             }
                         };
                     }
