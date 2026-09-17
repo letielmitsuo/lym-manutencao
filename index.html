@@ -372,7 +372,9 @@ if(window.currentSystemUser.role === 'func_cftv') roleDisplay = 'Técnico CFTV';
 document.getElementById('userRoleDisplay').textContent = roleDisplay;
             document.getElementById('userInitial').textContent = window.currentSystemUser.login.charAt(0).toUpperCase();
             
-            window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; window.renderActiveTab();
+            window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; 
+            history.pushState({ tab: window.activeTab }, "", `#${window.activeTab}`);
+            window.renderActiveTab();
             setTimeout(window.processTelegramQueue, 3000);
         };
 
@@ -429,7 +431,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                 menuItems.push({ id: 'func-history', icon: 'fa-history', label: 'Meus Registros' });
             }
 
-            menuItems.forEach(item => { const a = document.createElement('a'); a.href = "#"; a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium"; a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`; a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); }; navLinks.appendChild(a); });
+            menuItems.forEach(item => { const a = document.createElement('a'); a.href = "#"; a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium"; a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`; a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; history.pushState({ tab: window.activeTab }, "", `#${window.activeTab}`); if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); }; navLinks.appendChild(a); });
         };
 
         window.renderActiveTab = () => {
@@ -771,7 +773,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
             } catch (err) { window.showToast("Falha: " + (err.message || "Erro técnico"), "error"); } finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
         };
 
-        window.cancelEdit = () => { const type = window.activeTab.split('-')[1]; window.editingItemId = null; window.activeTab = window.currentSystemUser.role === 'admin' ? `admin-${type}` : 'func-history'; window.renderActiveTab(); };
+        window.cancelEdit = () => { const type = window.activeTab.split('-')[1]; window.editingItemId = null; window.activeTab = window.currentSystemUser.role === 'admin' ? `admin-${type}` : 'func-history'; history.pushState({ tab: window.activeTab }, "", `#${window.activeTab}`); window.renderActiveTab(); };
 
         window.editFuncRecord = (type, id) => {
             const record = window.localData[type].find(r => r.id === id); if(!record) return;
@@ -780,6 +782,7 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
             if(type === 'reports') window.activeTab = isAdmin ? 'func-reports' : 'func-reports';
             if(type === 'quotes') window.activeTab = isAdmin ? 'func-quotes' : 'func-quotes';
             if(type === 'thirdParty') window.activeTab = isAdmin ? 'func-thirdParty' : 'func-thirdParty';
+            history.pushState({ tab: window.activeTab }, "", `#${window.activeTab}`);
             window.renderActiveTab();
             setTimeout(() => {
                 const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
@@ -950,6 +953,14 @@ document.getElementById('userRoleDisplay').textContent = roleDisplay;
                 if(window.activeTab === 'admin-ceis') window.renderActiveTab();
             });
         };
+
+        // Listener que escuta o botão "Voltar" do celular ou navegador
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.tab && window.currentSystemUser) {
+                window.activeTab = e.state.tab;
+                window.renderActiveTab();
+            }
+        });
 
         window.onload = () => { window.initFirebaseSync(); };
 
