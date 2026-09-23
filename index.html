@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    <!-- ==================== MODAIS ADMIN (Catálogo, Cei, Usuários) ==================== -->
+    <!-- ==================== MODAIS ADMIN ==================== -->
     <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
@@ -194,7 +194,7 @@
                 <button type="button" onclick="window.stopScanner()" class="text-red-500 text-xl font-bold px-2"><i class="fas fa-times"></i></button>
             </div>
             <div id="reader" class="w-full bg-black" style="min-height: 300px;"></div>
-            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras do produto.</div>
+            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras.</div>
         </div>
     </div>
 
@@ -246,7 +246,7 @@
         
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
             <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
-                <div class="flex items-center gap-2"><i class="fas fa-bolt text-blue-400 text-lg"></i><h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v8.8</span></h2></div>
+                <div class="flex items-center gap-2"><i class="fas fa-bolt text-blue-400 text-lg"></i><h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v8.9</span></h2></div>
                 <div class="flex items-center gap-2 md:hidden"><button type="button" onclick="window.toggleDarkMode()" class="outline-none p-2"><i id="darkModeIconMobile" class="fas fa-moon text-slate-300 text-lg transition-colors"></i></button><button type="button" id="mobileMenuBtn" class="text-white p-2"><i class="fas fa-bars text-xl"></i></button></div>
             </div>
             
@@ -270,7 +270,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- LÓGICA JAVASCRIPT ÚNICA E BLINDADA                                        -->
+    <!-- LÓGICA JAVASCRIPT MASTER                                                  -->
     <!-- ========================================================================= -->
     <script>
         // 1. Configurações Firebase
@@ -346,7 +346,7 @@
             setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 600); }, 6000);
         };
 
-        window.addEventListener('online', () => { window.showToast('Conexão restabelecida. Processando fila...', 'success'); window.processTelegramQueue(); });
+        window.addEventListener('online', () => { window.showToast('Conexão restabelecida. Processando fila...', 'success'); if(window.processTelegramQueue) window.processTelegramQueue(); });
         window.addEventListener('offline', () => window.showToast('Sem internet! Modo Offline ativado.', 'error'));
         
         window.toggleDarkMode = () => { 
@@ -432,7 +432,7 @@
             window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; 
             history.pushState({ tab: window.activeTab }, "", `#${window.activeTab}`);
             window.renderActiveTab();
-            setTimeout(window.processTelegramQueue, 3000);
+            if(window.processTelegramQueue) setTimeout(window.processTelegramQueue, 3000);
 
             // GATILHO: Ponto de Restauração Automático (A cada 48 Horas)
             if (window.currentSystemUser.role === 'admin') {
@@ -827,7 +827,7 @@
             let imgsHtml = '';
             if(base64Photos && base64Photos.length > 0) { imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`; }
 
-            const pdfContentString = `<div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;"><div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;"><h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p></div>${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}<div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}${dataObj.companyName ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;"><p style="margin:0; line-height:1.5; color:#334155; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${wDone ? window.escapeHtml(wDone).replace(/\n/g, '<br>') : 'Sem descrição.'}</p></div>${matsHtml}${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; color:#334155; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}${imgsHtml}</div>`;
+            const pdfContentString = `<div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;"><div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;"><h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p></div>${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}<div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}${dataObj.companyName ? `<p style="margin:0;">color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(wDone).replace(/\n/g, '<br>')}</p></div>${matsHtml}${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}${imgsHtml}</div>`;
 
             const opt = { margin: 10, filename: `Relatorio.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             let pdfBlob = await html2pdf().set(opt).from(pdfContentString).output('blob');
