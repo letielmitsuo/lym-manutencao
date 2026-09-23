@@ -18,8 +18,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -269,7 +267,7 @@
         </div>
     </div>
     
-    <!-- MODAL CONFIRMAÇÃO SEGURO -->
+    <!-- MODAL CONFIRMAÇÃO BLINDADO -->
     <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-5">
             <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-exclamation-triangle"></i></div>
@@ -282,8 +280,9 @@
         </div>
     </div>
 
-    <!-- MAIN APP LAYOUT -->
+    <!-- ==================== MAIN APP LAYOUT ==================== -->
     <div id="appLayout" class="hidden w-full h-full flex flex-col md:flex-row">
+        
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
             <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-2">
@@ -344,18 +343,26 @@
         window.materialCount = 0; 
         window.lymCharts = {};
 
-        // 1. MANIPULAÇÃO VISUAL SEGURA
+        // 1. MANIPULAÇÃO VISUAL SEGURA E RESPONSIVA (TAILWIND)
         window.showElement = (id) => { 
             const el = document.getElementById(id); 
             if (el) { 
                 el.classList.remove('hidden'); 
-                if (id.startsWith('modal') || id === 'loginScreen') { el.style.display = 'flex'; } 
-                else { el.style.display = 'block'; } 
+                el.style.display = ''; // Deixa o Tailwind gerenciar o display
+                if (id.startsWith('modal') || id === 'loginScreen' || id === 'modalScanner') { 
+                    el.classList.add('flex'); 
+                } 
             } 
         };
         window.hideElement = (id) => { 
             const el = document.getElementById(id); 
-            if (el) { el.classList.add('hidden'); el.style.display = 'none'; } 
+            if (el) { 
+                el.classList.add('hidden'); 
+                el.style.display = ''; 
+                if (id.startsWith('modal') || id === 'loginScreen' || id === 'modalScanner') { 
+                    el.classList.remove('flex'); 
+                } 
+            } 
         };
 
         window.escapeHtml = (text) => { if (!text) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
@@ -389,7 +396,7 @@
             data.updatedAt = new Date().toISOString(); 
             // Atualização Otimista
             let exists = window.localData[colName].findIndex(x => String(x.id) === String(docId));
-            if (exists >= 0) { window.localData[colName][exists] = { ...window.localData[colName][exists], ...data }; } else { window.localData[colName].push(data); }
+            if (exists >= 0) { window.localData[colName][exists] = { ...window.localData[colName][exists], ...data }; } else { window.localData[colName].push({ id: String(docId), ...data }); }
             if(!db) return; 
             try { if(docId) await db.collection(colName).doc(String(docId)).set(data, { merge: true }); else await db.collection(colName).add(data); } catch(e) { console.error("Firebase Save Error", e); }
         };
@@ -531,7 +538,7 @@
         window.renderCftvVault = () => `
             <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in">
                 <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white text-center w-full"><i class="fas fa-network-wired text-blue-500 mr-2"></i> Cofre de Redes</h3>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white text-center w-full"><i class="fas fa-network-wired text-blue-500 mr-2"></i> Cofre de Redes e Acessos</h3>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Selecione a Creche (CEI)</label>
@@ -544,18 +551,57 @@
                     <form onsubmit="window.saveVaultData(event)" class="space-y-3">
                         <input type="hidden" id="vaultCeiId">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">IP do DVR / Acesso</label><input type="text" id="vIp" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Portas</label><input type="text" id="vPorts" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Usuário DVR</label><input type="text" id="vUser" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha DVR</label><div class="relative"><input type="password" id="vPass" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vPass', 'eyeVault1')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault1" class="fas fa-eye text-sm"></i></button></div></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha Roteador/WiFi</label><div class="relative"><input type="password" id="vWifi" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vWifi', 'eyeVault2')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault2" class="fas fa-eye text-sm"></i></button></div></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Canais / Qtd</label><input type="text" id="vCams" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">IP do DVR / Acesso Remoto</label><input type="text" id="vIp" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 192.168.1.108"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Portas (HTTP / Serviço)</label><input type="text" id="vPorts" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 80 / 37777"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Usuário do DVR</label><input type="text" id="vUser" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: admin"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha do DVR</label><div class="relative"><input type="password" id="vPass" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vPass', 'eyeVault1')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault1" class="fas fa-eye text-sm"></i></button></div></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha Roteador / WiFi</label><div class="relative"><input type="password" id="vWifi" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vWifi', 'eyeVault2')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault2" class="fas fa-eye text-sm"></i></button></div></div>
+                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Canais / Qtd Câmeras</label><input type="text" id="vCams" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 16 canais (12 ativas)"></div>
                         </div>
-                        <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Observações de Rede</label><textarea id="vObs" rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded resize-none outline-none text-sm"></textarea></div>
+                        <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Observações de Rede / Layout</label><textarea id="vObs" rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded resize-none outline-none text-sm" placeholder="Qualquer anotação sobre a posição do rack, switch, etc."></textarea></div>
                         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded shadow transition text-sm mt-3"><i class="fas fa-save mr-2"></i> Salvar no Cofre</button>
                     </form>
                 </div>
             </div>`;
+
+        window.loadVaultData = (ceiId) => {
+            const container = document.getElementById('vaultFormContainer');
+            if(!ceiId) { window.hideElement('vaultFormContainer'); return; }
+            const cei = window.localData.ceis.find(c => String(c.id) === String(ceiId));
+            if(!cei) return;
+            document.getElementById('vaultCeiId').value = ceiId;
+            const v = cei.vault || {};
+            document.getElementById('vIp').value = v.ip || "";
+            document.getElementById('vPorts').value = v.ports || "";
+            document.getElementById('vUser').value = v.user || "";
+            document.getElementById('vPass').value = v.pass || "";
+            document.getElementById('vWifi').value = v.wifi || "";
+            document.getElementById('vCams').value = v.cams || "";
+            document.getElementById('vObs').value = v.obs || "";
+            window.showElement('vaultFormContainer');
+        };
+
+        window.saveVaultData = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('vaultCeiId').value;
+            if(!id) return;
+            const vaultData = {
+                ip: document.getElementById('vIp').value,
+                ports: document.getElementById('vPorts').value,
+                user: document.getElementById('vUser').value,
+                pass: document.getElementById('vPass').value,
+                wifi: document.getElementById('vWifi').value,
+                cams: document.getElementById('vCams').value,
+                obs: document.getElementById('vObs').value
+            };
+            try {
+                await window.dbSave('ceis', id, { vault: vaultData });
+                window.logAudit(`Atualizou o Cofre de Redes da CEI ID: ${id}`);
+                window.showToast("Cofre atualizado!");
+            } catch(err) {
+                window.showToast("Erro ao salvar no cofre.", "error");
+            }
+        };
 
         window.renderFuncStockForm = () => `<div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-box-open mr-2"></i> Meu Almoxarifado</h3></div><form id="stockForm" onsubmit="window.saveStockMovement(event)" class="space-y-4"><div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Movimento *</label><select id="stkType" required class="w-full p-2 border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold"><option value="Retirada">Retirar do Estoque</option><option value="Devolução">Devolver ao Estoque</option></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="stkDate" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700"><div class="relative flex justify-center items-center mb-3"><h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais</h4><button type="button" onclick="window.addStockMovementRow('stockMovementsContainer')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs font-medium absolute right-0">+ Item</button></div><div id="stockMovementsContainer" class="space-y-2"><p class="text-xs text-slate-400 italic text-center p-2">Nenhum material adicionado.</p></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Motivo / Observação</label><textarea id="stkObs" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none text-sm"></textarea></div><button type="submit" id="btnSubmitStock" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-2">Registrar Movimento</button></form></div>`;
         window.renderFuncHistory = () => `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in mb-6"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-wrench mr-2 text-blue-500"></i> Minhas Manutenções</h3></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th class="p-3 font-semibold">Data</th><th class="p-3 font-semibold">CEI</th><th class="p-3 font-semibold text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in mb-6"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-file-invoice mr-2 text-green-500"></i> Meus Orçamentos</h3></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th class="p-3 font-semibold">Data</th><th class="p-3 font-semibold">CEI</th><th class="p-3 font-semibold text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-eye mr-2 text-purple-500"></i> Acompanhamentos Terceiros</h3></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th class="p-3 font-semibold">Data</th><th class="p-3 font-semibold">CEI</th><th class="p-3 font-semibold text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div>`;
@@ -563,7 +609,7 @@
         window.renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-green-700 dark:text-green-400 text-center w-full"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-3"><input type="hidden" id="editIdquotes"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelectQuote" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="dateQuote" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Status do Orçamento *</label><select id="statusQuote" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center font-bold"><option value="Pendente">⏳ Pendente de Aprovação</option><option value="Aprovado">✅ Aprovado</option><option value="Rejeitado">❌ Rejeitado</option></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 mt-3"><div class="relative flex justify-center items-center mb-3"><h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais</h4><button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs font-medium absolute right-0">+ Mat.</button></div><div id="quoMaterialsContainer" class="space-y-2"><p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p></div></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Problema (Telegram)</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Orçamento</button></form></div>`;
         window.renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-purple-700 dark:text-purple-400 text-center w-full"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-3"><input type="hidden" id="editIdthirdParty"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelectThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="dateThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Início *</label><input type="time" id="timeStartThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Término *</label><input type="time" id="timeEndThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos (Telegram)</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Acompanhamento</button></form></div>`;
 
-        // LÓGICA DE DADOS (LISTAS E FILTROS)
+        // LÓGICA DE DADOS (FILTROS E POPULAÇÃO)
         window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
         window.applyFilters = (type) => {
             const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
@@ -578,8 +624,7 @@
             if(type === 'quotes') { const statusF = document.getElementById('filterStatus')?.value || ""; if(statusF) data = data.filter(item => item.status === statusF); }
             
             data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)); window.currentFilteredData = data; 
-            let tbodyId = type === 'reports' ? 'tableBodyReports' : (type === 'quotes' ? 'tableBodyQuotes' : 'tableBodyThirdParty');
-            const tbody = document.getElementById(tbodyId); if(!tbody) return;
+            let tbodyId = type === 'reports' ? 'tableBodyReports' : (type === 'quotes' ? 'tableBodyQuotes' : 'tableBodyThirdParty'); const tbody = document.getElementById(tbodyId); if(!tbody) return;
             
             tbody.innerHTML = data.map(item => {
                 let uName = item.userName || item.userLogin || "Usuário";
@@ -602,7 +647,7 @@
             renderRows('reports', 'empHistoryReports'); renderRows('quotes', 'empHistoryQuotes'); renderRows('thirdParty', 'empHistoryThirdParty');
         };
 
-        // LÓGICA DE DETALHES, EDIÇÃO E EXCLUSÃO OTIMIZADA E BLINDADA
+        // LÓGICA DE DETALHES, EDIÇÃO E EXCLUSÃO (BLINDADA E OTIMIZADA)
         window.viewRecord = (type, id) => {
             const record = window.localData[type].find(r => String(r.id) === String(id)); if(!record) { window.showToast("Registro não encontrado", "error"); return; }
             const btnPrint = document.getElementById('btnPrintRecord'); btnPrint.onclick = () => window.printRecord(type, record);
@@ -625,11 +670,12 @@
 
         window.editFuncRecord = (type, id) => {
             const record = window.localData[type].find(r => String(r.id) === String(id)); if(!record) { window.showToast("Registro não encontrado", "error"); return; }
-            window.editingItemId = record.id; const isAdmin = window.currentSystemUser.role === 'admin';
-            window.activeTab = isAdmin ? `func-${type}` : `func-${type}`;
+            window.editingItemId = record.id; 
+            window.activeTab = `func-${type}`;
             try { history.pushState({ tab: window.activeTab }, "", "#" + window.activeTab); } catch(e) {} 
             window.renderActiveTab();
             
+            // Garantir que a tela seja preenchida somente APÓS o carregamento do DOM
             setTimeout(() => {
                 try {
                     const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
@@ -643,6 +689,7 @@
                     if(type === 'thirdParty') { const cn = document.getElementById('companyNameThirdParty'); if(cn) cn.value = record.companyName || ""; }
                     if(type === 'reports') { const dr = document.getElementById('diffRep'); if(dr) dr.value = record.difficulty || "Médio"; }
                     if(type === 'quotes') { const sq = document.getElementById('statusQuote'); if(sq) sq.value = record.status || "Pendente"; }
+                    
                     if((type === 'reports' || type === 'quotes') && record.materials) {
                         const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; const contEl = document.getElementById(contId);
                         if(contEl) {
@@ -655,13 +702,13 @@
                     const titleEl = document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`); if(titleEl) titleEl.textContent = "Editando Registro";
                     window.showElement('cancelEditBtn');
                 } catch(err) { console.error("Erro Edição:", err); window.showToast("Falha ao preencher dados.", "error"); }
-            }, 300); // 300ms garante que a tela termine de desenhar o form
+            }, 300);
         };
 
         window.deleteFuncRecord = (type, id) => { window.confirmAction(async () => { await window.dbDelete(type, id); window.logAudit(`Excluiu ${type} ID: ${id}`); window.showToast("Excluído!"); if (window.currentSystemUser.role === 'admin') { window.setupAdminFilters(); } else { window.renderEmployeeHistory(); } }); };
         window.cancelEdit = () => { const type = window.activeTab.split('-')[1]; window.editingItemId = null; window.activeTab = window.currentSystemUser.role === 'admin' ? `admin-${type}` : 'func-history'; try { history.pushState({ tab: window.activeTab }, "", "#" + window.activeTab); } catch(e) {} window.renderActiveTab(); };
 
-        // SISTEMA DE CADASTROS (USUÁRIOS, CEI, ALMOXARIFADO, FERRAMENTAS) OTIMIZADOS
+        // SISTEMA DE CADASTROS: USUÁRIOS, CEI, ALMOXARIFADO, FERRAMENTAS
         window.openUserModal = () => { window.editingItemId = null; document.getElementById('userForm').reset(); document.getElementById('newUsername').readOnly = false; document.getElementById('modalTitleUser').textContent = "Novo Usuário"; window.showElement('modalUser'); };
         window.editUser = (id) => { const u = window.localData.users.find(x => String(x.id) === String(id)); if(u) { window.editingItemId = id; document.getElementById('newUsername').value = u.login || u.username; document.getElementById('newUsername').readOnly = true; document.getElementById('newPassword').value = u.pass || u.password; document.getElementById('newRole').value = u.role || 'funcionario'; document.getElementById('modalTitleUser').textContent = "Editar Usuário"; window.showElement('modalUser'); } };
         window.saveUser = async (e) => { e.preventDefault(); try { const login = document.getElementById('newUsername').value.trim(); const pass = document.getElementById('newPassword').value.trim(); const role = document.getElementById('newRole').value; if(!login) return; if(!window.editingItemId && window.localData.users.find(u => (u.login === login || u.username === login))) { return window.showToast("Este login já existe!", "error"); } const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { id: String(id), login: login, pass: pass, password: pass, role: role }); window.logAudit(window.editingItemId ? `Usuário Editado: ${login}` : `Usuário Criado: ${login}`); window.showToast("Usuário salvo!"); window.hideElement('modalUser'); window.renderActiveTab(); } catch(err) { window.showToast("Erro ao salvar", "error"); } };
@@ -733,7 +780,7 @@
             
             let matsHtml = ''; if(dataObj.materials && dataObj.materials.length > 0) { matsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Materiais / Custos</h4><table style="width:100%; text-align:left; border-collapse:collapse; font-size:14px; margin-bottom:20px; border:1px solid #e2e8f0; table-layout: fixed; word-wrap: break-word;"><thead style="background-color:#f1f5f9;"><tr><th style="padding:10px; border:1px solid #e2e8f0; color:#334155; width: 10%;">Qtd</th><th style="padding:10px; border:1px solid #e2e8f0; color:#334155; width: 50%;">Material</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155; width: 20%;">R$ Un.</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155; width: 20%;">Total</th></tr></thead><tbody>${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #e2e8f0; color:#334155;">${m.qtd}</td><td style="padding:10px; border:1px solid #e2e8f0; color:#334155; word-break: break-word; white-space: pre-wrap;">${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand) || '-'})</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.price)}</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.qtd * m.price)}</td></tr>`).join('')}<tr style="background-color:#eff6ff;"><td colspan="3" style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#334155;">TOTAL:</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#1d4ed8;">${window.formatMoney(totalValue)}</td></tr></tbody></table>`; }
             let imgsHtml = ''; if(base64Photos && base64Photos.length > 0) { imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`; }
-            const pdfContentString = `<div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;"><div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;"><h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p></div>${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}<div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}${dataObj.companyName ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(wDone).replace(/\n/g, '<br>')}</p></div>${matsHtml}${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div></div>`;
+            const pdfContentString = `<div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;"><div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;"><h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p></div>${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}<div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}${dataObj.companyName ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(wDone).replace(/\n/g, '<br>')}</p></div>${matsHtml}${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}${imgsHtml}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div></div>`;
 
             const opt = { margin: 10, filename: `Relatorio.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             let pdfBlob = await html2pdf().set(opt).from(pdfContentString).output('blob');
@@ -786,6 +833,7 @@
                     if(type === 'reports') { document.getElementById('materialsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; document.getElementById('repPhotoPreview').innerHTML = ''; }
                     if(type === 'quotes') { document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; document.getElementById('quoPhotoPreview').innerHTML = ''; }
                     if(type === 'thirdParty') { document.getElementById('tpPhotoPreview').innerHTML = ''; }
+                    window.renderActiveTab(); // Força a atualização da tabela se o usuário for admin vendo as listas
                 }
             } catch (err) { window.showToast("Falha: " + (err.message || "Erro"), "error"); } finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
         };
@@ -841,8 +889,8 @@
                         let itemsRestored = 0; 
                         for(let col of colsToRestore) { 
                             if(data[col] && Array.isArray(data[col])) { 
-                                window.localData[col] = data[col]; // Restaura Local
-                                for(let item of data[col]) { window.dbSave(col, item.id, item); itemsRestored++; } // Restaura DB
+                                window.localData[col] = data[col]; 
+                                for(let item of data[col]) { window.dbSave(col, item.id, item); itemsRestored++; } 
                             } 
                         } 
                         window.logAudit(`Restaurou Ponto de Backup (${itemsRestored} itens processados)`); 
