@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    <!-- ==================== MODAIS ADMIN ==================== -->
+    <!-- ==================== MODAIS ADMIN (Catálogo, Cei, Usuários) ==================== -->
     <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
@@ -194,10 +194,11 @@
                 <button type="button" onclick="window.stopScanner()" class="text-red-500 text-xl font-bold px-2"><i class="fas fa-times"></i></button>
             </div>
             <div id="reader" class="w-full bg-black" style="min-height: 300px;"></div>
-            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras.</div>
+            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras do produto.</div>
         </div>
     </div>
 
+    <!-- MODAL CRECHE -->
     <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
@@ -216,6 +217,7 @@
         </div>
     </div>
 
+    <!-- MODAL USUÁRIO -->
     <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
@@ -234,6 +236,7 @@
         </div>
     </div>
 
+    <!-- ==================== MODAIS DE REGISTRO E CONFIRMAÇÃO ==================== -->
     <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8"><div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center sticky top-0 z-10"><h3 class="font-bold text-lg dark:text-white text-center w-full" id="viewRecordTitle">Detalhes</h3><div class="flex gap-2 absolute right-4"><button type="button" id="btnPrintRecord" class="px-2 py-1 bg-slate-800 dark:bg-blue-600 text-white text-xs font-bold rounded hover:bg-slate-700 shadow-sm"><i class="fas fa-print mr-1"></i> Imprimir</button><button type="button" onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white ml-2"><i class="fas fa-times text-lg"></i></button></div></div><div id="viewRecordContent" class="p-4 sm:p-5"></div></div></div>
     
     <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-5"><div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-exclamation-triangle"></i></div><h3 class="font-bold text-lg dark:text-white mb-1">Tem certeza?</h3><p class="text-slate-500 dark:text-slate-400 mb-5 text-sm">Esta ação não pode ser desfeita.</p><div class="flex justify-center gap-2"><button type="button" onclick="window.hideElement('modalConfirm')" class="px-4 py-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-sm font-medium">Cancelar</button><button type="button" id="btnConfirmAction" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">Sim, Confirmar</button></div></div></div>
@@ -243,7 +246,7 @@
         
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
             <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
-                <div class="flex items-center gap-2"><i class="fas fa-bolt text-blue-400 text-lg"></i><h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v8.7</span></h2></div>
+                <div class="flex items-center gap-2"><i class="fas fa-bolt text-blue-400 text-lg"></i><h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v8.8</span></h2></div>
                 <div class="flex items-center gap-2 md:hidden"><button type="button" onclick="window.toggleDarkMode()" class="outline-none p-2"><i id="darkModeIconMobile" class="fas fa-moon text-slate-300 text-lg transition-colors"></i></button><button type="button" id="mobileMenuBtn" class="text-white p-2"><i class="fas fa-bars text-xl"></i></button></div>
             </div>
             
@@ -267,7 +270,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- LÓGICA JAVASCRIPT MASTER                                                  -->
+    <!-- LÓGICA JAVASCRIPT ÚNICA E BLINDADA                                        -->
     <!-- ========================================================================= -->
     <script>
         // 1. Configurações Firebase
@@ -431,12 +434,13 @@
             window.renderActiveTab();
             setTimeout(window.processTelegramQueue, 3000);
 
+            // GATILHO: Ponto de Restauração Automático (A cada 48 Horas)
             if (window.currentSystemUser.role === 'admin') {
                 const lastBackup = localStorage.getItem('lym_last_autobackup');
                 const now = Date.now();
                 if (!lastBackup || (now - parseInt(lastBackup)) > 172800000) {
                     setTimeout(() => {
-                        window.downloadLocalBackup(true);
+                        window.downloadLocalBackup(true); // isAuto = true
                         localStorage.setItem('lym_last_autobackup', now.toString());
                         window.showToast("Ponto de restauração gerado automaticamente.", "info");
                     }, 6000);
@@ -736,7 +740,6 @@
         const renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-3"><input type="hidden" id="editIdreports">${renderFormFieldsCommon('Rep')} ${renderTimeFields('Rep')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Dificuldade *</label><select id="diffRep" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="Fácil">Fácil</option><option value="Médio" selected>Médio</option><option value="Difícil">Difícil</option></select></div>${renderMaterialInputs('materialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Serviço (Telegram)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Serviço</button></form></div>`;
         const renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-green-700 dark:text-green-400 text-center w-full"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-3"><input type="hidden" id="editIdquotes">${renderFormFieldsCommon('Quote')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Status do Orçamento *</label><select id="statusQuote" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center font-bold"><option value="Pendente">⏳ Pendente de Aprovação</option><option value="Aprovado">✅ Aprovado</option><option value="Rejeitado">❌ Rejeitado</option></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div>${renderMaterialInputs('quoMaterialsContainer')}<div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Problema (Telegram)</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Orçamento</button></form></div>`;
         const renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-purple-700 dark:text-purple-400 text-center w-full"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-3"><input type="hidden" id="editIdthirdParty">${renderFormFieldsCommon('ThirdParty')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div>${renderTimeFields('ThirdParty')}<div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos (Telegram)</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Acompanhamento</button></form></div>`;
-        const renderFuncHistory = () => `<div class="max-w-4xl mx-auto animate-fade-in space-y-6"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-3 bg-blue-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-blue-800 dark:text-blue-300 text-center text-sm"><i class="fas fa-wrench mr-2"></i> Minhas Manutenções</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-3 bg-green-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-green-800 dark:text-green-300 text-center text-sm"><i class="fas fa-file-invoice mr-2"></i> Meus Orçamentos</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="p-3 bg-purple-50 dark:bg-slate-700 border-b dark:border-slate-600 font-bold text-purple-800 dark:text-purple-300 text-center text-sm"><i class="fas fa-handshake mr-2"></i> Meus Terceiros</div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"><tr><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div></div>`;
 
         window.saveDraft = (type) => {
             if(window.editingItemId) return;
@@ -989,7 +992,7 @@
             document.getElementById('viewRecordContent').innerHTML = html; window.showElement('modalViewRecord');
         };
 
-// ----------------------------------------------------
+        // ----------------------------------------------------
         // Lógica de Gestão de Usuários e Creches (CEIs)
         // ----------------------------------------------------
         window.openUserModal = () => {
@@ -1094,7 +1097,7 @@
             }
         });
 
-// ----------------------------------------------------
+        // ----------------------------------------------------
         // MÓDULO DE CAUTELA (FERRAMENTAS)
         // ----------------------------------------------------
         window.openToolModal = () => { window.editingItemId = null; document.getElementById('toolForm').reset(); document.getElementById('modalTitleTool').textContent = "Nova Ferramenta"; window.showElement('modalTool'); };
@@ -1169,7 +1172,7 @@
                 }, 
                 (errorMessage) => { /* Ignora erros quadro-a-quadro da câmera */ }
             ).catch(err => {
-                window.showToast("Erro ao abrir câmera. Verifique as permissões do navegador.", "error");
+                window.showToast("Erro ao abrir câmera. Verifique as permissões.", "error");
                 window.stopScanner();
             });
         };
@@ -1235,6 +1238,98 @@
                     }
                 } else {
                     window.showToast("Este código não está no catálogo.", "error");
+                }
+            });
+        };
+
+        // ----------------------------------------------------
+        // BACKUP LOCAL E RESTAURAÇÃO
+        // ----------------------------------------------------
+        window.downloadLocalBackup = (isAuto = false) => {
+            try {
+                const backupData = JSON.stringify(window.localData, null, 2);
+                const blob = new Blob([backupData], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                const dataAtual = new Date().toISOString().split('T')[0];
+                a.download = isAuto ? `LYM_AutoBackup_${dataAtual}.json` : `LYM_Backup_Total_${dataAtual}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                if(!isAuto) {
+                    window.logAudit('Realizou Backup Manual do Banco de Dados');
+                    window.showToast("Backup baixado com sucesso!");
+                }
+            } catch(e) { console.error(e); }
+        };
+
+        window.triggerRestore = () => document.getElementById('restoreFile').click();
+        
+        window.processRestoreFile = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    window.confirmAction(async () => {
+                        window.showToast("Restaurando banco de dados, aguarde...", "info");
+                        const colsToRestore = ['ceis', 'users', 'reports', 'quotes', 'thirdParty', 'catalog', 'tools', 'stockMovements', 'toolMovements'];
+                        let itemsRestored = 0;
+                        for(let col of colsToRestore) {
+                            if(data[col] && Array.isArray(data[col])) {
+                                for(let item of data[col]) {
+                                    await db.collection(col).doc(item.id).set(item, {merge: true});
+                                    itemsRestored++;
+                                }
+                            }
+                        }
+                        window.logAudit(`Restaurou Ponto de Backup (${itemsRestored} itens processados)`);
+                        window.showToast("Restauração concluída com sucesso! Atualizando...");
+                        setTimeout(() => location.reload(), 2000);
+                    });
+                } catch(err) { window.showToast("Arquivo de backup inválido ou corrompido.", "error"); }
+                document.getElementById('restoreFile').value = '';
+            };
+            reader.readAsText(file);
+        };
+
+        // ----------------------------------------------------
+        // EXCLUSÃO EM MASSA E CHECKBOXES
+        // ----------------------------------------------------
+        window.toggleSelectAll = (source, type) => {
+            const checkboxes = document.querySelectorAll(`.chk-row-${type}`);
+            checkboxes.forEach(chk => chk.checked = source.checked);
+        };
+
+        window.deleteSelectedRecords = (type) => {
+            const checkboxes = document.querySelectorAll(`.chk-row-${type}:checked`);
+            if(checkboxes.length === 0) return window.showToast("Selecione pelo menos um item.", "error");
+            
+            window.confirmAction(async () => {
+                const btn = document.getElementById(`btnDelSel${type}`);
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Apagando...';
+                btn.disabled = true;
+                
+                try {
+                    for(let chk of checkboxes) {
+                        await window.dbDelete(type, chk.value);
+                    }
+                    window.logAudit(`Exclusão em Massa: ${checkboxes.length} itens da tabela ${type}`);
+                    window.showToast(`${checkboxes.length} itens excluídos!`);
+                    
+                    const selectAllCb = document.querySelector(`th input[type="checkbox"]`);
+                    if(selectAllCb) selectAllCb.checked = false;
+                    window.setupAdminFilters();
+                } catch(e) {
+                    window.showToast("Erro durante a exclusão.", "error");
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
             });
         };
