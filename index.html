@@ -67,8 +67,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 text-center">Senha</label>
-                    <div class="relative">
-                        <!-- O px-10 abaixo centraliza a senha perfeitamente compensando o botão do olho -->
+                    <div class="relative flex items-center justify-center">
                         <input type="password" id="loginPassword" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="••••••••">
                         <button type="button" onclick="window.toggleEye('loginPassword', 'eyeIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-300 outline-none">
                             <i id="eyeIcon" class="fas fa-eye text-md"></i>
@@ -195,7 +194,7 @@
                 <button type="button" onclick="window.stopScanner()" class="text-red-500 text-xl font-bold px-2"><i class="fas fa-times"></i></button>
             </div>
             <div id="reader" class="w-full bg-black" style="min-height: 300px;"></div>
-            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras.</div>
+            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras do produto.</div>
         </div>
     </div>
 
@@ -274,7 +273,6 @@
     <!-- LÓGICA JAVASCRIPT MASTER                                                  -->
     <!-- ========================================================================= -->
     <script>
-        // Função utilitária de prevenção de erros de offline
         window.processTelegramQueue = async () => {};
 
         // 1. Configurações Firebase
@@ -288,8 +286,12 @@
             appId: "1:172405408906:web:19ef22e87e8ecbe1d91973" 
         };
         
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+        } catch(e) {
+            console.error("Firebase config falhou", e);
         }
         
         const db = firebase.firestore();
@@ -408,8 +410,8 @@
                 );
                 
                 if (!user) { 
-                    if (u === 'admin' && p === 'admin123') { user = { id: 'master_admin', login: 'admin', role: 'admin' }; } 
-                    else if (u === 'func' && p === 'func123') { user = { id: 'master_func', login: 'func', role: 'funcionario' }; } 
+                    if (u.toLowerCase() === 'admin' && p === 'admin123') { user = { id: 'master_admin', login: 'admin', role: 'admin' }; } 
+                    else if (u.toLowerCase() === 'func' && p === 'func123') { user = { id: 'master_func', login: 'func', role: 'funcionario' }; } 
                 }
                 
                 if (user) {
@@ -419,7 +421,7 @@
                         window.hideElement('loginScreen'); window.showElement('modalForcePassword');
                     } else { window.completeLogin(); }
                 } else { window.showToast("Usuário ou senha inválidos!", "error"); }
-            } catch(err) { window.showToast("Erro ao processar login.", "error"); }
+            } catch(err) { window.showToast("Erro ao processar login: " + err.message, "error"); }
         };
 
         window.completeLogin = () => {
@@ -436,7 +438,7 @@
             window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; 
             history.pushState({ tab: window.activeTab }, "", `#${window.activeTab}`);
             window.renderActiveTab();
-            setTimeout(window.processTelegramQueue, 3000);
+            if(window.processTelegramQueue) setTimeout(window.processTelegramQueue, 3000);
 
             // GATILHO: Ponto de Restauração Automático (A cada 48 Horas)
             if (window.currentSystemUser.role === 'admin') {
@@ -831,7 +833,7 @@
             let imgsHtml = '';
             if(base64Photos && base64Photos.length > 0) { imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`; }
 
-            const pdfContentString = `<div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;"><div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;"><h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p></div>${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}<div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}${dataObj.companyName ? `<p style="margin:0;">color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(wDone).replace(/\n/g, '<br>')}</p></div>${matsHtml}${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}${imgsHtml}</div>`;
+            const pdfContentString = `<div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;"><div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;"><h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p></div>${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}<div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}${dataObj.companyName ? `<p style="margin:0;">color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(wDone).replace(/\n/g, '<br>')}</p></div>${matsHtml}${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div></div>`;
 
             const opt = { margin: 10, filename: `Relatorio.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             let pdfBlob = await html2pdf().set(opt).from(pdfContentString).output('blob');
