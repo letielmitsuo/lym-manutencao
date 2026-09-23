@@ -68,7 +68,8 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 text-center">Senha</label>
                     <div class="relative">
-                        <input type="password" id="loginPassword" required class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center pr-10" placeholder="••••••••">
+                        <!-- O px-10 abaixo centraliza a senha perfeitamente compensando o botão do olho -->
+                        <input type="password" id="loginPassword" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="••••••••">
                         <button type="button" onclick="window.toggleEye('loginPassword', 'eyeIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-300 outline-none">
                             <i id="eyeIcon" class="fas fa-eye text-md"></i>
                         </button>
@@ -90,8 +91,8 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400">Por segurança, crie uma nova senha antes de continuar.</p>
             </div>
             <form onsubmit="window.saveForcedPassword(event)" class="space-y-4">
-                <div class="relative"><input type="password" id="forcePass1" required class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center pr-10" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('forcePass1', 'eyeForce1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce1" class="fas fa-eye text-md"></i></button></div>
-                <div class="relative"><input type="password" id="forcePass2" required class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center pr-10" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('forcePass2', 'eyeForce2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce2" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="forcePass1" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('forcePass1', 'eyeForce1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce1" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="forcePass2" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('forcePass2', 'eyeForce2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce2" class="fas fa-eye text-md"></i></button></div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg transition shadow-md text-md mt-2">Salvar e Entrar</button>
                 <button type="button" onclick="window.logout()" class="w-full text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white py-2 text-sm">Cancelar e Sair</button>
             </form>
@@ -106,9 +107,9 @@
                 <button type="button" onclick="window.hideElement('modalChangePassword')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
             <form id="changePassForm" onsubmit="window.saveChangePassword(event)" class="p-4 sm:p-5 space-y-3">
-                <div class="relative"><input type="password" id="changePassCurrent" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center pr-10" placeholder="Senha Atual"><button type="button" onclick="window.toggleEye('changePassCurrent', 'eyeChg1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg1" class="fas fa-eye text-md"></i></button></div>
-                <div class="relative"><input type="password" id="changePassNew1" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center pr-10" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('changePassNew1', 'eyeChg2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg2" class="fas fa-eye text-md"></i></button></div>
-                <div class="relative"><input type="password" id="changePassNew2" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center pr-10" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('changePassNew2', 'eyeChg3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg3" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassCurrent" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Senha Atual"><button type="button" onclick="window.toggleEye('changePassCurrent', 'eyeChg1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg1" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassNew1" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('changePassNew1', 'eyeChg2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg2" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassNew2" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('changePassNew2', 'eyeChg3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg3" class="fas fa-eye text-md"></i></button></div>
                 <div class="flex justify-center gap-2 pt-3">
                     <button type="button" onclick="window.hideElement('modalChangePassword')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
@@ -273,6 +274,9 @@
     <!-- LÓGICA JAVASCRIPT MASTER                                                  -->
     <!-- ========================================================================= -->
     <script>
+        // Função utilitária de prevenção de erros de offline
+        window.processTelegramQueue = async () => {};
+
         // 1. Configurações Firebase
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
         const firebaseConfig = { 
@@ -346,7 +350,7 @@
             setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 600); }, 6000);
         };
 
-        window.addEventListener('online', () => { window.showToast('Conexão restabelecida. Processando fila...', 'success'); if(window.processTelegramQueue) window.processTelegramQueue(); });
+        window.addEventListener('online', () => { window.showToast('Conexão restabelecida. Processando fila...', 'success'); window.processTelegramQueue(); });
         window.addEventListener('offline', () => window.showToast('Sem internet! Modo Offline ativado.', 'error'));
         
         window.toggleDarkMode = () => { 
@@ -432,7 +436,7 @@
             window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; 
             history.pushState({ tab: window.activeTab }, "", `#${window.activeTab}`);
             window.renderActiveTab();
-            if(window.processTelegramQueue) setTimeout(window.processTelegramQueue, 3000);
+            setTimeout(window.processTelegramQueue, 3000);
 
             // GATILHO: Ponto de Restauração Automático (A cada 48 Horas)
             if (window.currentSystemUser.role === 'admin') {
