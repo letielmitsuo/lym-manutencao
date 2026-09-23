@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LYM Eletrônicos - Gestão</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: {} } };
-        if (localStorage.getItem('lym_theme') === 'dark' || (!('lym_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
+        if (localStorage.getItem('lym_theme') === 'dark' || (!('lym_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark'); }
     </script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
@@ -20,7 +16,6 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -29,7 +24,6 @@
         .toast { transition: all 0.3s ease-in-out; }
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
         @media print {
             body { background: white !important; color: black !important;}
             body * { visibility: hidden; }
@@ -45,45 +39,27 @@
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
     <datalist id="catalogList"></datalist>
 
-    <!-- ==================== TELA DE LOGIN ==================== -->
-    <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40" style="display: flex;">
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
-                <div class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <i class="fas fa-bolt text-xl"></i>
-                </div>
+                <div class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><i class="fas fa-bolt text-xl"></i></div>
                 <h1 class="text-xl font-bold text-slate-800 dark:text-white">LYM Eletrônicos</h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Sistema de Gestão e Manutenção</p>
             </div>
             <form id="loginForm" onsubmit="window.handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 text-center">Usuário</label>
-                    <input type="text" id="loginUsername" required class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Digite seu usuário">
-                </div>
+                <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 text-center">Usuário</label><input type="text" id="loginUsername" required class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Digite seu usuário"></div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 text-center">Senha</label>
-                    <div class="relative flex items-center justify-center">
-                        <input type="password" id="loginPassword" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="••••••••">
-                        <button type="button" onclick="window.toggleEye('loginPassword', 'eyeIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-300 outline-none">
-                            <i id="eyeIcon" class="fas fa-eye text-md"></i>
-                        </button>
-                    </div>
+                    <div class="relative flex items-center justify-center"><input type="password" id="loginPassword" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="••••••••"><button type="button" onclick="window.toggleEye('loginPassword', 'eyeIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-300 outline-none"><i id="eyeIcon" class="fas fa-eye text-md"></i></button></div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition shadow-md text-md mt-2">
-                    Entrar no Sistema
-                </button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition shadow-md text-md mt-2">Entrar no Sistema</button>
             </form>
         </div>
     </div>
 
-    <!-- ==================== TELA FORÇAR NOVA SENHA ==================== -->
     <div id="modalForcePassword" class="fixed inset-0 bg-slate-900 hidden items-center justify-center z-50">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
-            <div class="text-center mb-6">
-                <div class="bg-amber-500 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><i class="fas fa-shield-alt text-xl"></i></div>
-                <h1 class="text-xl font-bold text-slate-800 dark:text-white">Atualize sua Senha</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Por segurança, crie uma nova senha antes de continuar.</p>
-            </div>
+            <div class="text-center mb-6"><div class="bg-amber-500 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><i class="fas fa-shield-alt text-xl"></i></div><h1 class="text-xl font-bold text-slate-800 dark:text-white">Atualize sua Senha</h1><p class="text-sm text-slate-500 dark:text-slate-400">Por segurança, crie uma nova senha antes de continuar.</p></div>
             <form onsubmit="window.saveForcedPassword(event)" class="space-y-4">
                 <div class="relative"><input type="password" id="forcePass1" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('forcePass1', 'eyeForce1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce1" class="fas fa-eye text-md"></i></button></div>
                 <div class="relative"><input type="password" id="forcePass2" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('forcePass2', 'eyeForce2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce2" class="fas fa-eye text-md"></i></button></div>
@@ -93,334 +69,83 @@
         </div>
     </div>
 
-    <!-- ==================== TELA TROCAR SENHA VOLUNTÁRIA ==================== -->
     <div id="modalChangePassword" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full">Mudar Minha Senha</h3>
-                <button type="button" onclick="window.hideElement('modalChangePassword')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
-            </div>
+            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center"><h3 class="font-bold text-lg dark:text-white text-center w-full">Mudar Minha Senha</h3><button type="button" onclick="window.hideElement('modalChangePassword')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button></div>
             <form id="changePassForm" onsubmit="window.saveChangePassword(event)" class="p-4 sm:p-5 space-y-3">
                 <div class="relative"><input type="password" id="changePassCurrent" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Senha Atual"><button type="button" onclick="window.toggleEye('changePassCurrent', 'eyeChg1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg1" class="fas fa-eye text-md"></i></button></div>
                 <div class="relative"><input type="password" id="changePassNew1" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('changePassNew1', 'eyeChg2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg2" class="fas fa-eye text-md"></i></button></div>
                 <div class="relative"><input type="password" id="changePassNew2" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('changePassNew2', 'eyeChg3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg3" class="fas fa-eye text-md"></i></button></div>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalChangePassword')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
+                <div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalChangePassword')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div>
             </form>
         </div>
     </div>
 
-    <!-- ==================== MODAIS DE CADASTRO ==================== -->
-    <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8 w-full max-w-md">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCatalog">Novo Item</h3>
-                <button type="button" onclick="window.hideElement('modalCatalog')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <form id="catalogForm" onsubmit="window.saveCatalog(event)" class="p-4 sm:p-5 space-y-3">
-                <input type="text" id="catName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome do Item *">
-                <select id="catCategory" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center">
-                    <option value="Segurança Eletrônica">Segurança Eletrônica</option>
-                    <option value="Redes e Informática">Redes e Informática</option>
-                    <option value="Elétrica">Elétrica</option>
-                    <option value="Hidráulica">Hidráulica</option>
-                    <option value="Ferramentas">Ferramentas</option>
-                    <option value="Consumíveis">Consumíveis</option>
-                    <option value="Outros">Outros</option>
-                </select>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Cód. Barras</label>
-                        <div class="flex">
-                            <input type="text" id="catBarcode" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-l-lg outline-none text-xs text-center" placeholder="Ex: 789...">
-                            <button type="button" onclick="window.scanForInput('catBarcode')" class="bg-blue-600 text-white px-2 rounded-r-lg hover:bg-blue-700"><i class="fas fa-camera"></i></button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Marca</label>
-                        <input type="text" id="catBrand" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Preço (R$)</label>
-                        <input type="number" id="catPrice" step="0.01" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center">
-                    </div>
-                </div>
-                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 text-center">
-                    <label class="block text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Quantidade no Estoque</label>
-                    <input type="number" id="catStock" value="0" step="0.1" class="w-full p-2 border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg text-blue-700 dark:text-blue-400">
-                </div>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalCatalog')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modais de Cadastro -->
+    <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8"><div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center"><h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCatalog">Novo Item</h3><button type="button" onclick="window.hideElement('modalCatalog')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button></div><form id="catalogForm" onsubmit="window.saveCatalog(event)" class="p-4 sm:p-5 space-y-3"><input type="text" id="catName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome do Item *"><select id="catCategory" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="Segurança Eletrônica">Segurança Eletrônica</option><option value="Redes e Informática">Redes e Informática</option><option value="Elétrica">Elétrica</option><option value="Hidráulica">Hidráulica</option><option value="Ferramentas">Ferramentas</option><option value="Consumíveis">Consumíveis</option><option value="Outros">Outros</option></select><div class="grid grid-cols-1 sm:grid-cols-3 gap-2"><div><label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Cód. Barras</label><div class="flex"><input type="text" id="catBarcode" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-l-lg outline-none text-xs text-center" placeholder="Ex: 789..."><button type="button" onclick="window.scanForInput('catBarcode')" class="bg-blue-600 text-white px-2 rounded-r-lg hover:bg-blue-700"><i class="fas fa-camera"></i></button></div></div><div><label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Marca</label><input type="text" id="catBrand" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center"></div><div><label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Preço (R$)</label><input type="number" id="catPrice" step="0.01" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center"></div></div><div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 text-center"><label class="block text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Quantidade no Estoque</label><input type="number" id="catStock" value="0" step="0.1" class="w-full p-2 border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg text-blue-700 dark:text-blue-400"></div><div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalCatalog')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div></form></div></div>
+    <div id="modalTool" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8"><div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center"><h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleTool">Nova Ferramenta</h3><button type="button" onclick="window.hideElement('modalTool')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button></div><form id="toolForm" onsubmit="window.saveTool(event)" class="p-4 sm:p-5 space-y-3"><input type="text" id="toolName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome da Ferramenta *"><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Cód. Barras/Patrimônio</label><div class="flex"><input type="text" id="toolBarcode" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-l-lg outline-none text-xs text-center" placeholder="Ex: 12345"><button type="button" onclick="window.scanForInput('toolBarcode')" class="bg-blue-600 text-white px-2 rounded-r-lg hover:bg-blue-700"><i class="fas fa-camera"></i></button></div></div><div><label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Marca/Modelo</label><input type="text" id="toolBrand" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center"></div></div><div class="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-100 dark:border-amber-800 text-center"><label class="block text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">Quantidade Total Adquirida</label><input type="number" id="toolTotal" value="1" min="1" step="1" class="w-full p-2 border border-amber-200 dark:border-amber-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg text-amber-700 dark:text-amber-400"></div><div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalTool')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div></form></div></div>
+    <div id="modalScanner" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-[100] p-4"><div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl animate-fade-in"><div class="p-3 bg-slate-100 dark:bg-slate-700 flex justify-between items-center border-b dark:border-slate-600"><h3 class="font-bold dark:text-white"><i class="fas fa-barcode mr-2 text-blue-500"></i> Escanear Código</h3><button type="button" onclick="window.stopScanner()" class="text-red-500 text-xl font-bold px-2"><i class="fas fa-times"></i></button></div><div id="reader" class="w-full bg-black" style="min-height: 300px;"></div><div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras.</div></div></div>
+    <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in"><div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center"><h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCei">Nova Creche</h3><button type="button" onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button></div><form id="ceiForm" onsubmit="window.saveCei(event)" class="p-4 sm:p-5 space-y-3"><input type="text" id="ceiName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome da Creche"><div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 text-center"><p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-2"><i class="fab fa-telegram"></i> Integração Telegram</p><input type="text" id="ceiTelegramId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center mb-2" placeholder="ID do Grupo"><input type="text" id="ceiTelegramTopicId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center" placeholder="ID do Tópico (Opcional)"></div><div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalCei')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div></form></div></div>
+    <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in"><div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center"><h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleUser">Novo Usuário</h3><button type="button" onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button></div><form id="userForm" onsubmit="window.saveUser(event)" class="p-4 sm:p-5 space-y-3"><input type="text" id="newUsername" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Login"><div><input type="text" id="newPassword" value="123mudar" required class="w-full p-2 border dark:border-slate-600 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 rounded-lg outline-none text-center font-mono"><p class="text-[10px] text-slate-500 dark:text-slate-400 text-center mt-1">O usuário será forçado a trocar essa senha ao logar.</p></div><select id="newRole" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="funcionario">Funcionário Geral</option><option value="func_cftv">Técnico CFTV</option><option value="admin">Administrador</option></select><div class="flex justify-center gap-2 pt-3"><button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button></div></form></div></div>
 
-    <!-- MODAL FERRAMENTAS -->
-    <div id="modalTool" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8 w-full max-w-md">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleTool">Nova Ferramenta</h3>
-                <button type="button" onclick="window.hideElement('modalTool')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <form id="toolForm" onsubmit="window.saveTool(event)" class="p-4 sm:p-5 space-y-3">
-                <input type="text" id="toolName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome da Ferramenta *">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Cód. Barras/Patrimônio</label>
-                        <div class="flex">
-                            <input type="text" id="toolBarcode" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-l-lg outline-none text-xs text-center" placeholder="Ex: 12345">
-                            <button type="button" onclick="window.scanForInput('toolBarcode')" class="bg-blue-600 text-white px-2 rounded-r-lg hover:bg-blue-700"><i class="fas fa-camera"></i></button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 text-center">Marca/Modelo</label>
-                        <input type="text" id="toolBrand" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-xs text-center">
-                    </div>
-                </div>
-                <div class="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-100 dark:border-amber-800 text-center">
-                    <label class="block text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">Quantidade Total Adquirida</label>
-                    <input type="number" id="toolTotal" value="1" min="1" step="1" class="w-full p-2 border border-amber-200 dark:border-amber-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold text-lg text-amber-700 dark:text-amber-400">
-                </div>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalTool')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modais Interação (Visualizar e Confirmar) -->
+    <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8"><div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center sticky top-0 z-10"><h3 class="font-bold text-lg dark:text-white text-center w-full" id="viewRecordTitle">Detalhes</h3><div class="flex gap-2 absolute right-4"><button type="button" id="btnPrintRecord" class="px-2 py-1 bg-slate-800 dark:bg-blue-600 text-white text-xs font-bold rounded hover:bg-slate-700 shadow-sm"><i class="fas fa-print mr-1"></i> Imprimir</button><button type="button" onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white ml-2"><i class="fas fa-times text-lg"></i></button></div></div><div id="viewRecordContent" class="p-4 sm:p-5"></div></div></div>
+    <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-5"><div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-exclamation-triangle"></i></div><h3 class="font-bold text-lg dark:text-white mb-1">Tem certeza?</h3><p class="text-slate-500 dark:text-slate-400 mb-5 text-sm">Esta ação não pode ser desfeita.</p><div class="flex justify-center gap-2"><button type="button" onclick="window.hideElement('modalConfirm')" class="px-4 py-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-sm font-medium">Cancelar</button><button type="button" id="btnConfirmAction" onclick="window.executeConfirmAction()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">Sim, Confirmar</button></div></div></div>
 
-    <!-- TELA DA CÂMERA -->
-    <div id="modalScanner" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-[100] p-4">
-        <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl animate-fade-in">
-            <div class="p-3 bg-slate-100 dark:bg-slate-700 flex justify-between items-center border-b dark:border-slate-600">
-                <h3 class="font-bold dark:text-white"><i class="fas fa-barcode mr-2 text-blue-500"></i> Escanear Código</h3>
-                <button type="button" onclick="window.stopScanner()" class="text-red-500 text-xl font-bold px-2"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="reader" class="w-full bg-black" style="min-height: 300px;"></div>
-            <div class="p-3 text-center text-xs text-slate-500 dark:text-slate-400">Aponte a câmera para o código de barras.</div>
-        </div>
-    </div>
-
-    <!-- MODAL CRECHE -->
-    <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCei">Nova Creche</h3>
-                <button type="button" onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <form id="ceiForm" onsubmit="window.saveCei(event)" class="p-4 sm:p-5 space-y-3">
-                <input type="text" id="ceiName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome da Creche">
-                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 text-center">
-                    <p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-2"><i class="fab fa-telegram"></i> Integração Telegram</p>
-                    <input type="text" id="ceiTelegramId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center mb-2" placeholder="ID do Grupo">
-                    <input type="text" id="ceiTelegramTopicId" class="w-full p-2 text-sm border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-center" placeholder="ID do Tópico (Opcional)">
-                </div>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalCei')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL USUÁRIO -->
-    <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleUser">Novo Usuário</h3>
-                <button type="button" onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <form id="userForm" onsubmit="window.saveUser(event)" class="p-4 sm:p-5 space-y-3">
-                <input type="text" id="newUsername" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Login">
-                <div>
-                    <input type="text" id="newPassword" value="123mudar" required class="w-full p-2 border dark:border-slate-600 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 rounded-lg outline-none text-center font-mono">
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 text-center mt-1">O usuário será forçado a trocar essa senha ao logar.</p>
-                </div>
-                <select id="newRole" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center">
-                    <option value="funcionario">Funcionário Geral</option>
-                    <option value="func_cftv">Técnico CFTV</option>
-                    <option value="admin">Administrador</option>
-                </select>
-                <div class="flex justify-center gap-2 pt-3">
-                    <button type="button" onclick="window.hideElement('modalUser')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL DETALHES -->
-    <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8">
-            <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center sticky top-0 z-10">
-                <h3 class="font-bold text-lg dark:text-white text-center w-full" id="viewRecordTitle">Detalhes</h3>
-                <div class="flex gap-2 absolute right-4">
-                    <button type="button" id="btnPrintRecord" class="px-2 py-1 bg-slate-800 dark:bg-blue-600 text-white text-xs font-bold rounded hover:bg-slate-700 shadow-sm"><i class="fas fa-print mr-1"></i> Imprimir</button>
-                    <button type="button" onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white ml-2"><i class="fas fa-times text-lg"></i></button>
-                </div>
-            </div>
-            <div id="viewRecordContent" class="p-4 sm:p-5"></div>
-        </div>
-    </div>
-    
-    <!-- MODAL CONFIRMAÇÃO -->
-    <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-5">
-            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-exclamation-triangle"></i></div>
-            <h3 class="font-bold text-lg dark:text-white mb-1">Tem certeza?</h3>
-            <p class="text-slate-500 dark:text-slate-400 mb-5 text-sm">Esta ação não pode ser desfeita.</p>
-            <div class="flex justify-center gap-2">
-                <button type="button" onclick="window.hideElement('modalConfirm')" class="px-4 py-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-sm font-medium">Cancelar</button>
-                <button type="button" id="btnConfirmAction" onclick="window.executeConfirmAction()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">Sim, Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== MAIN APP LAYOUT ==================== -->
-    <div id="appLayout" class="hidden w-full h-full flex flex-col md:flex-row" style="display: none;">
-        
+    <!-- MAIN APP LAYOUT -->
+    <div id="appLayout" class="hidden w-full h-full flex flex-col md:flex-row">
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
-            <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-bolt text-blue-400 text-lg"></i>
-                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v9.5</span></h2>
-                </div>
-                <div class="flex items-center gap-2 md:hidden">
-                    <button type="button" onclick="window.toggleDarkMode()" class="outline-none p-2"><i id="darkModeIconMobile" class="fas fa-moon text-slate-300 text-lg transition-colors"></i></button>
-                    <button type="button" id="mobileMenuBtn" class="text-white p-2"><i class="fas fa-bars text-xl"></i></button>
-                </div>
-            </div>
-            
+            <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700"><div class="flex items-center gap-2"><i class="fas fa-bolt text-blue-400 text-lg"></i><h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v9.5</span></h2></div><div class="flex items-center gap-2 md:hidden"><button type="button" onclick="window.toggleDarkMode()" class="outline-none p-2"><i id="darkModeIconMobile" class="fas fa-moon text-slate-300 text-lg transition-colors"></i></button><button type="button" id="mobileMenuBtn" class="text-white p-2"><i class="fas fa-bars text-xl"></i></button></div></div>
             <div id="navLinks" class="hidden md:flex flex-col flex-grow overflow-y-auto py-2"></div>
-            
-            <div class="p-3 border-t border-slate-700 hidden md:block" id="navFooter">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2 overflow-hidden">
-                        <div class="w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center text-blue-400 font-bold text-sm" id="userInitial">A</div>
-                        <div class="overflow-hidden">
-                            <p class="font-medium text-sm truncate" id="userNameDisplay">Admin</p>
-                            <p class="text-[10px] text-slate-400 capitalize" id="userRoleDisplay">Administrador</p>
-                        </div>
-                    </div>
-                    <button type="button" onclick="window.toggleDarkMode()" class="outline-none p-1.5 hover:bg-slate-800 rounded-full transition"><i id="darkModeIconDesktop" class="fas fa-moon text-slate-300 text-md"></i></button>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" onclick="window.openChangePassword()" title="Mudar Senha" class="flex items-center justify-center w-10 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 rounded-lg transition text-sm"><i class="fas fa-key"></i></button>
-                    <button type="button" onclick="window.logout()" class="flex-grow flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 py-1.5 rounded-lg transition text-sm"><i class="fas fa-sign-out-alt"></i> Sair</button>
-                </div>
-            </div>
+            <div class="p-3 border-t border-slate-700 hidden md:block" id="navFooter"><div class="flex items-center justify-between mb-3"><div class="flex items-center gap-2 overflow-hidden"><div class="w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center text-blue-400 font-bold text-sm" id="userInitial">A</div><div class="overflow-hidden"><p class="font-medium text-sm truncate" id="userNameDisplay">Admin</p><p class="text-[10px] text-slate-400 capitalize" id="userRoleDisplay">Administrador</p></div></div><button type="button" onclick="window.toggleDarkMode()" class="outline-none p-1.5 hover:bg-slate-800 rounded-full transition"><i id="darkModeIconDesktop" class="fas fa-moon text-slate-300 text-md"></i></button></div><div class="flex gap-2"><button type="button" onclick="window.openChangePassword()" title="Mudar Senha" class="flex items-center justify-center w-10 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 rounded-lg transition text-sm"><i class="fas fa-key"></i></button><button type="button" onclick="window.logout()" class="flex-grow flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 py-1.5 rounded-lg transition text-sm"><i class="fas fa-sign-out-alt"></i> Sair</button></div></div>
         </nav>
-
         <main class="flex-grow flex flex-col h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
-            <header class="bg-white dark:bg-slate-800 shadow-sm px-4 py-3 flex md:hidden items-center justify-between border-b dark:border-slate-700 transition-colors">
-                <button type="button" onclick="window.openChangePassword()" class="text-slate-600 dark:text-slate-300 text-sm absolute left-4"><i class="fas fa-key"></i></button>
-                <h1 class="text-md font-bold text-slate-800 dark:text-slate-100 text-center w-full" id="mobilePageTitle">Painel</h1>
-                <button type="button" onclick="window.logout()" class="text-red-500 font-medium text-sm absolute right-4"><i class="fas fa-sign-out-alt"></i></button>
-            </header>
-            
+            <header class="bg-white dark:bg-slate-800 shadow-sm px-4 py-3 flex md:hidden items-center justify-between border-b dark:border-slate-700 transition-colors"><button type="button" onclick="window.openChangePassword()" class="text-slate-600 dark:text-slate-300 text-sm absolute left-4"><i class="fas fa-key"></i></button><h1 class="text-md font-bold text-slate-800 dark:text-slate-100 text-center w-full" id="mobilePageTitle">Painel</h1><button type="button" onclick="window.logout()" class="text-red-500 font-medium text-sm absolute right-4"><i class="fas fa-sign-out-alt"></i></button></header>
             <div id="mainContent" class="flex-grow overflow-y-auto p-3 sm:p-6 pb-32 sm:pb-12"></div>
         </main>
     </div>
 
-    <!-- LÓGICA JAVASCRIPT MASTER -->
     <script>
-        // CONFIG E ESTADO
+        // CONFIG & DB
         window.processTelegramQueue = async () => {};
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM", 
-            authDomain: "lym-manutencao.firebaseapp.com", 
-            projectId: "lym-manutencao", 
-            storageBucket: "lym-manutencao.firebasestorage.app", 
-            messagingSenderId: "172405408906", 
-            appId: "1:172405408906:web:19ef22e87e8ecbe1d91973" 
-        };
-        
+        const firebaseConfig = { apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM", authDomain: "lym-manutencao.firebaseapp.com", projectId: "lym-manutencao", storageBucket: "lym-manutencao.firebasestorage.app", messagingSenderId: "172405408906", appId: "1:172405408906:web:19ef22e87e8ecbe1d91973" };
         let db = null;
-        try {
-            if (typeof firebase !== 'undefined') {
-                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Firebase Offline falhou: ", err));
-            }
-        } catch(e) { console.warn("Aviso Firebase:", e); }
+        try { if (typeof firebase !== 'undefined') { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); db = firebase.firestore(); db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Firebase Offline falhou: ", err)); } } catch(e) { console.warn("Firebase config block."); }
 
         window.localData = { ceis: [], users: [], reports: [], quotes: [], thirdParty: [], audit: [], catalog: [], stockMovements: [], tools: [], toolMovements: [] };
-        window.currentSystemUser = null; 
-        window.activeTab = 'dashboard'; 
-        window.editingItemId = null; 
-        window.materialCount = 0; 
-        window.lymCharts = {};
+        window.currentSystemUser = null; window.activeTab = 'dashboard'; window.editingItemId = null; window.materialCount = 0; window.lymCharts = {};
 
-        // ==========================================
-        // FUNÇÕES DE EXIBIÇÃO DE MODAIS BLINDADAS
-        // ==========================================
-        window.showElement = (id) => { 
-            const el = document.getElementById(id); 
-            if (el) { 
-                el.classList.remove('hidden'); 
-                el.style.display = 'flex'; // Força o display como flex para garantir o alinhamento
-            } 
-        };
-        window.hideElement = (id) => { 
-            const el = document.getElementById(id); 
-            if (el) { 
-                el.classList.add('hidden'); 
-                el.style.display = 'none'; 
-            } 
-        };
-
+        // UI HELPERS (CORRIGIDOS PARA NUNCA BLOQUEAR BOTÕES)
+        window.showElement = (id) => { const el = document.getElementById(id); if (el) { el.classList.remove('hidden'); el.style.display = ''; } };
+        window.hideElement = (id) => { const el = document.getElementById(id); if (el) { el.classList.add('hidden'); el.style.display = 'none'; } };
         window.escapeHtml = (text) => { if (!text) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
         window.formatDateBR = (iso) => { try { if (!iso) return ""; let str = String(iso); if (str.includes('-') && str.split('-').length >= 3) { return str.split('T')[0].split('-').reverse().join('/'); } return str; } catch(e) { return ""; } };
         window.formatMoney = (val) => { try { let v = parseFloat(val); if (isNaN(v)) v = 0; return v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); } catch(e) { return "R$ 0,00"; } };
         window.getSafeTime = (obj) => { try { if (!obj) return 0; if (obj.timestamp) { let t = new Date(obj.timestamp).getTime(); if (!isNaN(t)) return t; } if (obj.date) { let dStr = String(obj.date); let t = new Date(dStr).getTime(); if (isNaN(t) && dStr.includes('/')) { t = new Date(dStr.split('/').reverse().join('-')).getTime(); } if (!isNaN(t)) return t; } return 0; } catch(e) { return 0; } };
         
         window.showToast = (msg, type = 'success') => {
-            const container = document.getElementById('toastContainer'); if(!container) return;
-            const toast = document.createElement('div');
+            const container = document.getElementById('toastContainer'); if(!container) return; const toast = document.createElement('div');
             let colorClass = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
             let iconClass = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle');
             toast.className = `${colorClass} text-white px-5 py-2.5 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300 animate-fade-in z-50 text-sm pointer-events-auto`;
             toast.innerHTML = `<i class="fas ${iconClass}"></i> <span class="font-medium">${window.escapeHtml(msg)}</span><button type="button" onclick="this.parentElement.remove()" class="ml-3 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10);
-            setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 600); }, 4000);
+            container.appendChild(toast); setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10); setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 600); }, 4000);
         };
 
         window.toggleDarkMode = () => { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('lym_theme', isDark ? 'dark' : 'light'); ['darkModeIconDesktop', 'darkModeIconMobile'].forEach(id => { const icon = document.getElementById(id); if(icon) icon.className = isDark ? 'fas fa-sun text-yellow-400 text-xl transition-colors' : 'fas fa-moon text-slate-300 text-xl transition-colors'; }); if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100); };
         
-        // MODAL DE CONFIRMAÇÃO GLOBAL BLINDADO
         let confirmActionCallback = null; 
-        window.confirmAction = (callback) => { 
-            confirmActionCallback = callback; 
-            window.showElement('modalConfirm'); 
-        };
-        window.executeConfirmAction = () => { 
-            if(confirmActionCallback) confirmActionCallback(); 
-            window.hideElement('modalConfirm'); 
-            confirmActionCallback = null; 
-        };
+        window.confirmAction = (callback) => { confirmActionCallback = callback; window.showElement('modalConfirm'); };
+        window.executeConfirmAction = () => { if(confirmActionCallback) confirmActionCallback(); window.hideElement('modalConfirm'); confirmActionCallback = null; };
 
-        // DB E AUTENTICAÇÃO
         window.initFirebaseSync = function() {
-            if(!db) return;
-            const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements', 'tools', 'toolMovements'];
-            cols.forEach(col => {
-                db.collection(col).onSnapshot(snap => {
-                    window.localData[col] = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if (col === 'users' && snap.empty) { db.collection('users').add({ login: 'admin', pass: 'admin123', role: 'admin' }); db.collection('users').add({ login: 'func', pass: 'func123', role: 'funcionario' }); }
-                    if (col === 'catalog' && window.updateCatalogDatalist) window.updateCatalogDatalist();
-                    if (window.currentSystemUser && window.renderActiveTab) window.renderActiveTab();
-                });
-            });
+            if(!db) return; const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements', 'tools', 'toolMovements'];
+            cols.forEach(col => { db.collection(col).onSnapshot(snap => { window.localData[col] = snap.docs.map(d => ({id: d.id, ...d.data()})); if (col === 'users' && snap.empty) { db.collection('users').add({ login: 'admin', pass: 'admin123', role: 'admin' }); db.collection('users').add({ login: 'func', pass: 'func123', role: 'funcionario' }); } if (col === 'catalog' && window.updateCatalogDatalist) window.updateCatalogDatalist(); if (window.currentSystemUser && window.renderActiveTab) window.renderActiveTab(); }); });
         };
 
-        window.dbSave = async (colName, docId, data) => { if(!db) return; data.updatedAt = new Date().toISOString(); if(docId) await db.collection(colName).doc(docId).set(data, { merge: true }); else await db.collection(colName).add(data); };
-        window.dbDelete = async (colName, docId) => { if(!db) return; await db.collection(colName).doc(docId).delete(); };
+        window.dbSave = async (colName, docId, data) => { if(!db) return; data.updatedAt = new Date().toISOString(); if(docId) await db.collection(colName).doc(String(docId)).set(data, { merge: true }); else await db.collection(colName).add(data); };
+        window.dbDelete = async (colName, docId) => { if(!db) return; await db.collection(colName).doc(String(docId)).delete(); };
         window.logAudit = async (actionDesc) => { if(!db) return; try { await db.collection('audit').add({ user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: actionDesc, date: new Date().toLocaleString('pt-BR'), timestamp: Date.now() }); } catch(e){} };
 
         window.toggleEye = function(inputId, iconId) { const pwd = document.getElementById(inputId); const icon = document.getElementById(iconId); if (pwd.type === 'password') { pwd.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } else { pwd.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); } };
@@ -428,20 +153,10 @@
         window.handleLogin = function(e) {
             e.preventDefault();
             try {
-                const u = document.getElementById('loginUsername').value.trim().toLowerCase(); 
-                const p = document.getElementById('loginPassword').value.trim();
+                const u = document.getElementById('loginUsername').value.trim().toLowerCase(); const p = document.getElementById('loginPassword').value.trim();
                 let user = window.localData.users.find(x => (String(x.login).toLowerCase() === u || String(x.username).toLowerCase() === u) && (x.pass === p || x.password === p));
-                if (!user) { 
-                    if (u === 'admin' && p === 'admin123') { user = { id: 'master_admin', login: 'admin', role: 'admin' }; } 
-                    else if (u === 'func' && p === 'func123') { user = { id: 'master_func', login: 'func', role: 'funcionario' }; } 
-                }
-                if (user) {
-                    window.currentSystemUser = { id: user.id, login: user.login || user.username || u, role: user.role, pass: p };
-                    if(p === '123mudar') {
-                        document.getElementById('forcePass1').value = ''; document.getElementById('forcePass2').value = '';
-                        window.hideElement('loginScreen'); window.showElement('modalForcePassword');
-                    } else { window.completeLogin(); }
-                } else { window.showToast("Usuário ou senha inválidos!", "error"); }
+                if (!user) { if (u === 'admin' && p === 'admin123') { user = { id: 'master_admin', login: 'admin', role: 'admin' }; } else if (u === 'func' && p === 'func123') { user = { id: 'master_func', login: 'func', role: 'funcionario' }; } }
+                if (user) { window.currentSystemUser = { id: user.id, login: user.login || user.username || u, role: user.role, pass: p }; if(p === '123mudar') { document.getElementById('forcePass1').value = ''; document.getElementById('forcePass2').value = ''; window.hideElement('loginScreen'); window.showElement('modalForcePassword'); } else { window.completeLogin(); } } else { window.showToast("Usuário ou senha inválidos!", "error"); }
             } catch(err) { window.showToast("Erro de acesso", "error"); }
         };
 
@@ -455,279 +170,62 @@
             window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; window.renderActiveTab();
         };
 
-        window.saveForcedPassword = async (e) => {
-            e.preventDefault(); const p1 = document.getElementById('forcePass1').value; const p2 = document.getElementById('forcePass2').value;
-            if(p1 !== p2) return window.showToast("As senhas não coincidem!", "error");
-            if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error");
-            if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error");
-            try { await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); window.currentSystemUser.pass = p1; window.logAudit('Trocou a senha'); window.completeLogin(); } catch(err) { window.showToast("Erro ao salvar.", "error"); }
-        };
-
+        window.saveForcedPassword = async (e) => { e.preventDefault(); const p1 = document.getElementById('forcePass1').value; const p2 = document.getElementById('forcePass2').value; if(p1 !== p2) return window.showToast("As senhas não coincidem!", "error"); if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error"); if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error"); try { await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); window.currentSystemUser.pass = p1; window.logAudit('Trocou a senha'); window.completeLogin(); } catch(err) { window.showToast("Erro ao salvar.", "error"); } };
         window.openChangePassword = () => { document.getElementById('changePassForm').reset(); window.showElement('modalChangePassword'); };
-        window.saveChangePassword = async (e) => {
-            e.preventDefault(); const current = document.getElementById('changePassCurrent').value; const p1 = document.getElementById('changePassNew1').value; const p2 = document.getElementById('changePassNew2').value;
-            if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error");
-            const realUser = window.localData.users.find(u => String(u.id) === String(window.currentSystemUser.id)); const realPass = realUser.pass || realUser.password;
-            if(current !== realPass) return window.showToast("Senha atual incorreta!", "error");
-            if(p1 !== p2) return window.showToast("Senhas não coincidem!", "error");
-            if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error");
-            try { await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); window.currentSystemUser.pass = p1; window.logAudit('Alterou a senha voluntariamente'); window.showToast("Senha alterada!"); window.hideElement('modalChangePassword'); } catch(err) { window.showToast("Erro.", "error"); }
-        };
-
+        window.saveChangePassword = async (e) => { e.preventDefault(); const current = document.getElementById('changePassCurrent').value; const p1 = document.getElementById('changePassNew1').value; const p2 = document.getElementById('changePassNew2').value; if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error"); const realUser = window.localData.users.find(u => String(u.id) === String(window.currentSystemUser.id)); const realPass = realUser.pass || realUser.password; if(current !== realPass) return window.showToast("Senha atual incorreta!", "error"); if(p1 !== p2) return window.showToast("Senhas não coincidem!", "error"); if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error"); try { await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); window.currentSystemUser.pass = p1; window.logAudit('Alterou a senha voluntariamente'); window.showToast("Senha alterada!"); window.hideElement('modalChangePassword'); } catch(err) { window.showToast("Erro.", "error"); } };
         window.resetUserPassword = (id) => { window.confirmAction(async () => { try { await window.dbSave('users', id, { pass: '123mudar', password: '123mudar' }); window.logAudit(`Resetou a senha ID: ${id}`); window.showToast("Senha resetada para 123mudar!"); } catch(err) { window.showToast("Erro", "error"); } }); };
         window.logout = () => { window.logAudit('Logout Efetuado'); window.currentSystemUser = null; window.hideElement('appLayout'); window.showElement('loginScreen'); document.getElementById('loginForm').reset(); };
 
-        // NAVEGAÇÃO E TABS
         window.buildMenu = () => {
-            const navLinks = document.getElementById('navLinks'); navLinks.innerHTML = "";
-            document.getElementById('mobileMenuBtn').onclick = () => { navLinks.classList.toggle('hidden'); navLinks.classList.toggle('flex'); };
-            const role = window.currentSystemUser.role;
-            let menuItems = [];
-            if (role === 'admin') {
-                menuItems = [
-                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' }, { id: 'admin-catalog', icon: 'fa-box-open', label: 'Almoxarifado' },
-                    { id: 'admin-ceis', icon: 'fa-school', label: 'Creches (CEIs)' }, { id: 'admin-users', icon: 'fa-users', label: 'Usuários' }, 
-                    { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços' }, { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, 
-                    { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' },
-                    { id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' }, { id: 'admin-tools', icon: 'fa-toolbox', label: 'Ferramentas' }
-                ];
-            } else {
-                menuItems = [ { id: 'func-stock', icon: 'fa-box-open', label: 'Meu Almoxarifado' }, { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' }, { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' } ];
-                if (role !== 'func_cftv') { menuItems.push({ id: 'func-thirdParty', icon: 'fa-eye', label: 'Acomp. Terceiro' }); } else { menuItems.push({ id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' }); }
-                menuItems.push({ id: 'func-tools', icon: 'fa-toolbox', label: 'Cautela Ferramentas' }, { id: 'func-history', icon: 'fa-history', label: 'Meus Registros' });
-            }
-            menuItems.forEach(item => { 
-                const a = document.createElement('a'); a.href = "#"; a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium"; 
-                a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`; 
-                a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); }; 
-                navLinks.appendChild(a); 
-            });
+            const navLinks = document.getElementById('navLinks'); navLinks.innerHTML = ""; document.getElementById('mobileMenuBtn').onclick = () => { navLinks.classList.toggle('hidden'); navLinks.classList.toggle('flex'); };
+            const role = window.currentSystemUser.role; let menuItems = [];
+            if (role === 'admin') { menuItems = [ { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' }, { id: 'admin-catalog', icon: 'fa-box-open', label: 'Almoxarifado' }, { id: 'admin-ceis', icon: 'fa-school', label: 'Creches (CEIs)' }, { id: 'admin-users', icon: 'fa-users', label: 'Usuários' }, { id: 'admin-reports', icon: 'fa-tools', label: 'Serviços' }, { id: 'admin-quotes', icon: 'fa-file-invoice-dollar', label: 'Orçamentos' }, { id: 'admin-thirdParty', icon: 'fa-handshake', label: 'Terceiros' }, { id: 'admin-audit', icon: 'fa-list-alt', label: 'Auditoria' }, { id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' }, { id: 'admin-tools', icon: 'fa-toolbox', label: 'Ferramentas' } ]; } 
+            else { menuItems = [ { id: 'func-stock', icon: 'fa-box-open', label: 'Meu Almoxarifado' }, { id: 'func-reports', icon: 'fa-wrench', label: 'Registrar Serviço' }, { id: 'func-quotes', icon: 'fa-file-invoice', label: 'Fazer Orçamento' } ]; if (role !== 'func_cftv') { menuItems.push({ id: 'func-thirdParty', icon: 'fa-eye', label: 'Acomp. Terceiro' }); } else { menuItems.push({ id: 'cftv-vault', icon: 'fa-network-wired', label: 'Cofre de Redes' }); } menuItems.push({ id: 'func-tools', icon: 'fa-toolbox', label: 'Cautela Ferramentas' }, { id: 'func-history', icon: 'fa-history', label: 'Meus Registros' }); }
+            menuItems.forEach(item => { const a = document.createElement('a'); a.href = "#"; a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium"; a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`; a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); }; navLinks.appendChild(a); });
         };
 
         window.renderActiveTab = () => {
             if(!window.currentSystemUser) return;
             const role = window.currentSystemUser.role; let html = ""; let title = "";
             if(role === 'admin') {
-                if(window.activeTab === 'dashboard') { title = "Resumo Geral"; html = window.renderAdminDashboard(); }
-                else if(window.activeTab === 'admin-ceis') { title = "Gestão de Creches"; html = window.renderAdminCeis(); }
-                else if(window.activeTab === 'admin-users') { title = "Gestão de Usuários"; html = window.renderAdminUsers(); }
-                else if(window.activeTab === 'admin-catalog') { title = "Almoxarifado"; html = window.renderAdminCatalog(); }
-                else if(window.activeTab === 'admin-tools') { title = "Gestão de Ferramentas"; html = window.renderAdminTools(); }
-                else if(window.activeTab === 'admin-reports') { title = "Serviços"; html = window.renderAdminReports(); }
-                else if(window.activeTab === 'admin-quotes') { title = "Orçamentos"; html = window.renderAdminQuotes(); }
-                else if(window.activeTab === 'admin-thirdParty') { title = "Terceiros"; html = window.renderAdminThirdParty(); }
-                else if(window.activeTab === 'admin-audit') { title = "Auditoria"; html = window.renderAdminAudit(); }
-                else if(window.activeTab === 'cftv-vault') { title = "Cofre de Redes"; html = window.renderCftvVault(); }
-                else if(window.activeTab === 'func-reports') { title = "Editar Manutenção"; html = window.renderFuncReportForm(); }
-                else if(window.activeTab === 'func-quotes') { title = "Editar Orçamento"; html = window.renderFuncQuoteForm(); }
-                else if(window.activeTab === 'func-thirdParty') { title = "Editar Acompanhamento"; html = window.renderFuncThirdPartyForm(); }
+                if(window.activeTab === 'dashboard') { title = "Resumo Geral"; html = window.renderAdminDashboard(); } else if(window.activeTab === 'admin-ceis') { title = "Gestão de Creches"; html = window.renderAdminCeis(); } else if(window.activeTab === 'admin-users') { title = "Gestão de Usuários"; html = window.renderAdminUsers(); } else if(window.activeTab === 'admin-catalog') { title = "Almoxarifado"; html = window.renderAdminCatalog(); } else if(window.activeTab === 'admin-tools') { title = "Gestão de Ferramentas"; html = window.renderAdminTools(); } else if(window.activeTab === 'admin-reports') { title = "Serviços"; html = window.renderAdminReports(); } else if(window.activeTab === 'admin-quotes') { title = "Orçamentos"; html = window.renderAdminQuotes(); } else if(window.activeTab === 'admin-thirdParty') { title = "Terceiros"; html = window.renderAdminThirdParty(); } else if(window.activeTab === 'admin-audit') { title = "Auditoria"; html = window.renderAdminAudit(); } else if(window.activeTab === 'cftv-vault') { title = "Cofre de Redes"; html = window.renderCftvVault(); } else if(window.activeTab === 'func-reports') { title = "Editar Manutenção"; html = window.renderFuncReportForm(); } else if(window.activeTab === 'func-quotes') { title = "Editar Orçamento"; html = window.renderFuncQuoteForm(); } else if(window.activeTab === 'func-thirdParty') { title = "Editar Acompanhamento"; html = window.renderFuncThirdPartyForm(); }
             } else {
-                if(window.activeTab === 'func-stock') { title = "Meu Almoxarifado"; html = window.renderFuncStockForm(); }
-                else if(window.activeTab === 'func-tools') { title = "Cautela de Ferramentas"; html = window.renderFuncTools(); }
-                else if(window.activeTab === 'func-reports') { title = "Registrar Manutenção"; html = window.renderFuncReportForm(); }
-                else if(window.activeTab === 'func-quotes') { title = "Novo Orçamento"; html = window.renderFuncQuoteForm(); }
-                else if(window.activeTab === 'func-thirdParty') { title = "Acompanhar Terceiro"; html = window.renderFuncThirdPartyForm(); }
-                else if(window.activeTab === 'cftv-vault') { title = "Cofre de Redes"; html = window.renderCftvVault(); }
-                else if(window.activeTab === 'func-history') { title = "Meus Registros"; html = window.renderFuncHistory(); }
+                if(window.activeTab === 'func-stock') { title = "Meu Almoxarifado"; html = window.renderFuncStockForm(); } else if(window.activeTab === 'func-tools') { title = "Cautela de Ferramentas"; html = window.renderFuncTools(); } else if(window.activeTab === 'func-reports') { title = "Registrar Manutenção"; html = window.renderFuncReportForm(); } else if(window.activeTab === 'func-quotes') { title = "Novo Orçamento"; html = window.renderFuncQuoteForm(); } else if(window.activeTab === 'func-thirdParty') { title = "Acompanhar Terceiro"; html = window.renderFuncThirdPartyForm(); } else if(window.activeTab === 'cftv-vault') { title = "Cofre de Redes"; html = window.renderCftvVault(); } else if(window.activeTab === 'func-history') { title = "Meus Registros"; html = window.renderFuncHistory(); }
             }
 
             const titleEl = document.getElementById('mobilePageTitle'); if(titleEl) titleEl.textContent = title;
-            const contentEl = document.getElementById('mainContent');
-            if(contentEl) {
-                if (html.includes('flex justify-between') || html.includes('flex justify-center')) { contentEl.innerHTML = html; } 
-                else { contentEl.innerHTML = `<div class="w-full flex justify-center mb-6 hidden md:flex"><h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 text-center">${title}</h2></div>${html}`; }
-            }
-
-            if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100);
-            if(['admin-reports', 'admin-quotes', 'admin-thirdParty'].includes(window.activeTab)) window.setupAdminFilters();
-            if(window.activeTab === 'func-history') window.renderEmployeeHistory();
+            const contentEl = document.getElementById('mainContent'); if(contentEl) { if (html.includes('flex justify-between') || html.includes('flex justify-center')) { contentEl.innerHTML = html; } else { contentEl.innerHTML = `<div class="w-full flex justify-center mb-6 hidden md:flex"><h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 text-center">${title}</h2></div>${html}`; } }
+            if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100); if(['admin-reports', 'admin-quotes', 'admin-thirdParty'].includes(window.activeTab)) window.setupAdminFilters(); if(window.activeTab === 'func-history') window.renderEmployeeHistory();
             if(['func-reports', 'func-quotes', 'func-thirdParty'].includes(window.activeTab)) {
-                window.populateCeiSelect();
-                if(!window.editingItemId) window.loadDraft(window.activeTab.split('-')[1]);
-                const formId = window.activeTab === 'func-reports' ? 'reportForm' : (window.activeTab === 'func-quotes' ? 'quoteForm' : 'thirdPartyForm');
-                const formObj = document.getElementById(formId);
-                if(formObj) { formObj.oninput = () => window.saveDraft(window.activeTab.split('-')[1]); formObj.onchange = () => window.saveDraft(window.activeTab.split('-')[1]); }
-                const contId = window.activeTab === 'func-reports' ? 'materialsContainer' : 'quoMaterialsContainer';
-                const contElement = document.getElementById(contId);
-                if(contElement) {
-                    contElement.oninput = (e) => {
-                        if(e.target.classList.contains('mat-name') && e.target.hasAttribute('list')) {
-                            const val = e.target.value; const found = window.localData.catalog.find(c => String(c.name).toLowerCase() === String(val).toLowerCase());
-                            if(found) { const p = e.target.closest('[id^="mat_"]'); if(p) { p.querySelector('.mat-brand').value = found.brand || ""; p.querySelector('.mat-price').value = found.price || ""; window.saveDraft(window.activeTab.split('-')[1]); } }
-                        }
-                    };
-                }
+                window.populateCeiSelect(); if(!window.editingItemId) window.loadDraft(window.activeTab.split('-')[1]);
+                const formId = window.activeTab === 'func-reports' ? 'reportForm' : (window.activeTab === 'func-quotes' ? 'quoteForm' : 'thirdPartyForm'); const formObj = document.getElementById(formId); if(formObj) { formObj.oninput = () => window.saveDraft(window.activeTab.split('-')[1]); formObj.onchange = () => window.saveDraft(window.activeTab.split('-')[1]); }
+                const contId = window.activeTab === 'func-reports' ? 'materialsContainer' : 'quoMaterialsContainer'; const contElement = document.getElementById(contId);
+                if(contElement) { contElement.oninput = (e) => { if(e.target.classList.contains('mat-name') && e.target.hasAttribute('list')) { const val = e.target.value; const found = window.localData.catalog.find(c => String(c.name).toLowerCase() === String(val).toLowerCase()); if(found) { const p = e.target.closest('[id^="mat_"]'); if(p) { p.querySelector('.mat-brand').value = found.brand || ""; p.querySelector('.mat-price').value = found.price || ""; window.saveDraft(window.activeTab.split('-')[1]); } } } }; }
             }
         };
 
-        // RENDERIZADORES DE HTML
-        window.renderAdminDashboard = () => `
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <h3 class="font-bold text-slate-700 dark:text-white text-lg"><i class="fas fa-chart-pie mr-2 text-blue-500"></i> Visão Geral</h3>
-                <div class="flex gap-2 mt-2 sm:mt-0">
-                    <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="window.processRestoreFile(event)">
-                    <button onclick="document.getElementById('restoreFile').click()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-upload mr-1"></i> Restaurar</button>
-                    <button onclick="window.downloadLocalBackup(false)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-download mr-1"></i> Backup</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in mb-6">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fas fa-tools"></i></div>
-                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Serviços</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.reports.length}</p></div>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center text-lg"><i class="fas fa-file-invoice-dollar"></i></div>
-                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Orçamentos</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.quotes.length}</p></div>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg"><i class="fas fa-handshake"></i></div>
-                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Terceiros</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.thirdParty.length}</p></div>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-lg"><i class="fas fa-school"></i></div>
-                    <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Creches</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.ceis.length}</p></div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3><div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div></div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume</h3><div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div></div>
-            </div>`;
+        // RENDER DE TELAS HTML COMPRIMIDO
+        window.renderAdminDashboard = () => `<div class="flex flex-col sm:flex-row justify-between items-center mb-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700"><h3 class="font-bold text-slate-700 dark:text-white text-lg"><i class="fas fa-chart-pie mr-2 text-blue-500"></i> Visão Geral</h3><div class="flex gap-2 mt-2 sm:mt-0"><input type="file" id="restoreFile" accept=".json" class="hidden" onchange="window.processRestoreFile(event)"><button onclick="document.getElementById('restoreFile').click()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-upload mr-1"></i> Restaurar</button><button onclick="window.downloadLocalBackup(false)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-download mr-1"></i> Backup</button></div></div><div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in mb-6"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fas fa-tools"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Serviços</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.reports.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center text-lg"><i class="fas fa-file-invoice-dollar"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Orçamentos</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.quotes.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg"><i class="fas fa-handshake"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Terceiros</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.thirdParty.length}</p></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-2"><div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-lg"><i class="fas fa-school"></i></div><div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Creches</p><p class="text-xl font-bold text-slate-800 dark:text-white">${window.localData.ceis.length}</p></div></div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3><div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume</h3><div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div></div></div>`;
+        window.initCharts = () => { try { const isDark = document.documentElement.classList.contains('dark'); const fontColor = isDark ? '#cbd5e1' : '#475569'; if(document.getElementById('chartDifficulty')) { const diffCounts = {'Fácil': 0, 'Médio': 0, 'Difícil': 0}; window.localData.reports.forEach(r => { if(r.difficulty && diffCounts[r.difficulty] !== undefined) diffCounts[r.difficulty]++; }); if(window.lymCharts.diff) window.lymCharts.diff.destroy(); window.lymCharts.diff = new Chart(document.getElementById('chartDifficulty'), { type: 'doughnut', data: { labels: ['Fácil', 'Médio', 'Difícil'], datasets: [{ data: [diffCounts['Fácil'], diffCounts['Médio'], diffCounts['Difícil']], backgroundColor: ['#22c55e', '#eab308', '#ef4444'], borderWidth: isDark ? 0 : 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font: { size: 10 } } } } } }); } if(document.getElementById('chartMonths')) { const monthsMap = {}; const addMonth = (dateStr, type) => { if(!dateStr) return; const ym = dateStr.substring(0, 7); if(!monthsMap[ym]) monthsMap[ym] = {rep: 0, quo: 0}; monthsMap[ym][type]++; }; window.localData.reports.forEach(r => addMonth(r.date, 'rep')); window.localData.quotes.forEach(r => addMonth(r.date, 'quo')); const sortedMonths = Object.keys(monthsMap).sort(); const repData = sortedMonths.map(m => monthsMap[m].rep); const quoData = sortedMonths.map(m => monthsMap[m].quo); if(window.lymCharts.months) window.lymCharts.months.destroy(); window.lymCharts.months = new Chart(document.getElementById('chartMonths'), { type: 'line', data: { labels: sortedMonths.map(m => m.split('-').reverse().join('/')), datasets: [{ label: 'Serviços', data: repData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }, { label: 'Orçamentos', data: quoData, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: fontColor, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }, y: { ticks: { color: fontColor, stepSize: 1, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } } }, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font:{size:10} } } } } }); } } catch(e){} };
 
-        window.renderAdminCeis = () => { 
-            let trs = [...window.localData.ceis].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `
-                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
-                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.telegramGroupId || '-')}</td>
-                    <td class="px-3 py-2 text-right space-x-2">
-                        <button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button>
-                        <button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join(""); 
-            return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Nome</th><th class="px-3 py-2 font-semibold">Telegram</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; 
-        };
-
-        window.renderAdminUsers = () => { 
-            let trs = [...window.localData.users].sort((a,b)=>String(a.login).localeCompare(String(b.login))).map(u => `
-                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td>
-                    <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-600 text-white' : 'bg-emerald-600 text-white'}">${String(u.role).toUpperCase()}</span></td>
-                    <td class="px-3 py-2 text-right space-x-1">
-                        <button onclick="window.resetUserPassword('${u.id}')" title="Resetar Senha" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded"><i class="fas fa-key"></i></button>
-                        <button onclick="window.editUser('${u.id}')" title="Editar" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button>
-                        <button onclick="window.deleteUser('${u.id}')" title="Apagar" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join(""); 
-            return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Login</th><th class="px-3 py-2 font-semibold">Nível</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; 
-        };
-
-        window.renderAdminCatalog = () => {
-            let trs = [...window.localData.catalog].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.category || '-')}</td><td class="px-3 py-2 text-sm text-right">${window.formatMoney(c.price)}</td><td class="px-3 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 text-center">${c.stock}</td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.editCatalog('${c.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCatalog('${c.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join("");
-            let historyTrs = [...window.localData.stockMovements].sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 100).map(m => { 
-                let badgeClass = m.type === 'Retirada' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'; 
-                let itemsDesc = m.items.map(it => `${it.qtd}x ${it.name}`).join(", "); 
-                return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 max-w-[200px] truncate" title="${window.escapeHtml(itemsDesc)}">${window.escapeHtml(itemsDesc)}</td></tr>`; 
-            }).join("");
-            return `<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-box-open mr-2 text-blue-600"></i> Estoque Atual</h3><button onclick="window.openCatalogModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto max-h-[600px]"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Material</th><th class="px-3 py-2 font-semibold">Marca</th><th class="px-3 py-2 font-semibold">Categoria</th><th class="px-3 py-2 font-semibold text-right">Preço Un.</th><th class="px-3 py-2 font-semibold text-center">Qtd Base</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum material cadastrado.</td></tr>`}</tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-blue-600"></i> Movimentações Recentes</h3></div><div class="overflow-x-auto flex-grow"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Usuário</th><th class="px-3 py-2 font-semibold">Tipo</th><th class="px-3 py-2 font-semibold">Itens</th></tr></thead><tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação de estoque.</td></tr>`}</tbody></table></div></div></div>`;
-        };
-
-        window.renderAdminTools = () => {
-            let trs = [...window.localData.tools].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => { let statusClass = c.availableStock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td><td class="px-3 py-2 text-sm font-bold text-center">${c.totalStock}</td><td class="px-3 py-2 text-sm font-bold ${statusClass} text-center">${c.availableStock}</td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.editTool('${c.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteTool('${c.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`; }).join(""); 
-            let historyTrs = [...window.localData.toolMovements].sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 50).map(m => { let badgeClass = m.type === 'Retirada' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'; return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400">${m.qtd}x ${window.escapeHtml(m.toolName)}</td></tr>`; }).join("");
-            return `<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-toolbox mr-2 text-amber-600"></i> Inventário de Ferramentas</h3><button onclick="window.openToolModal()" class="bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto max-h-[600px]"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Ferramenta</th><th class="px-3 py-2 font-semibold">Marca</th><th class="px-3 py-2 font-semibold text-center">Total Empresa</th><th class="px-3 py-2 font-semibold text-center">Na Base</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="5" class="p-6 text-center text-slate-400">Nenhuma ferramenta.</td></tr>`}</tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-amber-600"></i> Cautelas (Empréstimos)</h3></div><div class="overflow-x-auto flex-grow"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Técnico</th><th class="px-3 py-2 font-semibold">Ação</th><th class="px-3 py-2 font-semibold">Item</th></tr></thead><tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação.</td></tr>`}</tbody></table></div></div></div>`;
-        };
-
-        window.renderFilterBar = (type) => `
-            <div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-4 animate-fade-in">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3 items-end">
-                    <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI..."></div>
-                    <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div>
-                    <div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div>
-                    ${(type === 'reports' || type === 'quotes') ? `<div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Equipe</label><select id="filterSector" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"><option value="">Todas</option><option value="geral">Manutenção Geral</option><option value="func_cftv">Equipe CFTV</option></select></div>` : '<div class="hidden md:block"></div>'}
-                    ${type === 'quotes' ? `<div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Status</label><select id="filterStatus" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"><option value="">Todos</option><option value="Pendente">Pendente</option><option value="Aprovado">Aprovado</option><option value="Rejeitado">Rejeitado</option></select></div>` : '<div class="hidden md:block"></div>'}
-                    <div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div>
-                    <div class="flex gap-2"><button onclick="window.deleteSelectedRecords('${type}')" class="flex-1 bg-red-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-red-700"><i class="fas fa-trash-alt"></i> Excluir</button></div>
-                </div>
-            </div>`;
-
+        window.renderAdminCeis = () => { let trs = [...window.localData.ceis].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.telegramGroupId || '-')}</td><td class="px-3 py-2 text-right space-x-2"><button onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3><button onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Nome</th><th class="px-3 py-2 font-semibold">Telegram</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; };
+        window.renderAdminUsers = () => { let trs = [...window.localData.users].sort((a,b)=>String(a.login).localeCompare(String(b.login))).map(u => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-600 text-white' : 'bg-emerald-600 text-white'}">${String(u.role).toUpperCase()}</span></td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.resetUserPassword('${u.id}')" title="Resetar Senha" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded"><i class="fas fa-key"></i></button><button onclick="window.editUser('${u.id}')" title="Editar" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteUser('${u.id}')" title="Apagar" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários do Sistema</h3><button onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Login</th><th class="px-3 py-2 font-semibold">Nível</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs}</tbody></table></div></div>`; };
+        window.renderAdminCatalog = () => { let trs = [...window.localData.catalog].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.category || '-')}</td><td class="px-3 py-2 text-sm text-right">${window.formatMoney(c.price)}</td><td class="px-3 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 text-center">${c.stock}</td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.editCatalog('${c.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteCatalog('${c.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join(""); let historyTrs = [...window.localData.stockMovements].sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 100).map(m => { let badgeClass = m.type === 'Retirada' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'; let itemsDesc = m.items.map(it => `${it.qtd}x ${it.name}`).join(", "); return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 max-w-[200px] truncate" title="${window.escapeHtml(itemsDesc)}">${window.escapeHtml(itemsDesc)}</td></tr>`; }).join(""); return `<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-box-open mr-2 text-blue-600"></i> Estoque Atual</h3><button onclick="window.openCatalogModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto max-h-[600px]"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Material</th><th class="px-3 py-2 font-semibold">Marca</th><th class="px-3 py-2 font-semibold">Categoria</th><th class="px-3 py-2 font-semibold text-right">Preço Un.</th><th class="px-3 py-2 font-semibold text-center">Qtd Base</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum material cadastrado.</td></tr>`}</tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-blue-600"></i> Movimentações Recentes</h3></div><div class="overflow-x-auto flex-grow"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Usuário</th><th class="px-3 py-2 font-semibold">Tipo</th><th class="px-3 py-2 font-semibold">Itens</th></tr></thead><tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação de estoque.</td></tr>`}</tbody></table></div></div></div>`; };
+        window.renderAdminTools = () => { let trs = [...window.localData.tools].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => { let statusClass = c.availableStock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td><td class="px-3 py-2 text-sm font-bold text-center">${c.totalStock}</td><td class="px-3 py-2 text-sm font-bold ${statusClass} text-center">${c.availableStock}</td><td class="px-3 py-2 text-right space-x-1"><button onclick="window.editTool('${c.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button onclick="window.deleteTool('${c.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`; }).join(""); let historyTrs = [...window.localData.toolMovements].sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 50).map(m => { let badgeClass = m.type === 'Retirada' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'; return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400">${m.qtd}x ${window.escapeHtml(m.toolName)}</td></tr>`; }).join(""); return `<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-toolbox mr-2 text-amber-600"></i> Inventário de Ferramentas</h3><button onclick="window.openToolModal()" class="bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto max-h-[600px]"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Ferramenta</th><th class="px-3 py-2 font-semibold">Marca</th><th class="px-3 py-2 font-semibold text-center">Total Empresa</th><th class="px-3 py-2 font-semibold text-center">Na Base</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="5" class="p-6 text-center text-slate-400">Nenhuma ferramenta.</td></tr>`}</tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-amber-600"></i> Cautelas (Empréstimos)</h3></div><div class="overflow-x-auto flex-grow"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Técnico</th><th class="px-3 py-2 font-semibold">Ação</th><th class="px-3 py-2 font-semibold">Item</th></tr></thead><tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação.</td></tr>`}</tbody></table></div></div></div>`; };
+        window.renderFilterBar = (type) => `<div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-4 animate-fade-in"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3 items-end"><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Pesquisar</label><input type="text" id="filterSearch" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center" placeholder="Nome, CEI..."></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label><input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div><div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label><input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"></div>${(type === 'reports' || type === 'quotes') ? `<div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Equipe</label><select id="filterSector" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"><option value="">Todas</option><option value="geral">Manutenção Geral</option><option value="func_cftv">Equipe CFTV</option></select></div>` : '<div class="hidden md:block"></div>'}${(type === 'quotes') ? `<div><label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Status</label><select id="filterStatus" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none text-center"><option value="">Todos</option><option value="Pendente">Pendente</option><option value="Aprovado">Aprovado</option><option value="Rejeitado">Rejeitado</option></select></div>` : '<div class="hidden md:block"></div>'}<div class="flex gap-2"><button onclick="window.applyFilters('${type}')" class="flex-1 bg-slate-800 dark:bg-slate-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-slate-900"><i class="fas fa-filter"></i> Filtrar</button><button onclick="window.exportToExcel('${type}')" class="flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-green-700"><i class="fas fa-file-excel"></i> Excel</button></div><div class="flex gap-2"><button onclick="window.deleteSelectedRecords('${type}')" class="flex-1 bg-red-600 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-red-700"><i class="fas fa-trash-alt"></i> Excluir</button></div></div></div>`;
         window.renderAdminReports = () => window.renderFilterBar('reports') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'reports')"></th><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Técnico</th><th class="px-3 py-2 text-center">Equipe</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
         window.renderAdminQuotes = () => window.renderFilterBar('quotes') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'quotes')"></th><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Total Orçado</th><th class="px-3 py-2 text-center">Status</th><th class="px-3 py-2 text-center">Equipe</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
         window.renderAdminThirdParty = () => window.renderFilterBar('thirdParty') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'thirdParty')"></th><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Empresa</th><th class="px-3 py-2 text-center">Equipe</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
-        
         window.renderAdminAudit = () => `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center border-b dark:border-slate-700"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full">Logs de Auditoria</h3><button onclick="window.clearAuditLogs()" class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-medium absolute right-3"><i class="fas fa-trash-alt mr-1"></i> Limpar</button></div><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data/Hora</th><th class="px-3 py-2">Usuário</th><th class="px-3 py-2">Ação Realizada</th></tr></thead><tbody>${[...window.localData.audit].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 100).map(a => `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm"><td class="px-3 py-2">${a.date}</td><td class="px-3 py-2 font-medium capitalize text-slate-700 dark:text-slate-300">${window.escapeHtml(a.user)}</td><td class="px-3 py-2 text-slate-600 dark:text-slate-400">${window.escapeHtml(a.action)}</td></tr>`).join("")}</tbody></table></div></div>`;
+        window.renderCftvVault = () => `<div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-slate-800 dark:text-white text-center w-full"><i class="fas fa-network-wired text-blue-500 mr-2"></i> Cofre de Redes</h3></div><div class="mb-4"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Selecione a Creche (CEI)</label><select id="vaultCeiSelect" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-900 dark:text-white rounded-lg outline-none text-center" onchange="window.loadVaultData(this.value)"><option value="">Selecione...</option>${window.localData.ceis.sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<option value="${c.id}">${window.escapeHtml(c.name)}</option>`).join('')}</select></div><div id="vaultFormContainer" class="hidden"><form onsubmit="window.saveVaultData(event)" class="space-y-3"><input type="hidden" id="vaultCeiId"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">IP do DVR / Acesso</label><input type="text" id="vIp" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div><div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Portas</label><input type="text" id="vPorts" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div><div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Usuário DVR</label><input type="text" id="vUser" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div><div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha DVR</label><div class="relative"><input type="password" id="vPass" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vPass', 'eyeVault1')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault1" class="fas fa-eye text-sm"></i></button></div></div><div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha Roteador/WiFi</label><div class="relative"><input type="password" id="vWifi" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vWifi', 'eyeVault2')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault2" class="fas fa-eye text-sm"></i></button></div></div><div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Canais / Qtd</label><input type="text" id="vCams" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm"></div></div><div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Observações de Rede</label><textarea id="vObs" rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded resize-none outline-none text-sm"></textarea></div><button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded shadow transition text-sm mt-3"><i class="fas fa-save mr-2"></i> Salvar no Cofre</button></form></div></div>`;
+        window.renderFuncStockForm = () => `<div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-box-open mr-2"></i> Meu Almoxarifado</h3></div><form id="stockForm" onsubmit="window.saveStockMovement(event)" class="space-y-4"><div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Movimento *</label><select id="stkType" required class="w-full p-2 border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-slate-800 dark:text-white rounded-lg outline-none text-center font-bold"><option value="Retirada">Retirar do Estoque</option><option value="Devolução">Devolver ao Estoque</option></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="stkDate" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700"><div class="relative flex justify-center items-center mb-3"><h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais</h4><button type="button" onclick="window.addStockMovementRow('stockMovementsContainer')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs font-medium absolute right-0">+ Item</button></div><div id="stockMovementsContainer" class="space-y-2"><p class="text-xs text-slate-400 italic text-center p-2">Nenhum material adicionado.</p></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Motivo / Observação</label><textarea id="stkObs" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none text-sm"></textarea></div><button type="submit" id="btnSubmitStock" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-2">Registrar Movimento</button></form></div>`;
+        window.renderFuncHistory = () => `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in mb-6"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-wrench mr-2 text-blue-500"></i> Minhas Manutenções</h3></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th class="p-3 font-semibold">Data</th><th class="p-3 font-semibold">CEI</th><th class="p-3 font-semibold text-right">Ações</th></tr></thead><tbody id="empHistoryReports"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in mb-6"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-file-invoice mr-2 text-green-500"></i> Meus Orçamentos</h3></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th class="p-3 font-semibold">Data</th><th class="p-3 font-semibold">CEI</th><th class="p-3 font-semibold text-right">Ações</th></tr></thead><tbody id="empHistoryQuotes"></tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-eye mr-2 text-purple-500"></i> Acompanhamentos Terceiros</h3></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th class="p-3 font-semibold">Data</th><th class="p-3 font-semibold">CEI</th><th class="p-3 font-semibold text-right">Ações</th></tr></thead><tbody id="empHistoryThirdParty"></tbody></table></div></div>`;
+        window.renderFuncReportForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-wrench mr-2"></i> <span id="formTitleReports">Registrar Manutenção</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-3"><input type="hidden" id="editIdreports"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelectRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="dateRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Início *</label><input type="time" id="timeStartRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Término *</label><input type="time" id="timeEndRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Descrição do Serviço *</label><textarea id="workDoneRep" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Dificuldade *</label><select id="diffRep" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"><option value="Fácil">Fácil</option><option value="Médio" selected>Médio</option><option value="Difícil">Difícil</option></select></div><div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3"><div class="relative flex justify-center items-center mb-3"><h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais Utilizados</h4><button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs font-medium absolute right-0">+ Mat.</button></div><div id="materialsContainer" class="space-y-2"><p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p></div></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Serviço (Telegram)</label><input type="file" id="photosRep" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')"><div id="repPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observações (Opcional)</label><textarea id="obsRep" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Serviço</button></form></div>`;
+        window.renderFuncQuoteForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-green-700 dark:text-green-400 text-center w-full"><i class="fas fa-file-invoice mr-2"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-3"><input type="hidden" id="editIdquotes"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelectQuote" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="dateQuote" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Status do Orçamento *</label><select id="statusQuote" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center font-bold"><option value="Pendente">⏳ Pendente de Aprovação</option><option value="Aprovado">✅ Aprovado</option><option value="Rejeitado">❌ Rejeitado</option></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 mt-3"><div class="relative flex justify-center items-center mb-3"><h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais</h4><button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs font-medium absolute right-0">+ Mat.</button></div><div id="quoMaterialsContainer" class="space-y-2"><p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p></div></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Problema (Telegram)</label><input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')"><div id="quoPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Orçamento</button></form></div>`;
+        window.renderFuncThirdPartyForm = () => `<div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in"><div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2"><h3 class="text-lg font-bold text-purple-700 dark:text-purple-400 text-center w-full"><i class="fas fa-eye mr-2"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3><button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-[10px] bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded absolute right-0">Cancelar</button></div><form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-3"><input type="hidden" id="editIdthirdParty"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelectThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></select></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="dateThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" value="${new Date().toISOString().split('T')[0]}"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Início *</label><input type="time" id="timeStartThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Término *</label><input type="time" id="timeEndThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3"><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos (Telegram)</label><input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')"><div id="tpPhotoPreview" class="flex justify-center gap-2 mt-2 overflow-x-auto pb-1"></div></div><div><label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none"></textarea></div><button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-3">Salvar Acompanhamento</button></form></div>`;
 
-        window.renderCftvVault = () => `
-            <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in">
-                <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white text-center w-full"><i class="fas fa-network-wired text-blue-500 mr-2"></i> Cofre de Redes</h3>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Selecione a Creche (CEI)</label>
-                    <select id="vaultCeiSelect" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-900 dark:text-white rounded-lg outline-none text-center" onchange="window.loadVaultData(this.value)">
-                        <option value="">Selecione...</option>
-                        ${window.localData.ceis.sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c => `<option value="${c.id}">${window.escapeHtml(c.name)}</option>`).join('')}
-                    </select>
-                </div>
-                <div id="vaultFormContainer" class="hidden">
-                    <form onsubmit="window.saveVaultData(event)" class="space-y-3">
-                        <input type="hidden" id="vaultCeiId">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">IP do DVR / Acesso Remoto</label><input type="text" id="vIp" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 192.168.1.108"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Portas (HTTP / Serviço)</label><input type="text" id="vPorts" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 80 / 37777"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Usuário do DVR</label><input type="text" id="vUser" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: admin"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha do DVR</label><div class="relative"><input type="password" id="vPass" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vPass', 'eyeVault1')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault1" class="fas fa-eye text-sm"></i></button></div></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Senha Roteador / WiFi</label><div class="relative"><input type="password" id="vWifi" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm pr-8"><button type="button" onclick="window.toggleEye('vWifi', 'eyeVault2')" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 outline-none"><i id="eyeVault2" class="fas fa-eye text-sm"></i></button></div></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Canais / Qtd Câmeras</label><input type="text" id="vCams" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none text-sm" placeholder="Ex: 16 canais (12 ativas)"></div>
-                        </div>
-                        <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Observações de Rede / Layout</label><textarea id="vObs" rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded resize-none outline-none text-sm" placeholder="Qualquer anotação sobre a posição do rack, switch, etc."></textarea></div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded shadow transition text-sm mt-3"><i class="fas fa-save mr-2"></i> Salvar no Cofre</button>
-                    </form>
-                </div>
-            </div>`;
-
-        window.loadVaultData = (ceiId) => {
-            const container = document.getElementById('vaultFormContainer');
-            if(!ceiId) { window.hideElement('vaultFormContainer'); return; }
-            const cei = window.localData.ceis.find(c => String(c.id) === String(ceiId));
-            if(!cei) return;
-            document.getElementById('vaultCeiId').value = ceiId;
-            const v = cei.vault || {};
-            document.getElementById('vIp').value = v.ip || "";
-            document.getElementById('vPorts').value = v.ports || "";
-            document.getElementById('vUser').value = v.user || "";
-            document.getElementById('vPass').value = v.pass || "";
-            document.getElementById('vWifi').value = v.wifi || "";
-            document.getElementById('vCams').value = v.cams || "";
-            document.getElementById('vObs').value = v.obs || "";
-            window.showElement('vaultFormContainer');
-        };
-
-        window.saveVaultData = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('vaultCeiId').value;
-            if(!id) return;
-            const vaultData = {
-                ip: document.getElementById('vIp').value,
-                ports: document.getElementById('vPorts').value,
-                user: document.getElementById('vUser').value,
-                pass: document.getElementById('vPass').value,
-                wifi: document.getElementById('vWifi').value,
-                cams: document.getElementById('vCams').value,
-                obs: document.getElementById('vObs').value
-            };
-            try {
-                await window.dbSave('ceis', id, { vault: vaultData });
-                window.logAudit(`Atualizou o Cofre de Redes da CEI ID: ${id}`);
-                window.showToast("Cofre atualizado!");
-            } catch(err) {
-                window.showToast("Erro ao salvar no cofre.", "error");
-            }
-        };
-
-        // LÓGICA DE DADOS (Forms, Filtros, Exclusões)
+        // LÓGICA DE DADOS (LISTAS, FILTROS)
         window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
-        
         window.applyFilters = (type) => {
             const search = document.getElementById('filterSearch')?.value.toLowerCase() || "";
             const start = document.getElementById('filterDateStart')?.value || "";
@@ -745,49 +243,195 @@
             }
             if(start) data = data.filter(item => item.date >= start);
             if(end) data = data.filter(item => item.date <= end);
-            
             if(type === 'reports' || type === 'quotes') {
                 const sector = document.getElementById('filterSector')?.value || "";
-                if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv');
-                else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
+                if(sector === 'func_cftv') data = data.filter(item => item.userRole === 'func_cftv'); else if(sector === 'geral') data = data.filter(item => item.userRole !== 'func_cftv');
             }
-            if(type === 'quotes') {
-                const statusF = document.getElementById('filterStatus')?.value || "";
-                if(statusF) data = data.filter(item => item.status === statusF);
-            }
+            if(type === 'quotes') { const statusF = document.getElementById('filterStatus')?.value || ""; if(statusF) data = data.filter(item => item.status === statusF); }
             
-            data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
-            window.currentFilteredData = data; 
+            data.sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a)); window.currentFilteredData = data; 
             
             let tbodyId = type === 'reports' ? 'tableBodyReports' : (type === 'quotes' ? 'tableBodyQuotes' : 'tableBodyThirdParty');
-            const tbody = document.getElementById(tbodyId);
-            if(!tbody) return;
+            const tbody = document.getElementById(tbodyId); if(!tbody) return;
             
             tbody.innerHTML = data.map(item => {
                 let uName = item.userName || item.userLogin || "Usuário";
-                let mats = Array.isArray(item.materials) ? item.materials : [];
-                let totalVal = mats.reduce((acc, m) => acc + (parseFloat(m.qtd || m.q || 1) * parseFloat(m.price || m.v || 0)), 0);
-                if (isNaN(totalVal)) totalVal = 0;
-                
+                let mats = Array.isArray(item.materials) ? item.materials : []; let totalVal = mats.reduce((acc, m) => acc + (parseFloat(m.qtd || m.q || 1) * parseFloat(m.price || m.v || 0)), 0); if (isNaN(totalVal)) totalVal = 0;
                 let col3 = type === 'reports' ? uName : (type === 'quotes' ? window.formatMoney(totalVal) : String(item.companyName || ""));
                 let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Pendente Telegram WiFi"></i>' : '';
-                
-                let teamLabel = item.userRole === 'func_cftv' 
-                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">CFTV</span>' 
-                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">GERAL</span>';
-
+                let teamLabel = item.userRole === 'func_cftv' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">CFTV</span>' : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">GERAL</span>';
                 let statusCol = '';
-                if(type === 'quotes') {
-                    let s = item.status || "Pendente";
-                    let badgeClass = s === 'Aprovado' ? 'bg-green-600 text-white' : (s === 'Rejeitado' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white');
-                    statusCol = `<td class="p-4 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${s}</span></td>`;
-                }
-
-                return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-4 text-center"><input type="checkbox" class="chk-row-${type}" value="${item.id}"></td><td class="p-4">${badgeTg}${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${window.escapeHtml(item.cei || item.ceiId || '')}</td><td class="p-4 text-slate-600 dark:text-slate-400 capitalize">${window.escapeHtml(col3)}</td>${statusCol}<td class="p-4 text-center">${teamLabel}</td><td class="p-4 text-right flex justify-end gap-1"><button onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button><button onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button><button onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`;
+                if(type === 'quotes') { let s = item.status || "Pendente"; let badgeClass = s === 'Aprovado' ? 'bg-green-600 text-white' : (s === 'Rejeitado' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'); statusCol = `<td class="p-4 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${s}</span></td>`; }
+                return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-4 text-center"><input type="checkbox" class="chk-row-${type}" value="${item.id}"></td><td class="p-4">${badgeTg}${window.formatDateBR(item.date)}</td><td class="p-4 font-medium">${window.escapeHtml(item.cei || item.ceiId || '')}</td><td class="p-4 text-slate-600 dark:text-slate-400 capitalize">${window.escapeHtml(col3)}</td>${statusCol}<td class="p-4 text-center">${teamLabel}</td><td class="p-4 text-right flex justify-end gap-1"><button type="button" onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button><button type="button" onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button><button type="button" onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`;
             }).join("") || `<tr><td colspan="7" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
         };
 
-        // Outros Controles e Exportação
+        window.renderEmployeeHistory = () => {
+            if(!window.currentSystemUser) return;
+            const uid = String(window.currentSystemUser.id); const uname = String(window.currentSystemUser.login).toLowerCase().trim();
+            const renderRows = (type, tbodyId) => {
+                const tbody = document.getElementById(tbodyId); if(!tbody) return;
+                const myData = (window.localData[type] || []).filter(r => { const rUid = String(r.userId || ""); const rUname = String(r.userName || "").toLowerCase().trim(); const rUlogin = String(r.userLogin || "").toLowerCase().trim(); return rUid === uid || rUname === uname || rUlogin === uname; }).sort((a,b) => window.getSafeTime(b) - window.getSafeTime(a));
+                tbody.innerHTML = myData.map(r => { let badgeTg = r.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Pendente WiFi"></i>' : ''; return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-3">${badgeTg}${window.formatDateBR(r.date)}</td><td class="p-3 font-medium">${window.escapeHtml(r.cei || r.ceiId || '')}</td><td class="p-3 text-right flex justify-end gap-1"><button type="button" onclick="window.viewRecord('${type}', '${r.id}')" title="Visualizar" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-eye"></i></button><button type="button" onclick="window.editFuncRecord('${type}','${r.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-edit"></i></button><button type="button" onclick="window.deleteFuncRecord('${type}','${r.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1 rounded shadow-sm"><i class="fas fa-trash"></i></button></td></tr>`; }).join("") || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+            };
+            renderRows('reports', 'empHistoryReports'); renderRows('quotes', 'empHistoryQuotes'); renderRows('thirdParty', 'empHistoryThirdParty');
+        };
+
+        // LÓGICA DE DETALHES, EDIÇÃO E EXCLUSÃO (100% BLINDADA)
+        window.viewRecord = (type, id) => {
+            const record = window.localData[type].find(r => String(r.id) === String(id)); if(!record) return;
+            const btnPrint = document.getElementById('btnPrintRecord'); btnPrint.onclick = () => window.printRecord(type, record);
+            const uName = record.userName || record.userLogin || "Usuário"; const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+            let html = `<div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 dark:bg-slate-700/50 p-4 rounded border dark:border-slate-600"><div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Data:</span> ${window.formatDateBR(record.date)}</div><div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">CEI:</span> ${window.escapeHtml(record.cei || record.ceiId || '')}</div><div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Registro por:</span> <span class="capitalize">${window.escapeHtml(uName)}</span></div>`;
+            if(type === 'reports' || type === 'thirdParty') { html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Horário:</span> ${record.timeStart || '--'} às ${record.timeEnd || '--'}</div>`; }
+            if(type === 'thirdParty') { html += `<div class="col-span-2 dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Empresa:</span> ${window.escapeHtml(record.companyName || '')}</div>`; }
+            if(type === 'reports') { html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Dificuldade:</span> ${window.escapeHtml(record.difficulty || '-')}</div>`; }
+            if(type === 'quotes') { let s = record.status || "Pendente"; let bClass = s === 'Aprovado' ? 'text-green-600' : (s === 'Rejeitado' ? 'text-red-600' : 'text-amber-500'); html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Status:</span> <span class="font-bold ${bClass}">${s}</span></div>`; }
+            html += `</div><h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">${type === 'quotes' ? 'Diagnóstico / Escopo' : 'Serviço Realizado / Descrição'}</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded border dark:border-slate-600 break-words">${window.escapeHtml(desc)}</p>`;
+            if(record.materials && record.materials.length > 0) {
+                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Materiais / Custos</h4><div class="overflow-x-auto w-full mb-6"><table class="w-full text-xs sm:text-sm text-left border dark:border-slate-600 min-w-[320px]"><thead class="bg-slate-100 dark:bg-slate-700"><tr><th class="p-2 border dark:border-slate-600 dark:text-slate-200 w-10 text-center">Qtd</th><th class="p-2 border dark:border-slate-600 dark:text-slate-200">Material</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200 whitespace-nowrap">R$ Un.</th><th class="p-2 border dark:border-slate-600 text-right dark:text-slate-200 whitespace-nowrap">Total</th></tr></thead><tbody>`;
+                let totalGeral = 0;
+                record.materials.forEach(m => { const price = parseFloat(m.price || m.v || 0); const q = parseFloat(m.qtd || m.q || 1); const total = price * q; totalGeral += total; html += `<tr><td class="p-2 border dark:border-slate-600 dark:text-slate-300 text-center">${q}</td><td class="p-2 border dark:border-slate-600 dark:text-slate-300 break-words min-w-[120px]">${window.escapeHtml(m.name)} <span class="text-[10px] text-slate-400">(${window.escapeHtml(m.brand)||'-'})</span></td><td class="p-2 border dark:border-slate-600 text-right dark:text-slate-300 whitespace-nowrap">${window.formatMoney(price)}</td><td class="p-2 border dark:border-slate-600 font-medium text-right dark:text-slate-300 whitespace-nowrap">${window.formatMoney(total)}</td></tr>`; });
+                if(type === 'reports' || type === 'quotes') { html += `<tr class="bg-blue-50 dark:bg-blue-900/30"><td colspan="3" class="p-2 border dark:border-slate-600 text-right font-bold dark:text-slate-200">TOTAL:</td><td class="p-2 border dark:border-slate-600 font-bold text-blue-700 dark:text-blue-400 text-right text-sm sm:text-base whitespace-nowrap">${window.formatMoney(totalGeral)}</td></tr>`; }
+                html += `</tbody></table></div>`;
+            }
+            if(record.obs) { html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Observações</h4><p class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 dark:bg-yellow-900/20 p-3 border border-yellow-200 dark:border-yellow-700/50 rounded break-words">${window.escapeHtml(record.obs)}</p>`; }
+            if(record.telegramSent) { html += `<div class="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 dark:border-green-800 font-medium"><i class="fab fa-telegram text-xl"></i> Enviado ao Telegram.</div>`; } else if(record.pendingTelegram) { html += `<div class="bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-amber-200 dark:border-amber-800 font-medium"><i class="fas fa-wifi text-xl"></i> Na fila para envio (Offline).</div>`; } else if(record.photos && record.photos.length > 0) { html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b dark:border-slate-600 pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 gap-2">`; record.photos.forEach(b64 => { html += `<a href="${b64}" target="_blank" class="block border dark:border-slate-600 rounded p-1 hover:border-blue-500 transition"><img src="${b64}" class="w-full h-24 object-cover rounded"></a>`; }); html += `</div>`; }
+            document.getElementById('viewRecordContent').innerHTML = html; window.showElement('modalViewRecord');
+        };
+
+        window.editFuncRecord = (type, id) => {
+            const record = window.localData[type].find(r => String(r.id) === String(id)); if(!record) return;
+            window.editingItemId = record.id; const isAdmin = window.currentSystemUser.role === 'admin';
+            if(type === 'reports') window.activeTab = isAdmin ? 'func-reports' : 'func-reports';
+            if(type === 'quotes') window.activeTab = isAdmin ? 'func-quotes' : 'func-quotes';
+            if(type === 'thirdParty') window.activeTab = isAdmin ? 'func-thirdParty' : 'func-thirdParty';
+            try { history.pushState({ tab: window.activeTab }, "", "#" + window.activeTab); } catch(e) {}
+            window.renderActiveTab();
+            setTimeout(() => {
+                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                document.getElementById(`editId${type}`).value = record.id;
+                const selectCei = document.getElementById(`ceiSelect${sffx}`); const opt = Array.from(selectCei.options).find(o => String(o.value) === String(record.ceiId) || o.text === record.cei); if(opt) selectCei.value = opt.value;
+                document.getElementById(`date${sffx}`).value = record.date; document.getElementById(`workDone${sffx}`).value = record.workDone || record.desc || record.tpDesc || ""; if(record.obs) document.getElementById(`obs${sffx}`).value = record.obs;
+                if(type === 'reports' || type === 'thirdParty') { document.getElementById(`timeStart${sffx}`).value = record.timeStart || ""; document.getElementById(`timeEnd${sffx}`).value = record.timeEnd || ""; }
+                if(type === 'thirdParty') { document.getElementById('companyNameThirdParty').value = record.companyName || ""; }
+                if(type === 'reports') { document.getElementById('diffRep').value = record.difficulty || "Médio"; }
+                if(type === 'quotes') { document.getElementById('statusQuote').value = record.status || "Pendente"; }
+                if((type === 'reports' || type === 'quotes') && record.materials) {
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; document.getElementById(contId).innerHTML = '';
+                    record.materials.forEach(m => { window.addMaterialRow(contId, false); const lastRow = document.getElementById(`mat_${window.materialCount}`); lastRow.querySelector('.mat-name').value = m.name; if(m.brand) lastRow.querySelector('.mat-brand').value = m.brand; lastRow.querySelector('.mat-qtd').value = m.qtd; if(m.price) lastRow.querySelector('.mat-price').value = m.price; });
+                }
+                document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`).textContent = `Editando ${type === 'reports' ? 'Serviço' : (type==='quotes'?'Orçamento':'Acompanhamento')}`;
+                window.showElement('cancelEditBtn');
+            }, 200);
+        };
+
+        window.deleteFuncRecord = (type, id) => { window.confirmAction(async () => { await window.dbDelete(type, id); window.logAudit(`${window.currentSystemUser.role === 'admin' ? 'Admin' : 'Funcionário'} excluiu ${type} ID: ${id}`); window.showToast("Registro excluído!"); if (window.currentSystemUser.role === 'admin') { window.setupAdminFilters(); } else { window.renderEmployeeHistory(); } }); };
+        
+        window.cancelEdit = () => { const type = window.activeTab.split('-')[1]; window.editingItemId = null; window.activeTab = window.currentSystemUser.role === 'admin' ? `admin-${type}` : 'func-history'; try { history.pushState({ tab: window.activeTab }, "", "#" + window.activeTab); } catch(e) {} window.renderActiveTab(); };
+
+        // SALVAMENTO DE RASCUNHOS E FORMS DE REGISTRO
+        window.saveDraft = (type) => {
+            if(window.editingItemId) return;
+            const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+            const draft = { cei: document.getElementById(`ceiSelect${sffx}`)?.value || "", date: document.getElementById(`date${sffx}`)?.value || "", workDone: document.getElementById(`workDone${sffx}`)?.value || "", obs: document.getElementById(`obs${sffx}`)?.value || "" };
+            if(type === 'reports' || type === 'thirdParty') { draft.timeStart = document.getElementById(`timeStart${sffx}`)?.value || ""; draft.timeEnd = document.getElementById(`timeEnd${sffx}`)?.value || ""; }
+            if(type === 'thirdParty') draft.companyName = document.getElementById('companyNameThirdParty')?.value || "";
+            if(type === 'reports') draft.difficulty = document.getElementById('diffRep')?.value || "Médio";
+            if(type === 'quotes') draft.status = document.getElementById('statusQuote')?.value || "Pendente";
+            if(type === 'reports' || type === 'quotes') {
+                const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; const mats = [];
+                document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => { mats.push({ name: row.querySelector('.mat-name')?.value || "", brand: row.querySelector('.mat-brand')?.value || "", qtd: row.querySelector('.mat-qtd')?.value || "1", price: row.querySelector('.mat-price')?.value || "" }); });
+                draft.materials = mats;
+            }
+            localStorage.setItem(`lym_draft_${type}`, JSON.stringify(draft));
+        };
+
+        window.loadDraft = (type) => {
+            if(window.editingItemId) return; const draftStr = localStorage.getItem(`lym_draft_${type}`); if(!draftStr) return;
+            try {
+                const draft = JSON.parse(draftStr); const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                setTimeout(() => {
+                    if(draft.cei) { const el = document.getElementById(`ceiSelect${sffx}`); if(el) el.value = draft.cei; }
+                    if(draft.date) { const el = document.getElementById(`date${sffx}`); if(el) el.value = draft.date; }
+                    if(draft.workDone) { const el = document.getElementById(`workDone${sffx}`); if(el) el.value = draft.workDone; }
+                    if(draft.obs) { const el = document.getElementById(`obs${sffx}`); if(el) el.value = draft.obs; }
+                    if(type === 'reports' || type === 'thirdParty') { if(draft.timeStart) document.getElementById(`timeStart${sffx}`).value = draft.timeStart; if(draft.timeEnd) document.getElementById(`timeEnd${sffx}`).value = draft.timeEnd; }
+                    if(type === 'thirdParty' && draft.companyName) document.getElementById('companyNameThirdParty').value = draft.companyName; 
+                    if(type === 'reports' && draft.difficulty) document.getElementById('diffRep').value = draft.difficulty;
+                    if(type === 'quotes' && draft.status) document.getElementById('statusQuote').value = draft.status;
+                    if((type === 'reports' || type === 'quotes') && draft.materials) {
+                        const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; document.getElementById(contId).innerHTML = '';
+                        if(draft.materials.length === 0) { document.getElementById(contId).innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; } 
+                        else { draft.materials.forEach(m => { window.addMaterialRow(contId, false); const lastRow = document.getElementById(`mat_${window.materialCount}`); lastRow.querySelector('.mat-name').value = m.name; lastRow.querySelector('.mat-brand').value = m.brand; lastRow.querySelector('.mat-qtd').value = m.qtd; lastRow.querySelector('.mat-price').value = m.price; }); }
+                    }
+                }, 100);
+            } catch(e) {}
+        };
+
+        window.clearDraft = (type) => { localStorage.removeItem(`lym_draft_${type}`); };
+
+        window.saveRecord = async (e, type) => {
+            e.preventDefault(); 
+            const btnId = type === 'reports' ? 'btnSubmitReport' : (type === 'quotes' ? 'btnSubmitQuote' : 'btnSubmitThirdParty'); 
+            const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento'); 
+            const btn = document.getElementById(btnId); const originalBtnText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; btn.disabled = true;
+            try {
+                const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                const editId = document.getElementById(`editId${type}`)?.value || ""; const isEdit = editId !== ""; const recordId = isEdit ? editId : Date.now().toString();
+                const selectElement = document.getElementById(`ceiSelect${sffx}`); const ceiId = selectElement?.options[selectElement.selectedIndex]?.getAttribute('data-id') || "";
+                
+                const recordData = { id: String(recordId), userId: String(window.currentSystemUser?.id || "anon"), userName: String(window.currentSystemUser?.login || "Usuário"), userRole: String(window.currentSystemUser?.role || "funcionario"), cei: String(selectElement?.options[selectElement.selectedIndex]?.text || "CEI Não Informada"), ceiId: String(ceiId), date: String(document.getElementById(`date${sffx}`)?.value || ""), workDone: String(document.getElementById(`workDone${sffx}`)?.value || ""), obs: String(document.getElementById(`obs${sffx}`)?.value || ""), timestamp: new Date().toISOString() };
+                if(type === 'reports' || type === 'thirdParty') { recordData.timeStart = String(document.getElementById(`timeStart${sffx}`)?.value || ""); recordData.timeEnd = String(document.getElementById(`timeEnd${sffx}`)?.value || ""); }
+                if(type === 'thirdParty') { recordData.companyName = String(document.getElementById('companyNameThirdParty')?.value || ""); }
+                if(type === 'reports') { recordData.difficulty = String(document.getElementById('diffRep')?.value || "Médio"); }
+                if(type === 'quotes') { recordData.status = String(document.getElementById('statusQuote')?.value || "Pendente"); }
+
+                if(type === 'reports' || type === 'quotes') {
+                    const contId = type === 'reports' ? 'materialsContainer' : 'quoMaterialsContainer'; const mats = [];
+                    document.getElementById(contId).querySelectorAll('[id^="mat_"]').forEach(row => { mats.push({ name: String(row.querySelector('.mat-name')?.value || ""), brand: String(row.querySelector('.mat-brand')?.value || ""), qtd: String(row.querySelector('.mat-qtd')?.value || "1"), price: String(row.querySelector('.mat-price')?.value || "0") }); });
+                    recordData.materials = mats;
+                }
+
+                let base64Photos = []; const fileInput = document.getElementById(type === 'reports' ? 'photosRep' : (type === 'quotes' ? 'photosQuote' : 'photosThirdParty'));
+                if (fileInput && fileInput.files && fileInput.files.length > 0) { for(let file of fileInput.files) { if (file.type.startsWith('image/')) { base64Photos.push(await window.compressImage(file)); } } }
+                
+                if (ceiId !== "") {
+                    if (navigator.onLine) {
+                        try { await window.sendToTelegram(ceiId, recordData, base64Photos, isEdit, typeLabel); recordData.telegramSent = true; recordData.pendingTelegram = false; } 
+                        catch(errTg) { console.error("Erro Tg:", errTg); recordData.telegramSent = false; recordData.pendingTelegram = true; recordData.photos = base64Photos; window.showToast("Falha no Telegram. Entrou na fila.", "error"); }
+                    } else { recordData.telegramSent = false; recordData.pendingTelegram = true; recordData.photos = base64Photos; window.showToast("Sem Internet: Salvo na fila.", "info"); }
+                } else { throw new Error("Selecione uma Creche com Telegram."); }
+                
+                if(recordData.telegramSent) { recordData.photos = []; }
+
+                await window.dbSave(type, recordId, recordData); window.logAudit(`${isEdit ? 'Editou' : 'Registrou'} ${typeLabel} ID: ${recordId}`);
+                if(recordData.telegramSent) window.showToast("Salvo e Enviado!", "success");
+                window.clearDraft(type);
+
+                if (isEdit) { window.cancelEdit(); } 
+                else {
+                    document.getElementById(type === 'reports' ? 'reportForm' : (type==='quotes'?'quoteForm':'thirdPartyForm')).reset();
+                    if(type === 'reports') { document.getElementById('materialsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; document.getElementById('repPhotoPreview').innerHTML = ''; }
+                    if(type === 'quotes') { document.getElementById('quoMaterialsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>'; document.getElementById('quoPhotoPreview').innerHTML = ''; }
+                    if(type === 'thirdParty') { document.getElementById('tpPhotoPreview').innerHTML = ''; }
+                }
+            } catch (err) { window.showToast("Falha: " + (err.message || "Erro"), "error"); } finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
+        };
+
+        // EXPORTAÇÃO E PRINT
+        window.printRecord = (type, record) => {
+            const printArea = document.getElementById('printArea'); const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento'); const uName = record.userName || record.userLogin || "Usuário"; const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+            let matsHtml = ''; let totalValue = 0;
+            if(record.materials && record.materials.length > 0) {
+                matsHtml = `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word;"><thead><tr style="background: #1e293b; color: white; text-align: left;"><th style="padding: 10px; width: 10%;">Qtd</th><th style="padding: 10px; width: 50%;">Material</th><th style="padding: 10px; text-align:right; width: 20%;">R$ Un.</th><th style="padding: 10px; text-align:right; width: 20%;">Total</th></tr></thead><tbody>`;
+                record.materials.forEach(m => { const price = parseFloat(m.price || m.v || 0); const q = parseFloat(m.qtd || m.q || 1); const total = price * q; totalValue += total; matsHtml += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px;">${q}</td><td style="padding: 10px; word-break: break-word; white-space: pre-wrap;">${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand)||'-'})</td><td style="padding: 10px; text-align:right;">${window.formatMoney(price)}</td><td style="padding: 10px; text-align:right;">${window.formatMoney(total)}</td></tr>`; });
+                matsHtml += `<tr style="background: #f1f5f9; font-weight: bold;"><td colspan="3" style="padding: 10px; text-align: right;">TOTAL:</td><td style="padding: 10px; text-align:right; color: #1d4ed8;">${window.formatMoney(totalValue)}</td></tr></tbody></table>`;
+            }
+            printArea.innerHTML = `<div style="font-family: Arial, sans-serif; color: #334155; max-width: 800px; margin: 0 auto; word-wrap: break-word;"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #1d4ed8; padding-bottom: 20px; margin-bottom: 20px;"><div><h1 style="margin:0; font-size: 24px; color:#1d4ed8;">LYM Eletrônicos</h1><p style="margin:5px 0 0; color:#64748b; font-size:14px;">Documento de ${typeLabel}</p></div><div style="text-align: right; font-size:14px; color:#64748b;"><p style="margin:0;">Data: <strong>${window.formatDateBR(record.date)}</strong></p><p style="margin:0;">Ref: #LYM-${record.id.substring(record.id.length-6)}</p></div></div><div style="display:flex; justify-content:space-between; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 14px;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Técnico / Responsável:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${record.difficulty ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${record.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Cliente / Local:</span> ${window.escapeHtml(record.cei || record.ceiId || '')}</p>${record.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${record.timeStart} às ${record.timeEnd}</p>` : ''}${record.companyName ? `<p style="margin:0;">color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa Terceira:</span> ${window.escapeHtml(record.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(desc).replace(/\n/g, '<br>')}</p></div>${matsHtml}${record.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(record.obs).replace(/\n/g, '<br>')}</p></div>` : ''}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div></div>`;
+            window.showElement('printArea'); window.print(); setTimeout(() => { window.hideElement('printArea'); }, 1000);
+        };
+
         window.exportToExcel = (type) => {
             if(!window.currentFilteredData || window.currentFilteredData.length === 0) return window.showToast("Nenhum dado para exportar", "error");
             let exportData = []; let colWidths = [];
@@ -807,19 +451,7 @@
         };
 
         window.toggleSelectAll = (source, type) => { const checkboxes = document.querySelectorAll(`.chk-row-${type}`); checkboxes.forEach(chk => chk.checked = source.checked); };
-        
-        window.deleteSelectedRecords = (type) => { 
-            const checkboxes = document.querySelectorAll(`.chk-row-${type}:checked`); 
-            if(checkboxes.length === 0) return window.showToast("Selecione pelo menos um item.", "error"); 
-            window.confirmAction(async () => { 
-                const btn = document.getElementById(`btnDelSel${type}`); const originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Apagando...'; btn.disabled = true; 
-                try { 
-                    for(let chk of checkboxes) { await window.dbDelete(type, chk.value); } 
-                    window.logAudit(`Exclusão em Massa: ${checkboxes.length} itens da tabela ${type}`); window.showToast(`${checkboxes.length} itens excluídos!`); 
-                    const selectAllCb = document.querySelector(`th input[type="checkbox"]`); if(selectAllCb) selectAllCb.checked = false; window.setupAdminFilters(); 
-                } catch(e) { window.showToast("Erro na exclusão.", "error"); } finally { btn.innerHTML = originalText; btn.disabled = false; } 
-            }); 
-        };
+        window.deleteSelectedRecords = (type) => { const checkboxes = document.querySelectorAll(`.chk-row-${type}:checked`); if(checkboxes.length === 0) return window.showToast("Selecione pelo menos um item.", "error"); window.confirmAction(async () => { const btn = document.getElementById(`btnDelSel${type}`); const originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Apagando...'; btn.disabled = true; try { for(let chk of checkboxes) { await window.dbDelete(type, chk.value); } window.logAudit(`Exclusão em Massa: ${checkboxes.length} itens da tabela ${type}`); window.showToast(`${checkboxes.length} itens excluídos!`); const selectAllCb = document.querySelector(`th input[type="checkbox"]`); if(selectAllCb) selectAllCb.checked = false; window.setupAdminFilters(); } catch(e) { window.showToast("Erro na exclusão.", "error"); } finally { btn.innerHTML = originalText; btn.disabled = false; } }); };
 
         window.onload = () => { window.initFirebaseSync(); };
     </script>
