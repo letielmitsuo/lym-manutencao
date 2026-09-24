@@ -19,7 +19,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -47,7 +46,7 @@
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
     <datalist id="catalogList"></datalist>
 
-    <!-- ==================== TELA DE LOGIN ==================== -->
+    <!-- TELA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
@@ -78,51 +77,34 @@
         </div>
     </div>
 
-    <!-- ==================== TELA FORÇAR NOVA SENHA ==================== -->
-    <div id="modalForcePassword" class="fixed inset-0 bg-slate-900 hidden items-center justify-center z-50">
+    <!-- TELA FORÇAR NOVA SENHA -->
+    <div id="modalForcePassword" class="fixed inset-0 bg-slate-900 hidden flex items-center justify-center z-50">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
-                <div class="bg-amber-500 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <i class="fas fa-shield-alt text-xl"></i>
-                </div>
+                <div class="bg-amber-500 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><i class="fas fa-shield-alt text-xl"></i></div>
                 <h1 class="text-xl font-bold text-slate-800 dark:text-white">Atualize sua Senha</h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Por segurança, crie uma nova senha antes de continuar.</p>
             </div>
             <form onsubmit="window.saveForcedPassword(event)" class="space-y-4">
-                <div class="relative">
-                    <input type="password" id="forcePass1" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Nova Senha">
-                    <button type="button" onclick="window.toggleEye('forcePass1', 'eyeForce1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce1" class="fas fa-eye text-md"></i></button>
-                </div>
-                <div class="relative">
-                    <input type="password" id="forcePass2" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Repita a Senha">
-                    <button type="button" onclick="window.toggleEye('forcePass2', 'eyeForce2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce2" class="fas fa-eye text-md"></i></button>
-                </div>
+                <div class="relative"><input type="password" id="forcePass1" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('forcePass1', 'eyeForce1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce1" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="forcePass2" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('forcePass2', 'eyeForce2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce2" class="fas fa-eye text-md"></i></button></div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg transition shadow-md text-md mt-2">Salvar e Entrar</button>
                 <button type="button" onclick="window.logout()" class="w-full text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white py-2 text-sm">Cancelar e Sair</button>
             </form>
         </div>
     </div>
 
-    <!-- ==================== TELA TROCAR SENHA VOLUNTÁRIA ==================== -->
-    <div id="modalChangePassword" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <!-- TELA TROCAR SENHA VOLUNTÁRIA -->
+    <div id="modalChangePassword" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full">Mudar Minha Senha</h3>
                 <button type="button" onclick="window.hideElement('modalChangePassword')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
             <form id="changePassForm" onsubmit="window.saveChangePassword(event)" class="p-4 sm:p-5 space-y-3">
-                <div class="relative">
-                    <input type="password" id="changePassCurrent" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Senha Atual">
-                    <button type="button" onclick="window.toggleEye('changePassCurrent', 'eyeChg1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg1" class="fas fa-eye text-md"></i></button>
-                </div>
-                <div class="relative">
-                    <input type="password" id="changePassNew1" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nova Senha">
-                    <button type="button" onclick="window.toggleEye('changePassNew1', 'eyeChg2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg2" class="fas fa-eye text-md"></i></button>
-                </div>
-                <div class="relative">
-                    <input type="password" id="changePassNew2" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Repita a Senha">
-                    <button type="button" onclick="window.toggleEye('changePassNew2', 'eyeChg3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg3" class="fas fa-eye text-md"></i></button>
-                </div>
+                <div class="relative"><input type="password" id="changePassCurrent" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Senha Atual"><button type="button" onclick="window.toggleEye('changePassCurrent', 'eyeChg1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg1" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassNew1" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('changePassNew1', 'eyeChg2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg2" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassNew2" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('changePassNew2', 'eyeChg3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg3" class="fas fa-eye text-md"></i></button></div>
                 <div class="flex justify-center gap-2 pt-3">
                     <button type="button" onclick="window.hideElement('modalChangePassword')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
@@ -131,8 +113,8 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL ALMOXARIFADO ==================== -->
-    <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <!-- MODAL CATÁLOGO (ALMOXARIFADO) -->
+    <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCatalog">Novo Item</h3>
@@ -178,8 +160,8 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL FERRAMENTAS ==================== -->
-    <div id="modalTool" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <!-- MODAL FERRAMENTAS -->
+    <div id="modalTool" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleTool">Nova Ferramenta</h3>
@@ -212,8 +194,8 @@
         </div>
     </div>
 
-    <!-- ==================== TELA DA CÂMERA ==================== -->
-    <div id="modalScanner" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[100] p-4 flex-col">
+    <!-- TELA DA CÂMERA -->
+    <div id="modalScanner" class="fixed inset-0 bg-black/95 hidden flex flex-col items-center justify-center z-[100] p-4">
         <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl animate-fade-in">
             <div class="p-3 bg-slate-100 dark:bg-slate-700 flex justify-between items-center border-b dark:border-slate-600">
                 <h3 class="font-bold dark:text-white"><i class="fas fa-barcode mr-2 text-blue-500"></i> Escanear Código</h3>
@@ -224,8 +206,8 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL CRECHE ==================== -->
-    <div id="modalCei" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <!-- MODAL CRECHE -->
+    <div id="modalCei" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCei">Nova Creche</h3>
@@ -246,8 +228,8 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL USUÁRIO ==================== -->
-    <div id="modalUser" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <!-- MODAL USUÁRIO -->
+    <div id="modalUser" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleUser">Novo Usuário</h3>
@@ -272,8 +254,8 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL DETALHES ==================== -->
-    <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <!-- MODAL DETALHES -->
+    <div id="modalViewRecord" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center sticky top-0 z-10">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="viewRecordTitle">Detalhes</h3>
@@ -286,8 +268,8 @@
         </div>
     </div>
     
-    <!-- ==================== MODAL CONFIRMAÇÃO ==================== -->
-    <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <!-- MODAL CONFIRMAÇÃO BLINDADO -->
+    <div id="modalConfirm" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in text-center p-5">
             <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-exclamation-triangle"></i></div>
             <h3 class="font-bold text-lg dark:text-white mb-1">Tem certeza?</h3>
@@ -299,14 +281,14 @@
         </div>
     </div>
 
-    <!-- ==================== MAIN APP LAYOUT ==================== -->
+    <!-- MAIN APP LAYOUT -->
     <div id="appLayout" class="hidden w-full h-full flex flex-col md:flex-row">
         
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
             <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-bolt text-blue-400 text-lg"></i>
-                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v9.8</span></h2>
+                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v9.9</span></h2>
                 </div>
                 <div class="flex items-center gap-2 md:hidden">
                     <button type="button" onclick="window.toggleDarkMode()" class="outline-none p-2"><i id="darkModeIconMobile" class="fas fa-moon text-slate-300 text-lg transition-colors"></i></button>
@@ -345,30 +327,15 @@
         </main>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- LÓGICA JAVASCRIPT MASTER (EXPANDIDA E BLINDADA)                           -->
-    <!-- ========================================================================= -->
+    <!-- SCRIPT PRINCIPAL: FIREBASE, DADOS E LÓGICA -->
     <script>
-        // CONFIG E ESTADO
+        // CONFIGURACAO FIREBASE
         window.processTelegramQueue = async () => {};
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM", 
-            authDomain: "lym-manutencao.firebaseapp.com", 
-            projectId: "lym-manutencao", 
-            storageBucket: "lym-manutencao.firebasestorage.app", 
-            messagingSenderId: "172405408906", 
-            appId: "1:172405408906:web:19ef22e87e8ecbe1d91973" 
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCLYjq-4yOXL-_GZ8vWAR_4GpV6wa5l6OM", authDomain: "lym-manutencao.firebaseapp.com", projectId: "lym-manutencao", storageBucket: "lym-manutencao.firebasestorage.app", messagingSenderId: "172405408906", appId: "1:172405408906:web:19ef22e87e8ecbe1d91973" };
         
         let db = null;
-        try {
-            if (typeof firebase !== 'undefined') {
-                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Firebase Offline falhou: ", err));
-            }
-        } catch(e) { console.warn("Aviso Firebase:", e); }
+        try { if (typeof firebase !== 'undefined') { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); db = firebase.firestore(); db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Firebase Offline falhou: ", err)); } } catch(e) { console.warn("Aviso Firebase:", e); }
 
         window.localData = { ceis: [], users: [], reports: [], quotes: [], thirdParty: [], audit: [], catalog: [], stockMovements: [], tools: [], toolMovements: [] };
         window.currentSystemUser = null; 
@@ -377,117 +344,58 @@
         window.materialCount = 0; 
         window.lymCharts = {};
 
-        // ORDENAÇÃO SEGURA DE ARRAYS (Impede falhas de "is not defined")
+        // ORDENAÇÃO SEGURA DE ARRAYS
         window.safeSort = (arr, compareFn) => {
-            try {
-                if (!Array.isArray(arr)) return [];
-                return [...arr].sort(compareFn);
-            } catch(e) {
-                console.error("Erro na ordenação:", e);
-                return arr || [];
-            }
+            if (!arr || !Array.isArray(arr)) return [];
+            return [...arr].sort(compareFn);
         };
 
-        // 1. MANIPULAÇÃO VISUAL E MODAIS (Atualizado para não bugar o CSS)
+        // 1. MANIPULAÇÃO VISUAL E MODAIS
         window.showElement = (id) => { 
             const el = document.getElementById(id); 
             if (el) { 
                 el.classList.remove('hidden'); 
-                if (id.startsWith('modal') || id === 'loginScreen' || id === 'modalScanner' || id === 'appLayout') { 
+                if (id.startsWith('modal') || id === 'loginScreen' || id === 'appLayout') { 
                     el.classList.add('flex'); 
                 } 
+                el.style.display = ''; // Deixa o Tailwind gerenciar
             } 
         };
         window.hideElement = (id) => { 
             const el = document.getElementById(id); 
             if (el) { 
                 el.classList.add('hidden'); 
-                if (id.startsWith('modal') || id === 'loginScreen' || id === 'modalScanner' || id === 'appLayout') { 
+                if (id.startsWith('modal') || id === 'loginScreen' || id === 'appLayout') { 
                     el.classList.remove('flex'); 
                 } 
+                el.style.display = ''; 
             } 
         };
 
         window.escapeHtml = (text) => { if (!text) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
-        
-        window.formatDateBR = (iso) => { 
-            try { 
-                if (!iso) return ""; 
-                let str = String(iso); 
-                if (str.includes('-') && str.split('-').length >= 3) { 
-                    return str.split('T')[0].split('-').reverse().join('/'); 
-                } 
-                return str; 
-            } catch(e) { return ""; } 
-        };
-        
-        window.formatMoney = (val) => { 
-            try { 
-                let v = parseFloat(val); 
-                if (isNaN(v)) v = 0; 
-                return v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); 
-            } catch(e) { return "R$ 0,00"; } 
-        };
-        
-        window.getSafeTime = (obj) => { 
-            try { 
-                if (!obj) return 0; 
-                if (obj.timestamp) { 
-                    let t = new Date(obj.timestamp).getTime(); 
-                    if (!isNaN(t)) return t; 
-                } 
-                if (obj.date) { 
-                    let dStr = String(obj.date); 
-                    let t = new Date(dStr).getTime(); 
-                    if (isNaN(t) && dStr.includes('/')) { 
-                        t = new Date(dStr.split('/').reverse().join('-')).getTime(); 
-                    } 
-                    if (!isNaN(t)) return t; 
-                } 
-                return 0; 
-            } catch(e) { return 0; } 
-        };
+        window.formatDateBR = (iso) => { try { if (!iso) return ""; let str = String(iso); if (str.includes('-') && str.split('-').length >= 3) { return str.split('T')[0].split('-').reverse().join('/'); } return str; } catch(e) { return ""; } };
+        window.formatMoney = (val) => { try { let v = parseFloat(val); if (isNaN(v)) v = 0; return v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); } catch(e) { return "R$ 0,00"; } };
+        window.getSafeTime = (obj) => { try { if (!obj) return 0; if (obj.timestamp) { let t = new Date(obj.timestamp).getTime(); if (!isNaN(t)) return t; } if (obj.date) { let dStr = String(obj.date); let t = new Date(dStr).getTime(); if (isNaN(t) && dStr.includes('/')) { t = new Date(dStr.split('/').reverse().join('-')).getTime(); } if (!isNaN(t)) return t; } return 0; } catch(e) { return 0; } };
         
         window.showToast = (msg, type = 'success') => {
-            const container = document.getElementById('toastContainer'); 
-            if(!container) return; 
-            const toast = document.createElement('div');
+            const container = document.getElementById('toastContainer'); if(!container) return; const toast = document.createElement('div');
             let colorClass = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
             let iconClass = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle');
             toast.className = `${colorClass} text-white px-5 py-2.5 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-full opacity-0 transition-all duration-300 animate-fade-in z-50 text-sm pointer-events-auto`;
             toast.innerHTML = `<i class="fas ${iconClass}"></i> <span class="font-medium">${window.escapeHtml(msg)}</span><button type="button" onclick="this.parentElement.remove()" class="ml-3 opacity-75 hover:opacity-100"><i class="fas fa-times"></i></button>`;
-            container.appendChild(toast); 
-            setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10); 
-            setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 600); }, 4000);
+            container.appendChild(toast); setTimeout(() => { toast.classList.remove('translate-y-full', 'opacity-0'); }, 10); setTimeout(() => { toast.classList.add('translate-y-full', 'opacity-0'); setTimeout(() => toast.remove(), 600); }, 4000);
         };
 
-        window.toggleDarkMode = () => { 
-            document.documentElement.classList.toggle('dark'); 
-            const isDark = document.documentElement.classList.contains('dark'); 
-            localStorage.setItem('lym_theme', isDark ? 'dark' : 'light'); 
-            ['darkModeIconDesktop', 'darkModeIconMobile'].forEach(id => { 
-                const icon = document.getElementById(id); 
-                if(icon) icon.className = isDark ? 'fas fa-sun text-yellow-400 text-xl transition-colors' : 'fas fa-moon text-slate-300 text-xl transition-colors'; 
-            }); 
-            if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100); 
-        };
+        window.toggleDarkMode = () => { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('lym_theme', isDark ? 'dark' : 'light'); ['darkModeIconDesktop', 'darkModeIconMobile'].forEach(id => { const icon = document.getElementById(id); if(icon) icon.className = isDark ? 'fas fa-sun text-yellow-400 text-xl transition-colors' : 'fas fa-moon text-slate-300 text-xl transition-colors'; }); if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100); };
         
         // 2. SISTEMA DE CONFIRMAÇÃO GLOBAL
         let confirmActionCallback = null; 
-        window.confirmAction = (callback) => { 
-            confirmActionCallback = callback; 
-            window.showElement('modalConfirm'); 
-        };
-        window.executeConfirmAction = () => { 
-            if(confirmActionCallback) confirmActionCallback(); 
-            window.hideElement('modalConfirm'); 
-            confirmActionCallback = null; 
-        };
+        window.confirmAction = (callback) => { confirmActionCallback = callback; window.showElement('modalConfirm'); };
+        window.executeConfirmAction = () => { if(confirmActionCallback) confirmActionCallback(); window.hideElement('modalConfirm'); confirmActionCallback = null; };
 
         // 3. COMUNICAÇÃO FIREBASE
         window.initFirebaseSync = function() {
-            if(!db) return; 
-            const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements', 'tools', 'toolMovements'];
+            if(!db) return; const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements', 'tools', 'toolMovements'];
             cols.forEach(col => { 
                 db.collection(col).onSnapshot(snap => { 
                     window.localData[col] = snap.docs.map(d => ({id: d.id, ...d.data()})); 
@@ -503,55 +411,36 @@
 
         window.dbSave = async (colName, docId, data) => { 
             data.updatedAt = new Date().toISOString(); 
-            
-            // ATUALIZAÇÃO OTIMISTA (A tela reage na mesma hora)
             let exists = window.localData[colName].findIndex(x => String(x.id) === String(docId));
-            if (exists >= 0) { 
-                window.localData[colName][exists] = { ...window.localData[colName][exists], ...data }; 
-            } else { 
-                window.localData[colName].push({ id: String(docId), ...data }); 
-            }
-            
+            if (exists >= 0) { window.localData[colName][exists] = { ...window.localData[colName][exists], ...data }; } else { window.localData[colName].push({ id: String(docId), ...data }); }
             if(!db) return; 
-            try { 
-                if(docId) await db.collection(colName).doc(String(docId)).set(data, { merge: true }); 
-                else await db.collection(colName).add(data); 
-            } catch(e) { console.error("Firebase Save Error", e); }
+            try { if(docId) await db.collection(colName).doc(String(docId)).set(data, { merge: true }); else await db.collection(colName).add(data); } catch(e) { console.error("Firebase Save Error", e); }
         };
         
         window.dbDelete = async (colName, docId) => { 
-            // EXCLUSÃO OTIMISTA (Remove da tela na mesma hora)
             window.localData[colName] = window.localData[colName].filter(x => String(x.id) !== String(docId));
-            
             if(!db) return; 
             try { await db.collection(colName).doc(String(docId)).delete(); } catch(e) { console.error("Firebase Delete Error", e); }
         };
         
-        window.logAudit = async (actionDesc) => { 
-            if(!db) return; 
-            try { await db.collection('audit').add({ user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: actionDesc, date: new Date().toLocaleString('pt-BR'), timestamp: Date.now() }); } catch(e){} 
-        };
+        window.logAudit = async (actionDesc) => { if(!db) return; try { await db.collection('audit').add({ user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: actionDesc, date: new Date().toLocaleString('pt-BR'), timestamp: Date.now() }); } catch(e){} };
 
         // 4. AUTENTICAÇÃO E LOGIN
-        window.toggleEye = function(inputId, iconId) { 
-            const pwd = document.getElementById(inputId); 
-            const icon = document.getElementById(iconId); 
-            if (pwd.type === 'password') { pwd.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } 
-            else { pwd.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); } 
-        };
-        
+        window.toggleEye = function(inputId, iconId) { const pwd = document.getElementById(inputId); const icon = document.getElementById(iconId); if (pwd.type === 'password') { pwd.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } else { pwd.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); } };
         window.handleLogin = function(e) {
             e.preventDefault();
             try {
                 const u = document.getElementById('loginUsername').value.trim().toLowerCase(); 
                 const p = document.getElementById('loginPassword').value.trim();
-                let user = window.localData.users.find(x => (String(x.login).toLowerCase() === u || String(x.username).toLowerCase() === u) && (x.pass === p || x.password === p));
-                
+                let user = window.localData.users.find(x => {
+                    const loginName = x.login ? String(x.login).toLowerCase() : "";
+                    const usernameName = x.username ? String(x.username).toLowerCase() : "";
+                    return (loginName === u || usernameName === u) && (x.pass === p || x.password === p);
+                });
                 if (!user) { 
                     if (u === 'admin' && p === 'admin123') { user = { id: 'master_admin', login: 'admin', role: 'admin' }; } 
                     else if (u === 'func' && p === 'func123') { user = { id: 'master_func', login: 'func', role: 'funcionario' }; } 
                 }
-                
                 if (user) { 
                     window.currentSystemUser = { id: user.id, login: user.login || user.username || u, role: user.role, pass: p }; 
                     if(p === '123mudar') { 
@@ -559,109 +448,39 @@
                         document.getElementById('forcePass2').value = ''; 
                         window.hideElement('loginScreen'); 
                         window.showElement('modalForcePassword'); 
-                    } else { 
-                        window.completeLogin(); 
-                    } 
+                    } else { window.completeLogin(); } 
                 } else { window.showToast("Usuário ou senha inválidos!", "error"); }
             } catch(err) { window.showToast("Erro de acesso", "error"); }
         };
 
         window.completeLogin = () => {
-            window.showToast(`Bem-vindo(a), ${window.currentSystemUser.login}!`); 
-            window.logAudit('Login realizado');
-            
-            window.hideElement('modalForcePassword'); 
-            window.hideElement('loginScreen'); 
-            window.showElement('appLayout');
-            
+            window.showToast(`Bem-vindo(a), ${window.currentSystemUser.login}!`); window.logAudit('Login realizado');
+            window.hideElement('modalForcePassword'); window.hideElement('loginScreen'); window.showElement('appLayout');
             if (document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').textContent = window.currentSystemUser.login;
             let roleDisplay = window.currentSystemUser.role === 'admin' ? 'Administrador' : (window.currentSystemUser.role === 'func_cftv' ? 'Técnico CFTV' : 'Funcionário Geral');
             if (document.getElementById('userRoleDisplay')) document.getElementById('userRoleDisplay').textContent = roleDisplay;
             if (document.getElementById('userInitial')) document.getElementById('userInitial').textContent = window.currentSystemUser.login.charAt(0).toUpperCase();
-            
-            window.buildMenu(); 
-            window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; 
-            window.renderActiveTab();
+            window.buildMenu(); window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-reports'; window.renderActiveTab();
             
             if (window.currentSystemUser.role === 'admin') { 
                 const lastBackup = localStorage.getItem('lym_last_autobackup'); 
                 const now = Date.now(); 
                 if (!lastBackup || (now - parseInt(lastBackup)) > 172800000) { 
-                    setTimeout(() => { 
-                        window.downloadLocalBackup(true); 
-                        localStorage.setItem('lym_last_autobackup', now.toString()); 
-                        window.showToast("Ponto de restauração gerado automaticamente.", "info"); 
-                    }, 6000); 
+                    setTimeout(() => { window.downloadLocalBackup(true); localStorage.setItem('lym_last_autobackup', now.toString()); window.showToast("Ponto de restauração gerado automaticamente.", "info"); }, 6000); 
                 } 
             }
         };
 
-        window.saveForcedPassword = async (e) => { 
-            e.preventDefault(); 
-            const p1 = document.getElementById('forcePass1').value; 
-            const p2 = document.getElementById('forcePass2').value; 
-            if(p1 !== p2) return window.showToast("As senhas não coincidem!", "error"); 
-            if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error"); 
-            if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error"); 
-            try { 
-                await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); 
-                window.currentSystemUser.pass = p1; 
-                window.logAudit('Trocou a senha'); 
-                window.completeLogin(); 
-            } catch(err) { window.showToast("Erro ao salvar.", "error"); } 
-        };
-        
-        window.openChangePassword = () => { 
-            document.getElementById('changePassForm').reset(); 
-            window.showElement('modalChangePassword'); 
-        };
-        
-        window.saveChangePassword = async (e) => { 
-            e.preventDefault(); 
-            const current = document.getElementById('changePassCurrent').value; 
-            const p1 = document.getElementById('changePassNew1').value; 
-            const p2 = document.getElementById('changePassNew2').value; 
-            if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error"); 
-            const realUser = window.localData.users.find(u => String(u.id) === String(window.currentSystemUser.id)); 
-            const realPass = realUser.pass || realUser.password; 
-            if(current !== realPass) return window.showToast("Senha atual incorreta!", "error"); 
-            if(p1 !== p2) return window.showToast("Senhas não coincidem!", "error"); 
-            if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error"); 
-            try { 
-                await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); 
-                window.currentSystemUser.pass = p1; 
-                window.logAudit('Alterou a senha voluntariamente'); 
-                window.showToast("Senha alterada!"); 
-                window.hideElement('modalChangePassword'); 
-            } catch(err) { window.showToast("Erro.", "error"); } 
-        };
-        
-        window.resetUserPassword = (id) => { 
-            window.confirmAction(async () => { 
-                try { 
-                    await window.dbSave('users', id, { pass: '123mudar', password: '123mudar' }); 
-                    window.logAudit(`Resetou a senha ID: ${id}`); 
-                    window.showToast("Senha resetada para 123mudar!"); 
-                } catch(err) { window.showToast("Erro", "error"); } 
-            }); 
-        };
-        
-        window.logout = () => { 
-            window.logAudit('Logout Efetuado'); 
-            window.currentSystemUser = null; 
-            window.hideElement('appLayout'); 
-            window.showElement('loginScreen'); 
-            document.getElementById('loginForm').reset(); 
-        };
+        window.saveForcedPassword = async (e) => { e.preventDefault(); const p1 = document.getElementById('forcePass1').value; const p2 = document.getElementById('forcePass2').value; if(p1 !== p2) return window.showToast("As senhas não coincidem!", "error"); if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error"); if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error"); try { await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); window.currentSystemUser.pass = p1; window.logAudit('Trocou a senha'); window.completeLogin(); } catch(err) { window.showToast("Erro ao salvar.", "error"); } };
+        window.openChangePassword = () => { document.getElementById('changePassForm').reset(); window.showElement('modalChangePassword'); };
+        window.saveChangePassword = async (e) => { e.preventDefault(); const current = document.getElementById('changePassCurrent').value; const p1 = document.getElementById('changePassNew1').value; const p2 = document.getElementById('changePassNew2').value; if(String(window.currentSystemUser.id).startsWith('master_')) return window.showToast("Mestre inalterável.", "error"); const realUser = window.localData.users.find(u => String(u.id) === String(window.currentSystemUser.id)); const realPass = realUser.pass || realUser.password; if(current !== realPass) return window.showToast("Senha atual incorreta!", "error"); if(p1 !== p2) return window.showToast("Senhas não coincidem!", "error"); if(p1 === '123mudar') return window.showToast("Escolha senha diferente.", "error"); try { await window.dbSave('users', window.currentSystemUser.id, { pass: p1, password: p1 }); window.currentSystemUser.pass = p1; window.logAudit('Alterou a senha voluntariamente'); window.showToast("Senha alterada!"); window.hideElement('modalChangePassword'); } catch(err) { window.showToast("Erro.", "error"); } };
+        window.resetUserPassword = (id) => { window.confirmAction(async () => { try { await window.dbSave('users', id, { pass: '123mudar', password: '123mudar' }); window.logAudit(`Resetou a senha ID: ${id}`); window.showToast("Senha resetada para 123mudar!"); } catch(err) { window.showToast("Erro", "error"); } }); };
+        window.logout = () => { window.logAudit('Logout Efetuado'); window.currentSystemUser = null; window.hideElement('appLayout'); window.showElement('loginScreen'); document.getElementById('loginForm').reset(); };
 
         // 5. NAVEGAÇÃO
         window.buildMenu = () => {
-            const navLinks = document.getElementById('navLinks'); 
-            navLinks.innerHTML = ""; 
-            document.getElementById('mobileMenuBtn').onclick = () => { navLinks.classList.toggle('hidden'); navLinks.classList.toggle('flex'); };
-            const role = window.currentSystemUser.role; 
-            let menuItems = [];
-            
+            const navLinks = document.getElementById('navLinks'); navLinks.innerHTML = ""; document.getElementById('mobileMenuBtn').onclick = () => { navLinks.classList.toggle('hidden'); navLinks.classList.toggle('flex'); };
+            const role = window.currentSystemUser.role; let menuItems = [];
             if (role === 'admin') {
                 menuItems = [
                     { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo Geral' }, 
@@ -691,26 +510,17 @@
                     { id: 'func-history', icon: 'fa-history', label: 'Meus Registros' }
                 );
             }
-            
             menuItems.forEach(item => { 
-                const a = document.createElement('a'); 
-                a.href = "#"; 
-                a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium"; 
+                const a = document.createElement('a'); a.href = "#"; a.className = "flex items-center gap-3 px-5 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition group text-sm font-medium"; 
                 a.innerHTML = `<i class="fas ${item.icon} w-5 text-center group-hover:text-blue-400 transition"></i> <span>${item.label}</span>`; 
-                a.onclick = (e) => { 
-                    e.preventDefault(); 
-                    window.activeTab = item.id; 
-                    if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } 
-                    window.renderActiveTab(); 
-                }; 
+                a.onclick = (e) => { e.preventDefault(); window.activeTab = item.id; if(window.innerWidth < 768) { navLinks.classList.add('hidden'); navLinks.classList.remove('flex'); } window.renderActiveTab(); }; 
                 navLinks.appendChild(a); 
             });
         };
 
         window.renderActiveTab = () => {
             if(!window.currentSystemUser) return;
-            const role = window.currentSystemUser.role; 
-            let html = ""; let title = "";
+            const role = window.currentSystemUser.role; let html = ""; let title = "";
             
             if(role === 'admin') {
                 if(window.activeTab === 'dashboard') { title = "Resumo Geral"; html = window.renderAdminDashboard(); }
@@ -788,7 +598,11 @@
             ['Rep', 'Quote', 'ThirdParty'].forEach(sffx => { 
                 const sel = document.getElementById(`ceiSelect${sffx}`); 
                 if (sel) { 
-                    sel.innerHTML = '<option value="">Selecione a Creche...</option>' + window.safeSort(window.localData.ceis, (a,b) => String(a?.name || '').localeCompare(String(b?.name || ''))).map(c => `<option value="${c.id}" data-id="${c.id}">${window.escapeHtml(c.name)}</option>`).join(''); 
+                    sel.innerHTML = '<option value="">Selecione a Creche...</option>' + window.safeSort(window.localData.ceis, (a,b) => {
+                        let nameA = a && a.name ? String(a.name) : "";
+                        let nameB = b && b.name ? String(b.name) : "";
+                        return nameA.localeCompare(nameB);
+                    }).map(c => `<option value="${c.id}" data-id="${c.id}">${window.escapeHtml(c.name)}</option>`).join(''); 
                 } 
             }); 
         };
@@ -822,43 +636,18 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1">
-                    <h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3>
-                    <div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2">
-                    <h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume</h3>
-                    <div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div>
-                </div>
-            </div>
-        `;
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3><div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div></div>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume</h3><div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div></div>
+            </div>`;
 
-        window.initCharts = () => { 
-            try { 
-                const isDark = document.documentElement.classList.contains('dark'); 
-                const fontColor = isDark ? '#cbd5e1' : '#475569'; 
-                if(document.getElementById('chartDifficulty')) { 
-                    const diffCounts = {'Fácil': 0, 'Médio': 0, 'Difícil': 0}; 
-                    window.localData.reports.forEach(r => { if(r.difficulty && diffCounts[r.difficulty] !== undefined) diffCounts[r.difficulty]++; }); 
-                    if(window.lymCharts.diff) window.lymCharts.diff.destroy(); 
-                    window.lymCharts.diff = new Chart(document.getElementById('chartDifficulty'), { type: 'doughnut', data: { labels: ['Fácil', 'Médio', 'Difícil'], datasets: [{ data: [diffCounts['Fácil'], diffCounts['Médio'], diffCounts['Difícil']], backgroundColor: ['#22c55e', '#eab308', '#ef4444'], borderWidth: isDark ? 0 : 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font: { size: 10 } } } } } }); 
-                } 
-                if(document.getElementById('chartMonths')) { 
-                    const monthsMap = {}; 
-                    const addMonth = (dateStr, type) => { if(!dateStr) return; const ym = dateStr.substring(0, 7); if(!monthsMap[ym]) monthsMap[ym] = {rep: 0, quo: 0}; monthsMap[ym][type]++; }; 
-                    window.localData.reports.forEach(r => addMonth(r.date, 'rep')); 
-                    window.localData.quotes.forEach(r => addMonth(r.date, 'quo')); 
-                    const sortedMonths = Object.keys(monthsMap).sort(); 
-                    const repData = sortedMonths.map(m => monthsMap[m].rep); 
-                    const quoData = sortedMonths.map(m => monthsMap[m].quo); 
-                    if(window.lymCharts.months) window.lymCharts.months.destroy(); 
-                    window.lymCharts.months = new Chart(document.getElementById('chartMonths'), { type: 'line', data: { labels: sortedMonths.map(m => m.split('-').reverse().join('/')), datasets: [{ label: 'Serviços', data: repData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }, { label: 'Orçamentos', data: quoData, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: fontColor, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }, y: { ticks: { color: fontColor, stepSize: 1, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } } }, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font:{size:10} } } } } }); 
-                } 
-            } catch(e){} 
-        };
+        window.initCharts = () => { try { const isDark = document.documentElement.classList.contains('dark'); const fontColor = isDark ? '#cbd5e1' : '#475569'; if(document.getElementById('chartDifficulty')) { const diffCounts = {'Fácil': 0, 'Médio': 0, 'Difícil': 0}; window.localData.reports.forEach(r => { if(r.difficulty && diffCounts[r.difficulty] !== undefined) diffCounts[r.difficulty]++; }); if(window.lymCharts.diff) window.lymCharts.diff.destroy(); window.lymCharts.diff = new Chart(document.getElementById('chartDifficulty'), { type: 'doughnut', data: { labels: ['Fácil', 'Médio', 'Difícil'], datasets: [{ data: [diffCounts['Fácil'], diffCounts['Médio'], diffCounts['Difícil']], backgroundColor: ['#22c55e', '#eab308', '#ef4444'], borderWidth: isDark ? 0 : 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font: { size: 10 } } } } } }); } if(document.getElementById('chartMonths')) { const monthsMap = {}; const addMonth = (dateStr, type) => { if(!dateStr) return; const ym = dateStr.substring(0, 7); if(!monthsMap[ym]) monthsMap[ym] = {rep: 0, quo: 0}; monthsMap[ym][type]++; }; window.localData.reports.forEach(r => addMonth(r.date, 'rep')); window.localData.quotes.forEach(r => addMonth(r.date, 'quo')); const sortedMonths = Object.keys(monthsMap).sort(); const repData = sortedMonths.map(m => monthsMap[m].rep); const quoData = sortedMonths.map(m => monthsMap[m].quo); if(window.lymCharts.months) window.lymCharts.months.destroy(); window.lymCharts.months = new Chart(document.getElementById('chartMonths'), { type: 'line', data: { labels: sortedMonths.map(m => m.split('-').reverse().join('/')), datasets: [{ label: 'Serviços', data: repData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }, { label: 'Orçamentos', data: quoData, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: fontColor, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }, y: { ticks: { color: fontColor, stepSize: 1, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } } }, plugins: { legend: { position: 'bottom', labels: { color: fontColor, font:{size:10} } } } } }); } } catch(e){} };
 
         window.renderAdminCeis = () => { 
-            let trs = window.safeSort(window.localData.ceis, (a,b)=>String(a?.name||'').localeCompare(String(b?.name||''))).map(c => `
+            let trs = window.safeSort(window.localData.ceis, (a,b)=>{
+                let nameA = a && a.name ? String(a.name) : "";
+                let nameB = b && b.name ? String(b.name) : "";
+                return nameA.localeCompare(nameB);
+            }).map(c => `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
                     <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.telegramGroupId || '-')}</td>
@@ -891,7 +680,11 @@
         };
 
         window.renderAdminUsers = () => { 
-            let trs = window.safeSort(window.localData.users, (a,b)=>String(a?.login||'').localeCompare(String(b?.login||''))).map(u => `
+            let trs = window.safeSort(window.localData.users, (a,b)=>{
+                let nameA = a && a.login ? String(a.login) : "";
+                let nameB = b && b.login ? String(b.login) : "";
+                return nameA.localeCompare(nameB);
+            }).map(u => `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td>
                     <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-600 text-white' : 'bg-emerald-600 text-white'}">${String(u.role).toUpperCase()}</span></td>
@@ -925,7 +718,11 @@
         };
 
         window.renderAdminCatalog = () => {
-            let trs = window.safeSort(window.localData.catalog, (a,b)=>String(a?.name||'').localeCompare(String(b?.name||''))).map(c => `
+            let trs = window.safeSort(window.localData.catalog, (a,b)=>{
+                let nameA = a && a.name ? String(a.name) : "";
+                let nameB = b && b.name ? String(b.name) : "";
+                return nameA.localeCompare(nameB);
+            }).map(c => `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
                     <td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td>
@@ -988,7 +785,11 @@
         };
 
         window.renderAdminTools = () => {
-            let trs = window.safeSort(window.localData.tools, (a,b)=>String(a?.name||'').localeCompare(String(b?.name||''))).map(c => { 
+            let trs = window.safeSort(window.localData.tools, (a,b)=>{
+                let nameA = a && a.name ? String(a.name) : "";
+                let nameB = b && b.name ? String(b.name) : "";
+                return nameA.localeCompare(nameB);
+            }).map(c => { 
                 let statusClass = c.availableStock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; 
                 return `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
@@ -1069,95 +870,11 @@
                 </div>
             </div>`;
 
-        window.renderAdminReports = () => {
-            return window.renderFilterBar('reports') + `
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left whitespace-nowrap">
-                        <thead>
-                            <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
-                                <th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'reports')"></th>
-                                <th class="px-3 py-2">Data</th>
-                                <th class="px-3 py-2">CEI</th>
-                                <th class="px-3 py-2">Técnico</th>
-                                <th class="px-3 py-2 text-center">Equipe</th>
-                                <th class="px-3 py-2 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBodyReports"></tbody>
-                    </table>
-                </div>
-            </div>`;
-        };
-
-        window.renderAdminQuotes = () => {
-            return window.renderFilterBar('quotes') + `
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left whitespace-nowrap">
-                        <thead>
-                            <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
-                                <th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'quotes')"></th>
-                                <th class="px-3 py-2">Data</th>
-                                <th class="px-3 py-2">CEI</th>
-                                <th class="px-3 py-2">Total Orçado</th>
-                                <th class="px-3 py-2 text-center">Status</th>
-                                <th class="px-3 py-2 text-center">Equipe</th>
-                                <th class="px-3 py-2 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBodyQuotes"></tbody>
-                    </table>
-                </div>
-            </div>`;
-        };
-
-        window.renderAdminThirdParty = () => {
-            return window.renderFilterBar('thirdParty') + `
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left whitespace-nowrap">
-                        <thead>
-                            <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
-                                <th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'thirdParty')"></th>
-                                <th class="px-3 py-2">Data</th>
-                                <th class="px-3 py-2">CEI</th>
-                                <th class="px-3 py-2">Empresa</th>
-                                <th class="px-3 py-2 text-center">Equipe</th>
-                                <th class="px-3 py-2 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBodyThirdParty"></tbody>
-                    </table>
-                </div>
-            </div>`;
-        };
+        window.renderAdminReports = () => window.renderFilterBar('reports') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'reports')"></th><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Técnico</th><th class="px-3 py-2 text-center">Equipe</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyReports"></tbody></table></div></div>`;
+        window.renderAdminQuotes = () => window.renderFilterBar('quotes') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'quotes')"></th><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Total Orçado</th><th class="px-3 py-2 text-center">Status</th><th class="px-3 py-2 text-center">Equipe</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyQuotes"></tbody></table></div></div>`;
+        window.renderAdminThirdParty = () => window.renderFilterBar('thirdParty') + `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 w-10 text-center"><input type="checkbox" onclick="window.toggleSelectAll(this, 'thirdParty')"></th><th class="px-3 py-2">Data</th><th class="px-3 py-2">CEI</th><th class="px-3 py-2">Empresa</th><th class="px-3 py-2 text-center">Equipe</th><th class="px-3 py-2 text-right">Ações</th></tr></thead><tbody id="tableBodyThirdParty"></tbody></table></div></div>`;
         
-        window.renderAdminAudit = () => `
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden animate-fade-in">
-                <div class="p-3 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center border-b dark:border-slate-700">
-                    <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full">Logs de Auditoria</h3>
-                    <button type="button" onclick="window.clearAuditLogs()" class="bg-red-100 dark:bg-red-900/30 hover:bg-red-200 text-red-700 dark:text-red-400 px-2 py-1 rounded text-xs font-medium absolute right-3"><i class="fas fa-trash-alt mr-1"></i> Limpar</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left whitespace-nowrap">
-                        <thead>
-                            <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
-                                <th class="px-3 py-2">Data/Hora</th><th class="px-3 py-2">Usuário</th><th class="px-3 py-2">Ação Realizada</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${window.safeSort(window.localData.audit, (a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 100).map(a => `
-                                <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm">
-                                    <td class="px-3 py-2">${a.date}</td>
-                                    <td class="px-3 py-2 font-medium capitalize text-slate-700 dark:text-slate-300">${window.escapeHtml(a.user)}</td>
-                                    <td class="px-3 py-2 text-slate-600 dark:text-slate-400">${window.escapeHtml(a.action)}</td>
-                                </tr>
-                            `).join("")}
-                        </tbody>
-                    </table>
-                </div>
-            </div>`;
+        window.renderAdminAudit = () => `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center border-b dark:border-slate-700"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full">Logs de Auditoria</h3><button type="button" onclick="window.clearAuditLogs()" class="bg-red-100 dark:bg-red-900/30 hover:bg-red-200 text-red-700 dark:text-red-400 px-2 py-1 rounded text-xs font-medium absolute right-3"><i class="fas fa-trash-alt mr-1"></i> Limpar</button></div><div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2">Data/Hora</th><th class="px-3 py-2">Usuário</th><th class="px-3 py-2">Ação Realizada</th></tr></thead><tbody>${window.safeSort(window.localData.audit, (a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0, 100).map(a => `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm"><td class="px-3 py-2">${a.date}</td><td class="px-3 py-2 font-medium capitalize text-slate-700 dark:text-slate-300">${window.escapeHtml(a.user)}</td><td class="px-3 py-2 text-slate-600 dark:text-slate-400">${window.escapeHtml(a.action)}</td></tr>`).join("")}</tbody></table></div></div>`;
 
         window.renderCftvVault = () => `
             <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in">
@@ -1187,45 +904,6 @@
                     </form>
                 </div>
             </div>`;
-
-        window.loadVaultData = (ceiId) => {
-            const container = document.getElementById('vaultFormContainer');
-            if(!ceiId) { window.hideElement('vaultFormContainer'); return; }
-            const cei = window.localData.ceis.find(c => String(c.id) === String(ceiId));
-            if(!cei) return;
-            document.getElementById('vaultCeiId').value = ceiId;
-            const v = cei.vault || {};
-            document.getElementById('vIp').value = v.ip || "";
-            document.getElementById('vPorts').value = v.ports || "";
-            document.getElementById('vUser').value = v.user || "";
-            document.getElementById('vPass').value = v.pass || "";
-            document.getElementById('vWifi').value = v.wifi || "";
-            document.getElementById('vCams').value = v.cams || "";
-            document.getElementById('vObs').value = v.obs || "";
-            window.showElement('vaultFormContainer');
-        };
-
-        window.saveVaultData = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('vaultCeiId').value;
-            if(!id) return;
-            const vaultData = {
-                ip: document.getElementById('vIp').value,
-                ports: document.getElementById('vPorts').value,
-                user: document.getElementById('vUser').value,
-                pass: document.getElementById('vPass').value,
-                wifi: document.getElementById('vWifi').value,
-                cams: document.getElementById('vCams').value,
-                obs: document.getElementById('vObs').value
-            };
-            try {
-                await window.dbSave('ceis', id, { vault: vaultData });
-                window.logAudit(`Atualizou o Cofre de Redes da CEI ID: ${id}`);
-                window.showToast("Cofre atualizado!");
-            } catch(err) {
-                window.showToast("Erro ao salvar no cofre.", "error");
-            }
-        };
 
         window.renderFuncStockForm = () => `
             <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 animate-fade-in">
@@ -1465,8 +1143,8 @@
                     }
                     const titleEl = document.getElementById(`formTitle${type.charAt(0).toUpperCase() + type.slice(1)}`); if(titleEl) titleEl.textContent = "Editando Registro";
                     window.showElement('cancelEditBtn');
-                } catch(err) { console.error("Erro Edição:", err); window.showToast("Falha ao preencher dados.", "error"); }
-            }, 500); 
+                } catch(err) { console.error("Erro Edição:", err); window.showToast("Falha ao carregar dados.", "error"); }
+            }, 300); // Carrega rápido e sem falhas após renderizar
         };
 
         window.deleteFuncRecord = (type, id) => { window.confirmAction(async () => { await window.dbDelete(type, id); window.logAudit(`Excluiu ${type} ID: ${id}`); window.showToast("Excluído!"); if (window.currentSystemUser.role === 'admin') { window.setupAdminFilters(); } else { window.renderEmployeeHistory(); } }); };
@@ -1496,53 +1174,6 @@
         };
 
         window.clearDraft = (type) => { localStorage.removeItem(`lym_draft_${type}`); };
-
-        window.addMaterialRow = (containerId, triggerSave = true) => {
-            try {
-                const container = document.getElementById(containerId); if(!container) return;
-                const italicText = container.querySelector('.italic'); if(italicText) italicText.remove();
-                
-                window.materialCount = (window.materialCount || 0) + 1; const id = `mat_${window.materialCount}`; 
-                const div = document.createElement('div'); div.id = id; 
-                div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in mt-2";
-                
-                div.innerHTML = `<div class="flex flex-grow gap-1"><button type="button" onclick="window.scanForMaterialRow('${id}')" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700" title="Ler Código"><i class="fas fa-barcode"></i></button><input type="text" list="catalogList" class="mat-name w-full p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" placeholder="Material (Digite ou Leia)" required></div><input type="text" class="mat-brand w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Marca"><input type="number" class="mat-qtd w-full sm:w-16 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required><input type="number" class="mat-price w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="R$ Un." step="0.01"><button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200">X</button>`;
-                container.appendChild(div); 
-                
-                if(triggerSave && window.activeTab) { const type = window.activeTab.split('-')[1]; if (type) window.saveDraft(type); }
-            } catch(err) { console.error("Erro addMaterialRow", err); }
-        };
-
-        window.compressImage = (file, maxWidth = 800, quality = 0.7) => { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (event) => { const img = new Image(); img.src = event.target.result; img.onload = () => { try { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', quality)); } catch(e) { reject(e); } }; img.onerror = () => reject("Erro img"); }; reader.onerror = () => reject("Erro file"); }); };
-        window.handlePhotoSelection = (e, previewId) => { const c = document.getElementById(previewId); c.innerHTML = ""; Array.from(e.target.files).forEach(file => { if(file.type.startsWith('image/')) { const reader = new FileReader(); reader.onload = (ev) => { c.innerHTML += `<img src="${ev.target.result}" class="h-14 w-14 object-cover rounded shadow border dark:border-slate-600">`; }; reader.readAsDataURL(file); } }); };
-        const dataURItoBlob = (dataURI) => { let byteString = atob(dataURI.split(',')[1]); let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]; let ab = new ArrayBuffer(byteString.length); let ia = new Uint8Array(ab); for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); } return new Blob([ab], {type: mimeString}); };
-
-        window.sendToTelegram = async (ceiId, dataObj, base64Photos, isEdit, typeLabel) => {
-            const cei = window.localData.ceis.find(c => String(c.id) === String(ceiId)); if(!cei || !cei.telegramGroupId || cei.telegramGroupId.trim() === "") throw new Error("Creche sem Telegram.");
-            const chatId = cei.telegramGroupId.trim(); const topicId = cei.telegramTopicId ? cei.telegramTopicId.trim() : null;
-            let totalValue = 0; let materialText = "";
-            if(dataObj.materials) { dataObj.materials.forEach(m => { let v = parseFloat(m.price || 0); let q = parseFloat(m.qtd || 1); totalValue += (v * q); materialText += `- ${q}x ${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand)}) - R$ ${(v * q).toFixed(2)}\n`; }); }
-            let uName = dataObj.userName || dataObj.userLogin || "Usuário"; let wDone = dataObj.workDone || dataObj.desc || dataObj.tpDesc || "Sem descrição";
-            let tgText = `${isEdit ? "🔄 <b>[CORREÇÃO]</b>\n" : `🛠 <b>NOVO: ${typeLabel}</b>\n`}🏫 <b>CEI:</b> ${window.escapeHtml(dataObj.cei || cei.name)}\n👨‍🔧 <b>Técnico:</b> ${window.escapeHtml(uName).toUpperCase()}\n📅 <b>Data:</b> ${window.formatDateBR(dataObj.date)}\n`;
-            if (dataObj.timeStart) tgText += `🕒 <b>Horário:</b> ${dataObj.timeStart} às ${dataObj.timeEnd}\n`; if (wDone) tgText += `\n🛠 <b>Serviço:</b>\n${window.escapeHtml(wDone)}\n`; if (dataObj.materials && dataObj.materials.length > 0) tgText += `\n📦 <b>Materiais:</b>\n${materialText}<b>TOTAL: R$ ${totalValue.toFixed(2)}</b>\n`; if (dataObj.obs) tgText += `\n📌 <b>Obs:</b> ${window.escapeHtml(dataObj.obs)}\n`;
-
-            const payload = { chat_id: chatId, text: tgText, parse_mode: 'HTML' }; if (topicId) payload.message_thread_id = topicId;
-            const rTxt = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            const rTxtJson = await rTxt.json(); if (!rTxtJson.ok) throw new Error("Erro Telegram.");
-
-            if (base64Photos && base64Photos.length > 0) { for (let b64 of base64Photos) { try { const fdPhoto = new FormData(); fdPhoto.append('chat_id', chatId); if (topicId) fdPhoto.append('message_thread_id', topicId); fdPhoto.append('photo', dataURItoBlob(b64), 'foto.jpg'); await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fdPhoto }); } catch(e) {} } }
-            
-            let matsHtml = ''; if(dataObj.materials && dataObj.materials.length > 0) { matsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Materiais / Custos</h4><table style="width:100%; text-align:left; border-collapse:collapse; font-size:14px; margin-bottom:20px; border:1px solid #e2e8f0; table-layout: fixed; word-wrap: break-word;"><thead style="background-color:#f1f5f9;"><tr><th style="padding:10px; border:1px solid #e2e8f0; color:#334155; width: 10%;">Qtd</th><th style="padding:10px; border:1px solid #e2e8f0; color:#334155; width: 50%;">Material</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155; width: 20%;">R$ Un.</th><th style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155; width: 20%;">Total</th></tr></thead><tbody>${dataObj.materials.map(m => `<tr><td style="padding:10px; border:1px solid #e2e8f0; color:#334155;">${m.qtd}</td><td style="padding:10px; border:1px solid #e2e8f0; color:#334155; word-break: break-word; white-space: pre-wrap;">${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand) || '-'})</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.price)}</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; color:#334155;">${window.formatMoney(m.qtd * m.price)}</td></tr>`).join('')}<tr style="background-color:#eff6ff;"><td colspan="3" style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#334155;">TOTAL:</td><td style="padding:10px; border:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#1d4ed8;">${window.formatMoney(totalValue)}</td></tr></tbody></table>`; }
-            let imgsHtml = ''; if(base64Photos && base64Photos.length > 0) { imgsHtml = `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Fotos Anexadas</h4><div style="display:flex; flex-wrap:wrap; gap:10px;">${base64Photos.map(i => `<img src="${i}" style="height:180px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">`).join('')}</div>`; }
-            const pdfContentString = `<div style="padding:20px; font-family:Arial, sans-serif; color:#334155; background:#ffffff; box-sizing:border-box; width:750px; max-width:750px; margin: 0 auto;"><div style="border-bottom:2px solid #1d4ed8; padding-bottom:10px; margin-bottom:20px;"><h1 style="color:#1d4ed8; margin:0; font-size:24px;">LYM Eletrônicos</h1><p style="margin:5px 0 0 0; color:#64748b; font-size:14px;">Relatório de ${typeLabel}</p></div>${isEdit ? '<div style="background-color:#fef9c3; color:#a16207; padding:10px; border-radius:5px; margin-bottom:20px; font-weight:bold; text-align:center;">[REGISTRO CORRIGIDO/EDITADO]</div>' : ''}<div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Data:</span> ${window.formatDateBR(dataObj.date)}</p><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Registro por:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${dataObj.difficulty ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${dataObj.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">CEI:</span> ${window.escapeHtml(dataObj.cei || cei.name)}</p>${dataObj.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${dataObj.timeStart} às ${dataObj.timeEnd}</p>` : ''}${dataObj.companyName ? `<p style="margin:0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa:</span> ${window.escapeHtml(dataObj.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background-color:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(wDone).replace(/\n/g, '<br>')}</p></div>${matsHtml}${dataObj.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background-color:#fefce8; padding:15px; border-radius:8px; border:1px solid #fef08a; margin-bottom:20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(dataObj.obs).replace(/\n/g, '<br>')}</p></div>` : ''}${imgsHtml}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div></div>`;
-
-            const opt = { margin: 10, filename: `Relatorio.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            let pdfBlob = await html2pdf().set(opt).from(pdfContentString).output('blob');
-            const fData = new FormData(); fData.append('chat_id', chatId); if (topicId) fData.append('message_thread_id', topicId); fData.append('document', pdfBlob, `Relatorio_${typeLabel}.pdf`);
-            const rDoc = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: fData });
-            const rDocJson = await rDoc.json(); if (!rDocJson.ok) throw new Error("Erro Telegram (PDF)");
-            return true;
-        };
 
         window.saveRecord = async (e, type) => {
             e.preventDefault(); 
@@ -1590,6 +1221,19 @@
                     window.renderActiveTab(); 
                 }
             } catch (err) { window.showToast("Falha: " + (err.message || "Erro"), "error"); } finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
+        };
+
+        // EXPORTAÇÃO E PRINT
+        window.printRecord = (type, record) => {
+            const printArea = document.getElementById('printArea'); const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento'); const uName = record.userName || record.userLogin || "Usuário"; const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+            let matsHtml = ''; let totalValue = 0;
+            if(record.materials && record.materials.length > 0) {
+                matsHtml = `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word;"><thead><tr style="background: #1e293b; color: white; text-align: left;"><th style="padding: 10px; width: 10%;">Qtd</th><th style="padding: 10px; width: 50%;">Material</th><th style="padding: 10px; text-align:right; width: 20%;">R$ Un.</th><th style="padding: 10px; text-align:right; width: 20%;">Total</th></tr></thead><tbody>`;
+                record.materials.forEach(m => { const price = parseFloat(m.price || m.v || 0); const q = parseFloat(m.qtd || m.q || 1); const total = price * q; totalValue += total; matsHtml += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px;">${q}</td><td style="padding: 10px; word-break: break-word; white-space: pre-wrap;">${window.escapeHtml(m.name)} (${window.escapeHtml(m.brand)||'-'})</td><td style="padding: 10px; text-align:right;">${window.formatMoney(price)}</td><td style="padding: 10px; text-align:right;">${window.formatMoney(total)}</td></tr>`; });
+                matsHtml += `<tr style="background: #f1f5f9; font-weight: bold;"><td colspan="3" style="padding: 10px; text-align: right;">TOTAL:</td><td style="padding: 10px; text-align:right; color: #1d4ed8;">${window.formatMoney(totalValue)}</td></tr></tbody></table>`;
+            }
+            printArea.innerHTML = `<div style="font-family: Arial, sans-serif; color: #334155; max-width: 800px; margin: 0 auto; word-wrap: break-word;"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #1d4ed8; padding-bottom: 20px; margin-bottom: 20px;"><div><h1 style="margin:0; font-size: 24px; color:#1d4ed8;">LYM Eletrônicos</h1><p style="margin:5px 0 0; color:#64748b; font-size:14px;">Documento de ${typeLabel}</p></div><div style="text-align: right; font-size:14px; color:#64748b;"><p style="margin:0;">Data: <strong>${window.formatDateBR(record.date)}</strong></p><p style="margin:0;">Ref: #LYM-${record.id.substring(record.id.length-6)}</p></div></div><div style="display:flex; justify-content:space-between; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 14px;"><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Técnico / Responsável:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>${record.difficulty ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ${record.difficulty}</p>` : ''}</div><div style="width:48%; word-wrap: break-word;"><p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Cliente / Local:</span> ${window.escapeHtml(record.cei || record.ceiId || '')}</p>${record.timeStart ? `<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ${record.timeStart} às ${record.timeEnd}</p>` : ''}${record.companyName ? `<p style="margin:0;">color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa Terceira:</span> ${window.escapeHtml(record.companyName)}</p>` : ''}</div></div><h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;"><p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(desc).replace(/\n/g, '<br>')}</p></div>${matsHtml}${record.obs ? `<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(record.obs).replace(/\n/g, '<br>')}</p></div>` : ''}<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div></div>`;
+            window.showElement('printArea'); window.print(); setTimeout(() => { window.hideElement('printArea'); }, 1000);
         };
 
         window.exportToExcel = (type) => {
