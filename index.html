@@ -19,6 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -46,7 +47,7 @@
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
     <datalist id="catalogList"></datalist>
 
-    <!-- TELA DE LOGIN -->
+    <!-- ==================== TELAS DE LOGIN E SENHA ==================== -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
@@ -77,34 +78,32 @@
         </div>
     </div>
 
-    <!-- TELA FORÇAR NOVA SENHA -->
     <div id="modalForcePassword" class="fixed inset-0 bg-slate-900 hidden items-center justify-center z-50">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
                 <div class="bg-amber-500 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><i class="fas fa-shield-alt text-xl"></i></div>
                 <h1 class="text-xl font-bold text-slate-800 dark:text-white">Atualize sua Senha</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Por segurança, crie uma nova senha antes de continuar.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Por segurança, crie uma nova senha.</p>
             </div>
             <form onsubmit="window.saveForcedPassword(event)" class="space-y-4">
                 <div class="relative"><input type="password" id="forcePass1" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('forcePass1', 'eyeForce1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce1" class="fas fa-eye text-md"></i></button></div>
                 <div class="relative"><input type="password" id="forcePass2" required class="w-full px-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white outline-none transition text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('forcePass2', 'eyeForce2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeForce2" class="fas fa-eye text-md"></i></button></div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg transition shadow-md text-md mt-2">Salvar e Entrar</button>
-                <button type="button" onclick="window.logout()" class="w-full text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white py-2 text-sm">Cancelar e Sair</button>
+                <button type="button" onclick="window.logout()" class="w-full text-slate-500 hover:text-slate-700 dark:text-slate-400 py-2 text-sm">Cancelar e Sair</button>
             </form>
         </div>
     </div>
 
-    <!-- TELA TROCAR SENHA VOLUNTÁRIA -->
     <div id="modalChangePassword" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full">Mudar Minha Senha</h3>
-                <button type="button" onclick="window.hideElement('modalChangePassword')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
+                <button type="button" onclick="window.hideElement('modalChangePassword')" class="text-slate-400 hover:text-white absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
             <form id="changePassForm" onsubmit="window.saveChangePassword(event)" class="p-4 sm:p-5 space-y-3">
-                <div class="relative"><input type="password" id="changePassCurrent" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Senha Atual"><button type="button" onclick="window.toggleEye('changePassCurrent', 'eyeChg1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg1" class="fas fa-eye text-md"></i></button></div>
-                <div class="relative"><input type="password" id="changePassNew1" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('changePassNew1', 'eyeChg2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg2" class="fas fa-eye text-md"></i></button></div>
-                <div class="relative"><input type="password" id="changePassNew2" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('changePassNew2', 'eyeChg3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 outline-none"><i id="eyeChg3" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassCurrent" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Senha Atual"><button type="button" onclick="window.toggleEye('changePassCurrent', 'eyeChg1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400"><i id="eyeChg1" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassNew1" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nova Senha"><button type="button" onclick="window.toggleEye('changePassNew1', 'eyeChg2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400"><i id="eyeChg2" class="fas fa-eye text-md"></i></button></div>
+                <div class="relative"><input type="password" id="changePassNew2" required class="w-full px-10 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Repita a Senha"><button type="button" onclick="window.toggleEye('changePassNew2', 'eyeChg3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400"><i id="eyeChg3" class="fas fa-eye text-md"></i></button></div>
                 <div class="flex justify-center gap-2 pt-3">
                     <button type="button" onclick="window.hideElement('modalChangePassword')" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm">Salvar</button>
@@ -113,12 +112,12 @@
         </div>
     </div>
 
-    <!-- MODAL CATÁLOGO (ALMOXARIFADO) -->
+    <!-- ==================== MODAIS DE CADASTRO ==================== -->
     <div id="modalCatalog" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCatalog">Novo Item</h3>
-                <button type="button" onclick="window.hideElement('modalCatalog')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
+                <button type="button" onclick="window.hideElement('modalCatalog')" class="text-slate-400 hover:text-white absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
             <form id="catalogForm" onsubmit="window.saveCatalog(event)" class="p-4 sm:p-5 space-y-3">
                 <input type="text" id="catName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome do Item *">
@@ -160,12 +159,11 @@
         </div>
     </div>
 
-    <!-- MODAL FERRAMENTAS -->
     <div id="modalTool" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleTool">Nova Ferramenta</h3>
-                <button type="button" onclick="window.hideElement('modalTool')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
+                <button type="button" onclick="window.hideElement('modalTool')" class="text-slate-400 hover:text-white absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
             <form id="toolForm" onsubmit="window.saveTool(event)" class="p-4 sm:p-5 space-y-3">
                 <input type="text" id="toolName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome da Ferramenta *">
@@ -211,7 +209,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleCei">Nova Creche</h3>
-                <button type="button" onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
+                <button type="button" onclick="window.hideElement('modalCei')" class="text-slate-400 hover:text-white absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
             <form id="ceiForm" onsubmit="window.saveCei(event)" class="p-4 sm:p-5 space-y-3">
                 <input type="text" id="ceiName" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Nome da Creche">
@@ -233,7 +231,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleUser">Novo Usuário</h3>
-                <button type="button" onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4"><i class="fas fa-times text-lg"></i></button>
+                <button type="button" onclick="window.hideElement('modalUser')" class="text-slate-400 hover:text-white absolute right-4"><i class="fas fa-times text-lg"></i></button>
             </div>
             <form id="userForm" onsubmit="window.saveUser(event)" class="p-4 sm:p-5 space-y-3">
                 <input type="text" id="newUsername" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none text-center" placeholder="Login">
@@ -261,7 +259,7 @@
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="viewRecordTitle">Detalhes</h3>
                 <div class="flex gap-2 absolute right-4">
                     <button type="button" id="btnPrintRecord" class="px-2 py-1 bg-slate-800 dark:bg-blue-600 text-white text-xs font-bold rounded hover:bg-slate-700 shadow-sm"><i class="fas fa-print mr-1"></i> Imprimir</button>
-                    <button type="button" onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white ml-2"><i class="fas fa-times text-lg"></i></button>
+                    <button type="button" onclick="window.hideElement('modalViewRecord')" class="text-slate-500 dark:text-slate-300 hover:text-white ml-2"><i class="fas fa-times text-lg"></i></button>
                 </div>
             </div>
             <div id="viewRecordContent" class="p-4 sm:p-5"></div>
@@ -283,18 +281,21 @@
 
     <!-- MAIN APP LAYOUT -->
     <div id="appLayout" class="hidden w-full h-full flex-col md:flex-row">
+        
         <nav class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
             <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-bolt text-blue-400 text-lg"></i>
-                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v10.2</span></h2>
+                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v10.3</span></h2>
                 </div>
                 <div class="flex items-center gap-2 md:hidden">
                     <button type="button" onclick="window.toggleDarkMode()" class="outline-none p-2"><i id="darkModeIconMobile" class="fas fa-moon text-slate-300 text-lg transition-colors"></i></button>
                     <button type="button" id="mobileMenuBtn" class="text-white p-2"><i class="fas fa-bars text-xl"></i></button>
                 </div>
             </div>
+            
             <div id="navLinks" class="hidden md:flex flex-col flex-grow overflow-y-auto py-2"></div>
+            
             <div class="p-3 border-t border-slate-700 hidden md:block" id="navFooter">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2 overflow-hidden">
@@ -319,12 +320,19 @@
                 <h1 class="text-md font-bold text-slate-800 dark:text-slate-100 text-center w-full" id="mobilePageTitle">Painel</h1>
                 <button type="button" onclick="window.logout()" class="text-red-500 font-medium text-sm absolute right-4"><i class="fas fa-sign-out-alt"></i></button>
             </header>
+            
             <div id="mainContent" class="flex-grow overflow-y-auto p-3 sm:p-6 pb-32 sm:pb-12"></div>
         </main>
     </div>
 
-    <!-- SCRIPT PRINCIPAL: DADOS E FIREBASE -->
+    <!-- ========================================================================= -->
+    <!-- LÓGICA JAVASCRIPT MASTER (100% BLINDADA)                                  -->
+    <!-- ========================================================================= -->
+    
     <script>
+        // ==========================================
+        // 1. CONFIGURAÇÃO E FIREBASE
+        // ==========================================
         window.processTelegramQueue = async () => {};
         
         const TELEGRAM_BOT_TOKEN = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
@@ -352,8 +360,10 @@
         window.editingItemId = null; 
         window.materialCount = 0; 
         window.lymCharts = {};
-        let confirmActionCallback = null;
 
+        // ==========================================
+        // 2. FUNÇÕES ÚTEIS E VISUAIS
+        // ==========================================
         window.safeSort = (arr, compareFn) => {
             if (!arr || !Array.isArray(arr)) return [];
             return [...arr].sort(compareFn);
@@ -364,9 +374,10 @@
             if (el) { 
                 el.classList.remove('hidden'); 
                 if (id.startsWith('modal') || id === 'loginScreen' || id === 'appLayout' || id === 'modalScanner') { 
-                    el.classList.add('flex'); 
-                } 
-                el.style.display = ''; 
+                    el.style.display = 'flex'; 
+                } else {
+                    el.style.display = 'block';
+                }
             } 
         };
         
@@ -374,9 +385,6 @@
             const el = document.getElementById(id); 
             if (el) { 
                 el.classList.add('hidden'); 
-                if (id.startsWith('modal') || id === 'loginScreen' || id === 'appLayout' || id === 'modalScanner') { 
-                    el.classList.remove('flex'); 
-                } 
                 el.style.display = 'none'; 
             } 
         };
@@ -440,9 +448,36 @@
             if(window.activeTab === 'dashboard') setTimeout(window.initCharts, 100); 
         };
         
-        window.confirmAction = (callback) => { confirmActionCallback = callback; window.showElement('modalConfirm'); };
-        window.executeConfirmAction = () => { if(confirmActionCallback) confirmActionCallback(); window.hideElement('modalConfirm'); confirmActionCallback = null; };
+        // ==========================================
+        // 3. SISTEMA DE CONFIRMAÇÃO E AUDITORIA
+        // ==========================================
+        let confirmActionCallback = null; 
+        window.confirmAction = (callback) => { 
+            confirmActionCallback = callback; 
+            window.showElement('modalConfirm'); 
+        };
+        
+        window.executeConfirmAction = () => { 
+            if(confirmActionCallback) confirmActionCallback(); 
+            window.hideElement('modalConfirm'); 
+            confirmActionCallback = null; 
+        };
 
+        window.clearAuditLogs = () => { 
+            window.confirmAction(async () => { 
+                const logs = [...window.localData.audit]; 
+                window.localData.audit = []; 
+                window.renderActiveTab(); 
+                for(let l of logs){ 
+                    await window.dbDelete('audit', l.id); 
+                } 
+                window.showToast("Logs de auditoria limpos!"); 
+            }); 
+        };
+
+        // ==========================================
+        // 4. COMUNICAÇÃO FIREBASE
+        // ==========================================
         window.initFirebaseSync = function() {
             if(!db) return; 
             const cols = ['users', 'ceis', 'reports', 'quotes', 'thirdParty', 'audit', 'catalog', 'stockMovements', 'tools', 'toolMovements'];
@@ -485,6 +520,9 @@
             try { await db.collection('audit').add({ user: window.currentSystemUser ? window.currentSystemUser.login : 'Sistema', action: actionDesc, date: new Date().toLocaleString('pt-BR'), timestamp: Date.now() }); } catch(e){} 
         };
 
+        // ==========================================
+        // 5. AUTENTICAÇÃO E LOGIN
+        // ==========================================
         window.toggleEye = function(inputId, iconId) { 
             const pwd = document.getElementById(inputId); 
             const icon = document.getElementById(iconId); 
@@ -610,6 +648,9 @@
             document.getElementById('loginForm').reset(); 
         };
 
+        // ==========================================
+        // 6. NAVEGAÇÃO E TABS
+        // ==========================================
         window.buildMenu = () => {
             const navLinks = document.getElementById('navLinks'); 
             navLinks.innerHTML = ""; 
@@ -700,7 +741,12 @@
                 if (html.includes('flex justify-between') || html.includes('flex justify-center')) { 
                     contentEl.innerHTML = html; 
                 } else { 
-                    contentEl.innerHTML = `<div class="w-full flex justify-center mb-6 hidden md:flex"><h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 text-center">${title}</h2></div>${html}`; 
+                    contentEl.innerHTML = `
+                        <div class="w-full flex justify-center mb-6 hidden md:flex">
+                            <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 text-center">${title}</h2>
+                        </div>
+                        ${html}
+                    `; 
                 }
             }
 
@@ -729,8 +775,10 @@
                             if(found) { 
                                 const p = e.target.closest('[id^="mat_"]'); 
                                 if(p) { 
-                                    p.querySelector('.mat-brand').value = found.brand || ""; 
-                                    p.querySelector('.mat-price').value = found.price || ""; 
+                                    const bEl = p.querySelector('.mat-brand');
+                                    if(bEl) bEl.value = found.brand || ""; 
+                                    const pEl = p.querySelector('.mat-price');
+                                    if(pEl) pEl.value = found.price || ""; 
                                     window.saveDraft(window.activeTab.split('-')[1]); 
                                 } 
                             }
@@ -749,34 +797,265 @@
             }); 
         };
 
-        window.openUserModal = () => { window.editingItemId = null; document.getElementById('userForm').reset(); document.getElementById('newUsername').readOnly = false; document.getElementById('modalTitleUser').textContent = "Novo Usuário"; window.showElement('modalUser'); };
-        window.editUser = (id) => { const u = window.localData.users.find(x => String(x.id) === String(id)); if(u) { window.editingItemId = id; document.getElementById('newUsername').value = u.login || u.username; document.getElementById('newUsername').readOnly = true; document.getElementById('newPassword').value = u.pass || u.password; document.getElementById('newRole').value = u.role || 'funcionario'; document.getElementById('modalTitleUser').textContent = "Editar Usuário"; window.showElement('modalUser'); } };
-        window.saveUser = async (e) => { e.preventDefault(); try { const login = document.getElementById('newUsername').value.trim(); const pass = document.getElementById('newPassword').value.trim(); const role = document.getElementById('newRole').value; if(!login) return; if(!window.editingItemId && window.localData.users.find(u => (u.login === login || u.username === login))) { return window.showToast("Este login já existe!", "error"); } const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { id: String(id), login: login, pass: pass, password: pass, role: role }); window.logAudit(window.editingItemId ? `Usuário Editado: ${login}` : `Usuário Criado: ${login}`); window.showToast("Usuário salvo!"); window.hideElement('modalUser'); window.renderActiveTab(); } catch(err) { window.showToast("Erro ao salvar", "error"); } };
-        window.deleteUser = (id) => { if(String(id) === String(window.currentSystemUser.id)) return window.showToast("Não é possível excluir você mesmo!", "error"); window.confirmAction(async () => { await window.dbDelete('users', id); window.logAudit(`Usuário Excluído ID: ${id}`); window.showToast("Usuário excluído!"); window.renderActiveTab(); }); };
+        // ==========================================
+        // 7. FUNÇÕES ADICIONAIS: MATERIAIS, FERRAMENTAS E SCANNER
+        // ==========================================
+        window.updateCatalogDatalist = () => {
+            const dl = document.getElementById('catalogList');
+            if(dl) dl.innerHTML = window.safeSort(window.localData.catalog, (a,b) => String(a?.name||'').localeCompare(String(b?.name||''))).map(c => `<option value="${window.escapeHtml(c.name)}"></option>`).join('');
+        };
 
-        window.openCeiModal = () => { window.editingItemId = null; document.getElementById('ceiForm').reset(); document.getElementById('modalTitleCei').textContent = "Nova Creche"; window.showElement('modalCei'); };
-        window.editCei = (id) => { const c = window.localData.ceis.find(x => String(x.id) === String(id)); if(c) { window.editingItemId = id; document.getElementById('ceiName').value = c.name || ""; document.getElementById('ceiTelegramId').value = c.telegramGroupId || ""; document.getElementById('ceiTelegramTopicId').value = c.telegramTopicId || ""; document.getElementById('modalTitleCei').textContent = "Editar Creche"; window.showElement('modalCei'); } };
-        window.saveCei = async (e) => { e.preventDefault(); try { const n = document.getElementById('ceiName').value.trim(); const tgId = document.getElementById('ceiTelegramId').value.trim(); const tgTopic = document.getElementById('ceiTelegramTopicId').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('ceis', id, { id: String(id), name: n, telegramGroupId: tgId, telegramTopicId: tgTopic }); window.logAudit(window.editingItemId ? `Creche Editada: ${n}` : `Creche Criada: ${n}`); window.showToast("Creche salva!"); window.hideElement('modalCei'); window.renderActiveTab(); } catch(err) { window.showToast("Erro ao salvar", "error"); } };
-        window.deleteCei = (id) => { window.confirmAction(async () => { await window.dbDelete('ceis', id); window.logAudit(`Creche Excluída ID: ${id}`); window.showToast("Creche excluída!"); window.renderActiveTab(); }); };
+        window.addMaterialRow = (containerId, triggerSave = true) => {
+            try {
+                const container = document.getElementById(containerId); 
+                if(!container) return;
+                
+                const italicText = container.querySelector('.italic'); 
+                if(italicText) italicText.remove();
+                
+                window.materialCount = (window.materialCount || 0) + 1; 
+                const id = `mat_${window.materialCount}`; 
+                
+                const div = document.createElement('div'); 
+                div.id = id; 
+                div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in mt-2";
+                
+                div.innerHTML = `
+                    <div class="flex flex-grow gap-1">
+                        <button type="button" onclick="window.scanForMaterialRow('${id}')" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700" title="Ler Código"><i class="fas fa-barcode"></i></button>
+                        <input type="text" list="catalogList" class="mat-name w-full p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none" placeholder="Material (Digite ou Leia)" required>
+                    </div>
+                    <input type="text" class="mat-brand w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Marca">
+                    <input type="number" class="mat-qtd w-full sm:w-16 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required>
+                    <input type="number" class="mat-price w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="R$ Un." step="0.01">
+                    <button type="button" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200">X</button>
+                `;
+                container.appendChild(div); 
+                
+                if(triggerSave && window.activeTab) { 
+                    const type = window.activeTab.split('-')[1]; 
+                    if (type) window.saveDraft(type); 
+                }
+            } catch(err) { console.error("Erro addMaterialRow", err); }
+        };
 
-        window.openCatalogModal = () => { window.editingItemId = null; document.getElementById('catalogForm').reset(); document.getElementById('modalTitleCatalog').textContent = "Novo Item"; window.showElement('modalCatalog'); };
-        window.editCatalog = (id) => { const c = window.localData.catalog.find(x => String(x.id) === String(id)); if(c) { window.editingItemId = id; document.getElementById('catName').value = c.name || ""; document.getElementById('catBrand').value = c.brand || ""; document.getElementById('catCategory').value = c.category || "Segurança Eletrônica"; document.getElementById('catPrice').value = c.price || ""; document.getElementById('catStock').value = c.stock || "0"; document.getElementById('catBarcode').value = c.barcode || ""; document.getElementById('modalTitleCatalog').textContent = "Editar Item"; window.showElement('modalCatalog'); } };
-        window.saveCatalog = async (e) => { e.preventDefault(); try { const n = document.getElementById('catName').value.trim(); const b = document.getElementById('catBrand').value.trim(); const cat = document.getElementById('catCategory').value; const p = document.getElementById('catPrice').value; const s = document.getElementById('catStock').value; const bc = document.getElementById('catBarcode').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); await window.dbSave('catalog', id, { id: String(id), name: n, brand: b, category: cat, price: p, stock: parseFloat(s || 0), barcode: bc }); window.logAudit(window.editingItemId ? `Estoque Editado: ${n}` : `Estoque Criado: ${n}`); window.showToast("Material salvo!"); window.hideElement('modalCatalog'); window.renderActiveTab(); } catch(err) { window.showToast("Erro ao salvar", "error"); } };
-        window.deleteCatalog = (id) => { window.confirmAction(async () => { await window.dbDelete('catalog', id); window.logAudit(`Material Excluído ID: ${id}`); window.showToast("Excluído!"); window.renderActiveTab(); }); };
+        window.getStockOptionsHtml = () => { 
+            return '<option value="">Selecione o Item...</option>' + window.safeSort(window.localData.catalog, (a,b) => String(a?.name||'').localeCompare(String(b?.name||''))).map(c => `<option value="${c.id}">${window.escapeHtml(c.name)} (${window.escapeHtml(c.brand || '-')}) - Estoque: ${c.stock || 0}</option>`).join(''); 
+        };
+        
+        window.addStockMovementRow = (containerId) => { 
+            try {
+                const container = document.getElementById(containerId); 
+                if(!container) return;
+                
+                const italicText = container.querySelector('.italic'); 
+                if(italicText) italicText.remove();
+                
+                window.materialCount = (window.materialCount || 0) + 1; 
+                const id = `stk_${window.materialCount}`; 
+                
+                const div = document.createElement('div'); 
+                div.id = id; 
+                div.className = "flex flex-col sm:flex-row gap-2 bg-white dark:bg-slate-700 p-2 rounded border dark:border-slate-600 animate-fade-in mb-2"; 
+                
+                div.innerHTML = `
+                    <div class="flex flex-grow gap-1">
+                        <button type="button" onclick="window.scanForStock('${id}')" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700" title="Ler Código"><i class="fas fa-barcode"></i></button>
+                        <select class="stk-item flex-grow p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none w-full" required>
+                            ${window.getStockOptionsHtml()}
+                        </select>
+                    </div>
+                    <input type="number" class="stk-qtd w-full sm:w-20 p-2 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center" placeholder="Qtd" value="1" min="0.1" step="0.1" required>
+                    <button type="button" onclick="document.getElementById('${id}').remove();" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-2 rounded font-bold hover:bg-red-200">X</button>
+                `; 
+                container.appendChild(div); 
+            } catch(e) { console.error("Erro addStockMovementRow", e); }
+        };
 
-        window.openToolModal = () => { window.editingItemId = null; document.getElementById('toolForm').reset(); document.getElementById('modalTitleTool').textContent = "Nova Ferramenta"; window.showElement('modalTool'); };
-        window.editTool = (id) => { const c = window.localData.tools.find(x => String(x.id) === String(id)); if(c) { window.editingItemId = id; document.getElementById('toolName').value = c.name || ""; document.getElementById('toolBrand').value = c.brand || ""; document.getElementById('toolBarcode').value = c.barcode || ""; document.getElementById('toolTotal').value = c.totalStock || "1"; document.getElementById('modalTitleTool').textContent = "Editar Ferramenta"; window.showElement('modalTool'); } };
-        window.saveTool = async (e) => { e.preventDefault(); try { const n = document.getElementById('toolName').value.trim(); const b = document.getElementById('toolBrand').value.trim(); const tot = parseInt(document.getElementById('toolTotal').value) || 1; const bc = document.getElementById('toolBarcode').value.trim(); if(!n) return; const id = window.editingItemId || Date.now().toString(); let existing = window.localData.tools.find(x => String(x.id) === String(id)); let available = existing ? existing.availableStock + (tot - existing.totalStock) : tot; if(available < 0) available = 0; await window.dbSave('tools', id, { id: String(id), name: n, brand: b, totalStock: tot, availableStock: available, barcode: bc }); window.logAudit(window.editingItemId ? `Ferramenta Editada: ${n}` : `Ferramenta Criada: ${n}`); window.showToast("Ferramenta salva!"); window.hideElement('modalTool'); window.renderActiveTab(); } catch(err) { window.showToast("Erro ao salvar", "error"); } };
-        window.deleteTool = (id) => { window.confirmAction(async () => { await window.dbDelete('tools', id); window.logAudit(`Ferramenta Excluída ID: ${id}`); window.showToast("Excluída!"); window.renderActiveTab(); }); };
+        window.saveStockMovement = async (e) => { 
+            e.preventDefault(); 
+            const type = document.getElementById('stkType').value; 
+            const date = document.getElementById('stkDate').value; 
+            const obs = document.getElementById('stkObs').value.trim(); 
+            const container = document.getElementById('stockMovementsContainer'); 
+            const items = []; 
+            
+            container.querySelectorAll('[id^="stk_"]').forEach(row => { 
+                const sel = row.querySelector('.stk-item'); 
+                const qty = parseFloat(row.querySelector('.stk-qtd').value || 0); 
+                if(sel && sel.value && qty > 0) { 
+                    const catalogItem = window.localData.catalog.find(c => String(c.id) === String(sel.value)); 
+                    if(catalogItem) { 
+                        items.push({ id: catalogItem.id, name: catalogItem.name, brand: catalogItem.brand, category: catalogItem.category, qtd: qty }); 
+                    } 
+                } 
+            }); 
+            
+            if(items.length === 0) return window.showToast("Adicione pelo menos um item.", "error"); 
+            
+            const btn = document.getElementById('btnSubmitStock'); 
+            const origText = btn.innerHTML; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; 
+            btn.disabled = true; 
+            
+            try { 
+                const recordId = Date.now().toString(); 
+                const recordData = { id: recordId, userId: window.currentSystemUser.id, userName: window.currentSystemUser.login, type: type, date: date, obs: obs, items: items, timestamp: new Date().toISOString() }; 
+                
+                for(let it of items) { 
+                    const catItem = window.localData.catalog.find(c => String(c.id) === String(it.id)); 
+                    if(catItem) { 
+                        let currentStock = parseFloat(catItem.stock || 0); 
+                        let newStock = type === 'Retirada' ? currentStock - it.qtd : currentStock + it.qtd; 
+                        await window.dbSave('catalog', catItem.id, { stock: newStock }); 
+                    } 
+                } 
+                
+                await window.dbSave('stockMovements', recordId, recordData); 
+                window.logAudit(`Movimento (${type}): ${items.length} itens`); 
+                window.showToast("Sucesso!"); 
+                document.getElementById('stockForm').reset(); 
+                document.getElementById('stockMovementsContainer').innerHTML = '<p class="text-xs text-slate-400 italic text-center p-2">Nenhum material adicionado.</p>'; 
+                window.renderActiveTab(); 
+            } catch(err) { window.showToast("Erro ao salvar.", "error"); } finally { btn.innerHTML = origText; btn.disabled = false; } 
+        };
 
-        window.renderAdminDashboard = () => {
-            return `
+        window.saveToolMovement = async (e) => {
+            e.preventDefault(); 
+            const type = document.getElementById('tType').value; 
+            const date = document.getElementById('tDate').value; 
+            const obs = document.getElementById('tObs').value.trim(); 
+            const toolId = document.getElementById('tToolSelect').value; 
+            const qtd = parseInt(document.getElementById('tQtd').value) || 1;
+            
+            if(!toolId) return window.showToast("Selecione uma ferramenta.", "error"); 
+            
+            const btn = document.getElementById('btnSubmitTool'); 
+            const origText = btn.innerHTML; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Registrando...'; 
+            btn.disabled = true; 
+            
+            try { 
+                const toolItem = window.localData.tools.find(c => String(c.id) === String(toolId)); 
+                if(!toolItem) throw new Error("Ferramenta não encontrada");
+                
+                let currentStock = parseInt(toolItem.availableStock || 0);
+                
+                if(type === 'Retirada' && currentStock < qtd) { 
+                    window.showToast("Quantidade indisponível na base!", "error"); 
+                    btn.innerHTML = origText; btn.disabled = false; 
+                    return; 
+                }
+                
+                let newStock = type === 'Retirada' ? currentStock - qtd : currentStock + qtd; 
+                if (type === 'Devolução' && newStock > toolItem.totalStock) newStock = toolItem.totalStock; 
+                
+                await window.dbSave('tools', toolItem.id, { availableStock: newStock }); 
+                
+                const recordId = Date.now().toString(); 
+                const recordData = { 
+                    id: recordId, 
+                    userId: window.currentSystemUser.id, 
+                    userName: window.currentSystemUser.login, 
+                    type: type, 
+                    date: date, 
+                    obs: obs, 
+                    toolId: toolItem.id, 
+                    toolName: toolItem.name, 
+                    qtd: qtd, 
+                    timestamp: new Date().toISOString() 
+                }; 
+                
+                await window.dbSave('toolMovements', recordId, recordData); 
+                window.logAudit(`Cautela (${type}): ${qtd}x ${toolItem.name}`); 
+                window.showToast("Cautela registrada com sucesso!"); 
+                document.getElementById('toolMovementForm').reset(); 
+                window.renderActiveTab(); 
+            } catch(err) { window.showToast("Erro ao salvar.", "error"); } finally { btn.innerHTML = origText; btn.disabled = false; } 
+        };
+
+        window.html5QrcodeScanner = null;
+        window.startScanner = (onScanSuccess) => { 
+            window.showElement('modalScanner'); 
+            window.html5QrcodeScanner = new Html5Qrcode("reader"); 
+            window.html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } }, (decodedText) => { 
+                window.stopScanner(); 
+                onScanSuccess(decodedText); 
+            }, (errorMessage) => { } ).catch(err => { 
+                window.showToast("Erro ao abrir câmera.", "error"); 
+                window.stopScanner(); 
+            }); 
+        };
+        
+        window.stopScanner = () => { 
+            if (window.html5QrcodeScanner) { 
+                window.html5QrcodeScanner.stop().then(() => { 
+                    window.html5QrcodeScanner.clear(); 
+                    window.html5QrcodeScanner = null; 
+                }).catch(err => console.log(err)); 
+            } 
+            window.hideElement('modalScanner'); 
+        };
+        
+        window.scanForTool = () => { 
+            window.startScanner((code) => { 
+                const found = window.localData.tools.find(c => c.barcode === code); 
+                if (found) { 
+                    const ts = document.getElementById('tToolSelect');
+                    if(ts) ts.value = found.id; 
+                    window.showToast("Ferramenta Localizada!"); 
+                } else { window.showToast("Não encontrada.", "error"); } 
+            }); 
+        };
+        
+        window.scanForInput = (inputId) => { 
+            window.startScanner((code) => { 
+                const el = document.getElementById(inputId);
+                if(el) el.value = code; 
+                window.showToast("Código vinculado: " + code); 
+            }); 
+        };
+        
+        window.scanForStock = (rowId) => { 
+            window.startScanner((code) => { 
+                const found = window.localData.catalog.find(c => c.barcode === code); 
+                if (found) { 
+                    const row = document.getElementById(rowId); 
+                    if(row) { 
+                        const si = row.querySelector('.stk-item');
+                        if(si) si.value = found.id; 
+                        window.showToast("Localizado!"); 
+                    } 
+                } else { window.showToast("Não está no catálogo.", "error"); } 
+            }); 
+        };
+        
+        window.scanForMaterialRow = (rowId) => { 
+            window.startScanner((code) => { 
+                const found = window.localData.catalog.find(c => c.barcode === code); 
+                if (found) { 
+                    const row = document.getElementById(rowId); 
+                    if(row) { 
+                        const nEl = row.querySelector('.mat-name'); if(nEl) nEl.value = found.name; 
+                        const bEl = row.querySelector('.mat-brand'); if(bEl) bEl.value = found.brand || ""; 
+                        const pEl = row.querySelector('.mat-price'); if(pEl) pEl.value = found.price || ""; 
+                        if(window.activeTab) window.saveDraft(window.activeTab.split('-')[1]); 
+                        window.showToast("Localizado!"); 
+                    } 
+                } else { window.showToast("Não está no catálogo.", "error"); } 
+            }); 
+        };
+
+        // ==========================================
+        // 8. RENDERIZADORES DE TELAS (DASHBOARD E LISTAS)
+        // ==========================================
+        window.renderAdminDashboard = () => `
             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
                 <h3 class="font-bold text-slate-700 dark:text-white text-lg"><i class="fas fa-chart-pie mr-2 text-blue-500"></i> Visão Geral</h3>
                 <div class="flex gap-2 mt-2 sm:mt-0">
                     <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="window.processRestoreFile(event)">
-                    <button onclick="document.getElementById('restoreFile').click()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-upload mr-1"></i> Restaurar</button>
-                    <button onclick="window.downloadLocalBackup(false)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-download mr-1"></i> Backup</button>
+                    <button type="button" onclick="document.getElementById('restoreFile').click()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-upload mr-1"></i> Restaurar</button>
+                    <button type="button" onclick="window.downloadLocalBackup(false)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fas fa-download mr-1"></i> Backup</button>
                 </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in mb-6">
@@ -798,10 +1077,16 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3><div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div></div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2"><h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume</h3><div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div></div>
-            </div>`;
-        };
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-1">
+                    <h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Dificuldade</h3>
+                    <div style="position: relative; height: 200px;"><canvas id="chartDifficulty"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2">
+                    <h3 class="text-md font-bold mb-3 text-slate-800 dark:text-white text-center">Volume</h3>
+                    <div style="position: relative; height: 200px;"><canvas id="chartMonths"></canvas></div>
+                </div>
+            </div>
+        `;
 
         window.initCharts = () => { 
             try { 
@@ -828,7 +1113,7 @@
         };
 
         window.renderAdminCeis = () => { 
-            let sortedCeis = window.safeSort(window.localData.ceis, (a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+            let sortedCeis = window.safeSort(window.localData.ceis, (a,b)=>String(a?.name||'').localeCompare(String(b?.name||'')));
             let trs = sortedCeis.map(c => `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
@@ -839,11 +1124,30 @@
                     </td>
                 </tr>
             `).join(""); 
-            return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3><button type="button" onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Nome</th><th class="px-3 py-2 font-semibold">Telegram</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody></table></div></div>`; 
+            return `
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
+                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                        <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Creches Cadastradas</h3>
+                        <button type="button" onclick="window.openCeiModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Nova</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
+                                    <th class="px-3 py-2 font-semibold">Nome</th>
+                                    <th class="px-3 py-2 font-semibold">Telegram</th>
+                                    <th class="px-3 py-2 font-semibold text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `; 
         };
 
         window.renderAdminUsers = () => { 
-            let sortedUsers = window.safeSort(window.localData.users, (a,b)=>String(a.login||'').localeCompare(String(b.login||'')));
+            let sortedUsers = window.safeSort(window.localData.users, (a,b)=>String(a?.login||'').localeCompare(String(b?.login||'')));
             let trs = sortedUsers.map(u => `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td>
@@ -855,22 +1159,97 @@
                     </td>
                 </tr>
             `).join(""); 
-            return `<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários do Sistema</h3><button type="button" onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm"><th class="px-3 py-2 font-semibold">Login</th><th class="px-3 py-2 font-semibold">Nível</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum usuário.</td></tr>`}</tbody></table></div></div>`; 
+            return `
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
+                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                        <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-center w-full">Usuários do Sistema</h3>
+                        <button type="button" onclick="window.openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-user-plus mr-1"></i> Novo</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
+                                    <th class="px-3 py-2 font-semibold">Login</th>
+                                    <th class="px-3 py-2 font-semibold">Nível</th>
+                                    <th class="px-3 py-2 font-semibold text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum usuário.</td></tr>`}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `; 
         };
 
         window.renderAdminCatalog = () => {
-            let sortedCat = window.safeSort(window.localData.catalog, (a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
-            let trs = sortedCat.map(c => `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td><td class="px-3 py-2 text-sm">${window.escapeHtml(c.category || '-')}</td><td class="px-3 py-2 text-sm text-right">${window.formatMoney(c.price)}</td><td class="px-3 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 text-center">${c.stock}</td><td class="px-3 py-2 text-right space-x-1"><button type="button" onclick="window.editCatalog('${c.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button><button type="button" onclick="window.deleteCatalog('${c.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`).join("");
-            let historyTrs = window.safeSort(window.localData.stockMovements, (a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 100).map(m => { 
+            let sortedCat = window.safeSort(window.localData.catalog, (a,b)=>String(a?.name||'').localeCompare(String(b?.name||'')));
+            let trs = sortedCat.map(c => `
+                <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
+                    <td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td>
+                    <td class="px-3 py-2 text-sm">${window.escapeHtml(c.category || '-')}</td>
+                    <td class="px-3 py-2 text-sm text-right">${window.formatMoney(c.price)}</td>
+                    <td class="px-3 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 text-center">${c.stock}</td>
+                    <td class="px-3 py-2 text-right space-x-1">
+                        <button type="button" onclick="window.editCatalog('${c.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded"><i class="fas fa-edit"></i></button>
+                        <button type="button" onclick="window.deleteCatalog('${c.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+            
+            let sortedMoves = window.safeSort(window.localData.stockMovements, (a,b) => window.getSafeTime(b) - window.getSafeTime(a)).slice(0, 100);
+            let historyTrs = sortedMoves.map(m => { 
                 let badgeClass = m.type === 'Retirada' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'; 
                 let itemsDesc = m.items.map(it => `${it.qtd}x ${it.name}`).join(", "); 
-                return `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 max-w-[200px] truncate" title="${window.escapeHtml(itemsDesc)}">${window.escapeHtml(itemsDesc)}</td></tr>`; 
+                return `
+                    <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td>
+                        <td class="px-3 py-2 text-sm font-medium capitalize">${window.escapeHtml(m.userName)}</td>
+                        <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td>
+                        <td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 max-w-[200px] truncate" title="${window.escapeHtml(itemsDesc)}">${window.escapeHtml(itemsDesc)}</td>
+                    </tr>
+                `; 
             }).join("");
-            return `<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in"><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-box-open mr-2 text-blue-600"></i> Estoque Atual</h3><button type="button" onclick="window.openCatalogModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Novo</button></div><div class="overflow-x-auto max-h-[600px]"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Material</th><th class="px-3 py-2 font-semibold">Marca</th><th class="px-3 py-2 font-semibold">Categoria</th><th class="px-3 py-2 font-semibold text-right">Preço Un.</th><th class="px-3 py-2 font-semibold text-center">Qtd Base</th><th class="px-3 py-2 font-semibold text-right">Ações</th></tr></thead><tbody>${trs || `<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum material cadastrado.</td></tr>`}</tbody></table></div></div><div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"><div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-blue-600"></i> Movimentações Recentes</h3></div><div class="overflow-x-auto flex-grow"><table class="w-full text-left border-collapse whitespace-nowrap"><thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm"><th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Usuário</th><th class="px-3 py-2 font-semibold">Tipo</th><th class="px-3 py-2 font-semibold">Itens</th></tr></thead><tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação de estoque.</td></tr>`}</tbody></table></div></div></div>`;
+            
+            return `
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in">
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden xl:col-span-2">
+                        <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-box-open mr-2 text-blue-600"></i> Estoque Atual</h3>
+                            <button type="button" onclick="window.openCatalogModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium shadow-sm absolute right-3"><i class="fas fa-plus mr-1"></i> Novo</button>
+                        </div>
+                        <div class="overflow-x-auto max-h-[600px]">
+                            <table class="w-full text-left border-collapse whitespace-nowrap">
+                                <thead>
+                                    <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm">
+                                        <th class="px-3 py-2 font-semibold">Material</th><th class="px-3 py-2 font-semibold">Marca</th><th class="px-3 py-2 font-semibold">Categoria</th><th class="px-3 py-2 font-semibold text-right">Preço Un.</th><th class="px-3 py-2 font-semibold text-center">Qtd Base</th><th class="px-3 py-2 font-semibold text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${trs || `<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum material cadastrado.</td></tr>`}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                        <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-exchange-alt mr-2 text-blue-600"></i> Movimentações Recentes</h3>
+                        </div>
+                        <div class="overflow-x-auto flex-grow">
+                            <table class="w-full text-left border-collapse whitespace-nowrap">
+                                <thead>
+                                    <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm">
+                                        <th class="px-3 py-2 font-semibold">Data</th><th class="px-3 py-2 font-semibold">Usuário</th><th class="px-3 py-2 font-semibold">Tipo</th><th class="px-3 py-2 font-semibold">Itens</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${historyTrs || `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma movimentação de estoque.</td></tr>`}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
         };
 
         window.renderAdminTools = () => {
-            let sortedTools = window.safeSort(window.localData.tools, (a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+            let sortedTools = window.safeSort(window.localData.tools, (a,b)=>String(a?.name||'').localeCompare(String(b?.name||'')));
             let trs = sortedTools.map(c => { 
                 let statusClass = c.availableStock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; 
                 return `
@@ -1263,7 +1642,7 @@
         `;
 
         // ==========================================
-        // 8. FILTROS E EXIBIÇÃO EM LISTAS
+        // 9. LÓGICA DE FILTROS E LISTAS (ADMIN E FUNC)
         // ==========================================
         window.setupAdminFilters = () => { window.applyFilters(window.activeTab.split('-')[1]); };
         
@@ -1328,7 +1707,7 @@
         };
 
         // ==========================================
-        // 9. LÓGICA DE DETALHES, EDIÇÃO E EXCLUSÃO (BLINDADA)
+        // 10. LÓGICA DE DETALHES, EDIÇÃO E EXCLUSÃO (100% BLINDADA)
         // ==========================================
         window.viewRecord = (type, id) => {
             const record = window.localData[type].find(r => String(r.id) === String(id)); 
@@ -1397,7 +1776,7 @@
             try { history.pushState({ tab: window.activeTab }, "", "#" + window.activeTab); } catch(e) {} 
             window.renderActiveTab();
             
-            // Garantir que a tela seja preenchida somente APÓS o carregamento do DOM (com margem de segurança)
+            // Garantir que a tela seja preenchida SOMENTE APÓS o carregamento do DOM e o desenho dos materiais
             setTimeout(() => {
                 try {
                     const sffx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
@@ -1459,7 +1838,7 @@
                     if(titleEl) titleEl.textContent = "Editando Registro";
                     window.showElement('cancelEditBtn');
                 } catch(err) { console.error("Erro Edição:", err); window.showToast("Falha ao carregar dados.", "error"); }
-            }, 600); // Aguarda o DOM carregar completamente
+            }, 600); // 600ms garante que o Javascript construiu o DOM antes de injetar os dados (resolve o branco)
         };
 
         window.deleteFuncRecord = (type, id) => { 
@@ -1480,7 +1859,7 @@
         };
 
         // ==========================================
-        // 10. SALVAMENTO DE RASCUNHOS E FORMS DE SERVIÇO
+        // 11. SALVAMENTO E COMUNICAÇÃO DE SERVIÇOS
         // ==========================================
         window.saveDraft = (type) => {
             if(window.editingItemId) return; 
@@ -1670,7 +2049,7 @@
         };
 
         // ==========================================
-        // 11. EXPORTAÇÃO, PRINT, BACKUP
+        // 12. EXPORTAÇÃO, IMPRESSÃO E BACKUP
         // ==========================================
         window.printRecord = (type, record) => {
             const printArea = document.getElementById('printArea'); 
