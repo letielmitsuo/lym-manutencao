@@ -2339,77 +2339,112 @@
         window.viewRecord = function(type, id) {
             const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
             if(!item) return window.showToast("Registro não encontrado.", "error");
-            
+
             const titleEl = document.getElementById('viewRecordTitle');
-            if(titleEl) {
-                titleEl.textContent = type === 'reports' ? 'Detalhes do Serviço' : (type === 'quotes' ? 'Detalhes do Orçamento' : 'Acompanhamento de Terceiro');
-            }
-            
-            let html = '<div class="space-y-4 text-sm text-slate-800 dark:text-slate-200">';
-            
-            html += '<div class="grid grid-cols-2 gap-4 border-b dark:border-slate-700 pb-3">';
-            html += '<div><p class="text-xs text-slate-500 dark:text-slate-400">Data</p><p class="font-bold text-base">' + window.formatDateBR(item.date) + '</p></div>';
-            
-            if(item.ceiId) {
-                const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
-                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400">CEI / Creche</p><p class="font-bold text-base">' + (cei ? window.escapeHtml(cei.name) : window.escapeHtml(item.ceiId)) + '</p></div>';
+            let docTitle = type === 'reports' ? 'Ordem de Serviço' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
+            if(titleEl) titleEl.textContent = docTitle;
+
+            const cei = item.ceiId ? window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); }) : null;
+            const ceiName = cei ? window.escapeHtml(cei.name) : window.escapeHtml(item.ceiId || 'N/A');
+
+            let html = '<div class="bg-white text-slate-800 p-2 sm:p-4 rounded-lg w-full" id="printContentWrapper">';
+
+            html += '<div class="flex justify-between items-start border-b-2 border-slate-800 pb-4 mb-5">';
+            html += '<div><h2 class="text-xl sm:text-2xl font-black uppercase tracking-wider text-slate-900">' + docTitle + '</h2>';
+            html += '<p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Ref: #' + String(item.id).substring(item.id.length - 6) + '</p></div>';
+            if(type === 'quotes') {
+                let badge = item.status === 'Aprovado' ? 'bg-green-100 text-green-800 border-green-300' : (item.status === 'Rejeitado' ? 'bg-red-100 text-red-800 border-red-300' : 'bg-amber-100 text-amber-800 border-amber-300');
+                html += '<div class="px-3 py-1.5 rounded border font-bold text-xs sm:text-sm uppercase shadow-sm ' + badge + '">' + (item.status || 'Pendente') + '</div>';
             }
             html += '</div>';
 
-            if(item.userName) {
-                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400">Técnico / Responsável</p><p class="font-medium">' + window.escapeHtml(item.userName) + '</p></div>';
-            }
-            
+            html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">';
+            html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Cliente / Local</span><span class="font-bold text-base">' + ceiName + '</span></div>';
+            html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Data do Documento</span><span class="font-semibold">' + window.formatDateBR(item.date) + '</span></div>';
+            if(item.userName) html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Técnico Responsável</span><span class="font-semibold">' + window.escapeHtml(item.userName) + '</span></div>';
+            if(type === 'thirdParty' && item.companyName) html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Empresa Terceira</span><span class="font-semibold">' + window.escapeHtml(item.companyName) + '</span></div>';
+            html += '</div>';
+
             if(item.workDone) {
-                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Serviço / Escopo</p><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded border dark:border-slate-700">' + window.escapeHtml(item.workDone).replace(/\n/g, '<br>') + '</div></div>';
+                html += '<div class="mb-6"><span class="block text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wide">Descrição do Serviço / Escopo</span>';
+                html += '<div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm whitespace-pre-wrap leading-relaxed shadow-sm">' + window.escapeHtml(item.workDone) + '</div></div>';
             }
-            
+
+            let totalGeral = 0;
             if(item.materials && Array.isArray(item.materials) && item.materials.length > 0) {
-                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Materiais Utilizados/Orçados</p><ul class="list-disc pl-5 space-y-1 bg-slate-50 dark:bg-slate-900/50 p-3 rounded border dark:border-slate-700">';
+                html += '<div class="mb-6 overflow-hidden rounded-lg border border-slate-200 shadow-sm">';
+                html += '<table class="w-full text-left text-sm border-collapse">';
+                html += '<thead><tr class="bg-slate-800 text-white text-xs uppercase tracking-wider"><th class="py-3 px-4 font-semibold w-16 text-center">Qtd</th><th class="py-3 px-4 font-semibold">Descrição do Material</th><th class="py-3 px-4 font-semibold text-right w-28">Vlr. Unit</th><th class="py-3 px-4 font-semibold text-right w-32">Subtotal</th></tr></thead>';
+                html += '<tbody class="bg-white">';
                 item.materials.forEach(function(m) {
-                    html += '<li>' + m.qtd + 'x <strong>' + window.escapeHtml(m.name) + '</strong>' + (m.price ? ' - ' + window.formatMoney(m.price) : '') + '</li>';
+                    let p = parseFloat(m.price) || 0;
+                    let q = parseFloat(m.qtd) || 1;
+                    let sub = p * q;
+                    totalGeral += sub;
+                    html += '<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="py-3 px-4 text-center font-medium">' + q + '</td><td class="py-3 px-4 text-slate-700">' + window.escapeHtml(m.name) + '</td><td class="py-3 px-4 text-right text-slate-500">' + window.formatMoney(p) + '</td><td class="py-3 px-4 text-right font-bold text-slate-800">' + window.formatMoney(sub) + '</td></tr>';
                 });
-                html += '</ul></div>';
+                html += '</tbody></table></div>';
+            } else if (item.totalPrice) {
+                totalGeral = parseFloat(item.totalPrice) || 0;
             }
 
+            html += '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-t-2 border-slate-800 pt-6 mt-4">';
+            html += '<div class="w-full sm:w-2/3">';
             if(item.obs) {
-                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Observações</p><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded border dark:border-slate-700">' + window.escapeHtml(item.obs).replace(/\n/g, '<br>') + '</div></div>';
+                html += '<span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Observações Adicionais</span>';
+                html += '<p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 whitespace-pre-wrap">' + window.escapeHtml(item.obs) + '</p>';
             }
+            html += '</div>';
 
-            if(item.totalPrice) {
-                html += '<div class="mt-4 border-t dark:border-slate-700 pt-3 text-right"><p class="text-xs text-slate-500 dark:text-slate-400">Total do Orçamento</p><p class="font-bold text-xl text-green-600 dark:text-green-400">' + window.formatMoney(item.totalPrice) + '</p></div>';
-            }
-            
+            html += '<div class="w-full sm:w-1/3 bg-slate-800 text-white p-5 rounded-xl text-right shadow-lg">';
+            html += '<span class="block text-slate-300 text-[10px] font-bold uppercase mb-1 tracking-widest">Total Geral</span>';
+            html += '<span class="text-2xl sm:text-3xl font-black tracking-tight">' + window.formatMoney(totalGeral) + '</span>';
+            html += '</div>';
             html += '</div>';
             
+            html += '</div>';
+
             const viewContent = document.getElementById('viewRecordContent');
             if(viewContent) viewContent.innerHTML = html;
 
             const btnPrint = document.getElementById('btnPrintRecord');
-            if(btnPrint) btnPrint.onclick = window.printRecord;
-            
+            if(btnPrint) {
+                btnPrint.onclick = function() { window.printRecord(docTitle); };
+            }
+
             window.showElement('modalViewRecord');
         };
 
-        window.printRecord = function() {
-            const content = document.getElementById('viewRecordContent');
+        window.printRecord = function(docTitle) {
+            const content = document.getElementById('printContentWrapper');
             const printArea = document.getElementById('printArea');
+            
             if(content && printArea) {
-                const title = document.getElementById('viewRecordTitle') ? document.getElementById('viewRecordTitle').textContent : 'Registro';
+                let printHtml = '<div class="p-8 max-w-4xl mx-auto font-sans text-slate-900 bg-white relative print:p-0">';
                 
-                let printHtml = '<div class="p-8 max-w-4xl mx-auto font-sans text-slate-800 bg-white min-h-screen">';
-                printHtml += '<div class="border-b-2 border-slate-800 pb-4 mb-6 flex justify-between items-center">';
-                printHtml += '<div><h1 class="text-2xl font-bold">LYM Eletrônicos</h1><p class="text-sm text-slate-500">Documento: ' + title + '</p></div>';
+                printHtml += '<div class="flex justify-between items-end border-b-4 border-slate-900 pb-6 mb-8">';
+                printHtml += '<div><h1 class="text-4xl font-black tracking-tighter text-slate-900 leading-none">LYM ELETRONICOS</h1>';
+                printHtml += '<p class="text-sm text-slate-600 font-medium mt-2">Jardim das Camélias, São Paulo - SP</p></div>';
+                printHtml += '<div class="text-right"><p class="text-lg font-black uppercase text-slate-800 tracking-widest">' + (docTitle || 'Documento') + '</p>';
+                printHtml += '<p class="text-xs text-slate-500 mt-1 font-medium">Emitido em: ' + new Date().toLocaleDateString('pt-BR') + '</p></div>';
                 printHtml += '</div>';
                 
                 printHtml += content.innerHTML;
                 
-                printHtml += '<div class="mt-12 pt-8 border-t border-slate-300 text-center text-xs text-slate-500">';
-                printHtml += 'Gerado pelo LYM APP em ' + new Date().toLocaleString('pt-BR') + ' por ' + (window.currentSystemUser ? window.currentSystemUser.login : 'Sistema');
+                printHtml += '<div class="mt-24 pt-8 grid grid-cols-2 gap-16 text-center break-inside-avoid">';
+                printHtml += '<div><div class="border-t-2 border-slate-300 pt-2 font-bold text-sm text-slate-700">Assinatura Cliente / Responsável</div></div>';
+                printHtml += '<div><div class="border-t-2 border-slate-300 pt-2 font-bold text-sm text-slate-700">Assinatura Técnico / LYM</div></div>';
+                printHtml += '</div>';
+
+                printHtml += '<div class="mt-16 text-center text-[10px] text-slate-400 font-medium uppercase tracking-widest">';
+                printHtml += 'Documento gerado digitalmente via Sistema de Gestão LYM APP';
                 printHtml += '</div></div>';
                 
                 printArea.innerHTML = printHtml;
-                window.print();
+                
+                setTimeout(function() {
+                    window.print();
+                }, 300);
             }
         };
 
