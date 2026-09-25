@@ -2476,7 +2476,8 @@
             filtered = window.safeSort(filtered, function(a,b) { return window.getSafeTime(b) - window.getSafeTime(a); });
 
             if (filtered.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>';
+                let colCount = type === 'quotes' ? 7 : 6;
+                tableBody.innerHTML = '<tr><td colspan="' + colCount + '" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>';
                 return;
             }
 
@@ -2485,28 +2486,34 @@
                 const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
                 const ceiName = cei ? cei.name : item.ceiId;
                 
-                let col3 = ""; let col4 = "";
+                let extraCols = "";
+                let teamBadge = item.userRole === 'func_cftv' 
+                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-blue-600">CFTV</span>'
+                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-slate-600">Geral</span>';
                 
                 if(type === 'reports') {
-                    col3 = window.escapeHtml(item.userName);
-                    col4 = item.userRole === 'func_cftv' ? 'CFTV' : 'Geral';
+                    extraCols = '<td class="px-3 py-2 text-sm text-center">' + window.escapeHtml(item.userName || '-') + '</td>' +
+                                '<td class="px-3 py-2 text-sm text-center">' + teamBadge + '</td>';
                 } else if(type === 'quotes') {
-                    col3 = window.formatMoney(item.totalPrice || 0);
                     let badgeColor = item.status === 'Aprovado' ? 'bg-green-600' : (item.status === 'Rejeitado' ? 'bg-red-600' : 'bg-amber-500');
-                    col4 = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white ' + badgeColor + '">' + (item.status || 'Pendente') + '</span>';
+                    let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white ' + badgeColor + '">' + (item.status || 'Pendente') + '</span>';
+                    
+                    extraCols = '<td class="px-3 py-2 text-sm text-center">' + window.formatMoney(item.totalPrice || 0) + '</td>' +
+                                '<td class="px-3 py-2 text-sm text-center">' + statusBadge + '</td>' +
+                                '<td class="px-3 py-2 text-sm text-center">' + teamBadge + '</td>';
                 } else if(type === 'thirdParty') {
-                    col3 = window.escapeHtml(item.companyName);
-                    col4 = item.userRole === 'func_cftv' ? 'CFTV' : 'Geral';
+                    extraCols = '<td class="px-3 py-2 text-sm text-center">' + window.escapeHtml(item.companyName || '-') + '</td>' +
+                                '<td class="px-3 py-2 text-sm text-center">' + teamBadge + '</td>';
                 }
 
                 html += '<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">' +
-                    '<td class="px-3 py-2 text-center"><input type="checkbox" class="row-checkbox" value="' + item.id + '"></td>' +
-                    '<td class="px-3 py-2 text-sm">' + window.formatDateBR(item.date) + '</td>' +
-                    '<td class="px-3 py-2 font-medium truncate max-w-[200px]">' + window.escapeHtml(ceiName) + '</td>' +
-                    '<td class="px-3 py-2 text-sm text-center">' + col3 + '</td>' +
-                    '<td class="px-3 py-2 text-sm text-center">' + col4 + '</td>' +
-                    '<td class="px-3 py-2 text-right space-x-1">' +
+                    '<td class="px-3 py-2 text-center w-10"><input type="checkbox" class="row-checkbox" value="' + item.id + '"></td>' +
+                    '<td class="px-3 py-2 text-sm whitespace-nowrap">' + window.formatDateBR(item.date) + '</td>' +
+                    '<td class="px-3 py-2 font-medium w-full">' + window.escapeHtml(ceiName) + '</td>' +
+                    extraCols +
+                    '<td class="px-3 py-2 text-right space-x-2 whitespace-nowrap">' +
                         '<button type="button" onclick="window.viewRecord(\'' + type + '\', \'' + item.id + '\')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-eye"></i></button>' +
+                        '<button type="button" onclick="window.editFuncRecord(\'' + type + '\', \'' + item.id + '\')" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded transition"><i class="fas fa-edit"></i></button>' +
                         '<button type="button" onclick="window.deleteFuncRecord(\'' + type + '\', \'' + item.id + '\')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash"></i></button>' +
                     '</td></tr>';
             });
