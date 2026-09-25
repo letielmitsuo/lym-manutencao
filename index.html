@@ -2331,6 +2331,83 @@
             } catch(err) { window.showToast("Erro ao salvar.", "error"); } finally { btn.innerHTML = origText; btn.disabled = false; } 
         };
 
+// ==========================================
+        // 12. CRUD FUNCIONÁRIO (VISUALIZAR, EDITAR, EXCLUIR)
+        // ==========================================
+        window.viewRecord = function(type, id) {
+            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
+            if(!item) return window.showToast("Registro não encontrado.", "error");
+            
+            let html = '<div class="space-y-3 text-sm text-slate-700 dark:text-slate-300">';
+            html += '<p><strong class="dark:text-white">Data:</strong> ' + window.formatDateBR(item.date) + '</p>';
+            
+            if(item.ceiId) {
+                const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
+                html += '<p><strong class="dark:text-white">CEI:</strong> ' + (cei ? window.escapeHtml(cei.name) : window.escapeHtml(item.ceiId)) + '</p>';
+            }
+            
+            if(item.workDone) html += '<p><strong class="dark:text-white">Serviço/Escopo:</strong><br>' + window.escapeHtml(item.workDone).replace(/\n/g, '<br>') + '</p>';
+            if(item.obs) html += '<p><strong class="dark:text-white">Observações:</strong><br>' + window.escapeHtml(item.obs).replace(/\n/g, '<br>') + '</p>';
+            html += '</div>';
+            
+            const viewContent = document.getElementById('viewRecordContent');
+            if(viewContent) viewContent.innerHTML = html;
+            window.showElement('modalViewRecord');
+        };
+
+        window.editFuncRecord = function(type, id) {
+            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
+            if(!item) return window.showToast("Registro não encontrado.", "error");
+
+            window.editingItemId = id;
+            if (type === 'reports') window.activeTab = 'func-reports';
+            else if (type === 'quotes') window.activeTab = 'func-quotes';
+            else if (type === 'thirdParty') window.activeTab = 'func-thirdParty';
+            
+            window.renderActiveTab();
+            
+            setTimeout(function() {
+                let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                
+                const fields = ['date', 'timeStart', 'timeEnd', 'workDone', 'obs'];
+                fields.forEach(function(f) {
+                    const el = document.getElementById(f + sfx);
+                    if(el && item[f]) el.value = item[f];
+                });
+                
+                const elCei = document.getElementById('ceiSelect' + sfx);
+                if(elCei && item.ceiId) elCei.value = item.ceiId;
+                
+                if (type === 'reports' && document.getElementById('diffRep') && item.difficulty) {
+                    document.getElementById('diffRep').value = item.difficulty;
+                }
+                
+                if (type === 'thirdParty' && document.getElementById('companyNameThirdParty') && item.companyName) {
+                    document.getElementById('companyNameThirdParty').value = item.companyName;
+                }
+                
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                if(cancelBtn) window.showElement('cancelEditBtn');
+            }, 150);
+        };
+
+        window.deleteFuncRecord = function(type, id) {
+            window.confirmAction(async function() {
+                try {
+                    await window.dbDelete(type, id);
+                    window.showToast("Registro excluído com sucesso!");
+                    window.renderActiveTab();
+                } catch(e) {
+                    window.showToast("Erro ao excluir.", "error");
+                }
+            });
+        };
+
+        window.cancelEdit = function() {
+            window.editingItemId = null;
+            window.renderActiveTab();
+        };
+
         // ==========================================
         // 13. INICIALIZAÇÃO
         // ==========================================
