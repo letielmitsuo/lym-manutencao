@@ -345,7 +345,7 @@
             <div class="p-3 sm:p-5 flex items-center justify-between md:justify-center border-b border-slate-700">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-bolt text-blue-400 text-lg" aria-hidden="true"></i>
-                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v10.3</span></h2>
+                    <h2 class="text-lg font-bold tracking-wider flex items-center gap-2">LYM APP <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">v10.6</span></h2>
                 </div>
                 <div class="flex items-center gap-2 md:hidden">
                     <button type="button" aria-label="Alternar Tema" onclick="window.toggleDarkMode()" class="outline-none p-2">
@@ -403,7 +403,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- LÓGICA JAVASCRIPT MASTER (Totalmente Segura - WCAG/ES6 Compatível)        -->
+    <!-- LÓGICA JAVASCRIPT MASTER (Totalmente Segura)                              -->
     <!-- ========================================================================= -->
     
     <script>
@@ -434,16 +434,8 @@
         } catch(e) { console.warn("Aviso de Configuração do Firebase:", e); }
 
         window.localData = { 
-            ceis: [], 
-            users: [], 
-            reports: [], 
-            quotes: [], 
-            thirdParty: [], 
-            audit: [], 
-            catalog: [], 
-            stockMovements: [], 
-            tools: [], 
-            toolMovements: [] 
+            ceis: [], users: [], reports: [], quotes: [], thirdParty: [], 
+            audit: [], catalog: [], stockMovements: [], tools: [], toolMovements: [] 
         };
         
         window.currentSystemUser = null; 
@@ -663,7 +655,6 @@
         window.dbSave = async function(colName, docId, data) { 
             data.updatedAt = new Date().toISOString(); 
             
-            // Atualização Otimista UI
             let existsIndex = window.localData[colName].findIndex(function(x) { return String(x.id) === String(docId); });
             if (existsIndex >= 0) { 
                 window.localData[colName][existsIndex] = Object.assign({}, window.localData[colName][existsIndex], data); 
@@ -1286,7 +1277,7 @@
         };
 
         // ==========================================
-        // 8. CRIAÇÃO DE TELAS HTML: ADMIN
+        // 8. CRIAÇÃO DE TELAS HTML: ADMIN E FUNCIONÁRIOS
         // ==========================================
         window.renderAdminDashboard = function() {
             return `
@@ -1966,7 +1957,7 @@
         };
 
         // ==========================================
-        // 8. RENDERIZADORES DE TELAS FUNCIONÁRIOS
+        // 8. RENDERIZADORES DE TELAS FUNCIONÁRIOS E ADDONS FALTANTES
         // ==========================================
         window.renderFuncStockForm = function() {
             return `
@@ -2005,6 +1996,59 @@
                 </form>
             </div>
             `;
+        };
+
+        window.renderFuncTools = function() {
+            const uid = String(window.currentSystemUser.id);
+            
+            let myTools = window.safeSort((window.localData.toolMovements || []).filter(function(r) { return String(r.userId) === uid; }), function(a,b) { 
+                return window.getSafeTime(b) - window.getSafeTime(a); 
+            }).slice(0, 50).map(function(m) { 
+                let badgeClass = m.type === 'Retirada' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'; 
+                return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 leading-tight">${m.qtd}x ${window.escapeHtml(m.toolName)}</td></tr>`; 
+            }).join("");
+            
+            let options = '<option value="">Selecione a ferramenta...</option>' + window.safeSort(window.localData.tools || [], function(a,b) { 
+                return String(a.name||'').localeCompare(String(b.name||'')); 
+            }).map(function(c) { 
+                return `<option value="${c.id}">${window.escapeHtml(c.name)} (Livre: ${c.availableStock})</option>`; 
+            }).join('');
+            
+            return `
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-5">
+                    <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
+                        <h3 class="text-lg font-bold text-amber-700 dark:text-amber-400 text-center w-full"><i class="fas fa-toolbox mr-2" aria-hidden="true"></i> Cautela de Ferramentas</h3>
+                    </div>
+                    <form id="toolMovementForm" onsubmit="window.saveToolMovement(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label for="tType" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Ação *</label><select id="tType" required class="w-full p-2 border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-slate-800 dark:text-white rounded-lg outline-none focus:border-amber-500 text-center font-bold transition"><option value="Retirada">Pegar Emprestado</option><option value="Devolução">Devolver à Base</option></select></div>
+                            <div><label for="tDate" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="tDate" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-amber-500 text-center transition" value="${new Date().toISOString().split('T')[0]}"></div>
+                        </div>
+                        <div>
+                            <label for="tToolSelect" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Ferramenta *</label>
+                            <div class="flex gap-1">
+                                <button type="button" aria-label="Ler Código" onclick="window.scanForTool()" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700 transition"><i class="fas fa-barcode" aria-hidden="true"></i></button>
+                                <select id="tToolSelect" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none focus:border-amber-500 text-sm transition">${options}</select>
+                            </div>
+                        </div>
+                        <div><label for="tQtd" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Quantidade *</label><input type="number" id="tQtd" required min="1" step="1" value="1" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-amber-500 text-center transition"></div>
+                        <div><label for="tObs" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observação / Estado</label><textarea id="tObs" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-amber-500 text-sm transition" placeholder="Ex: Furadeira entregue sem a broca 6"></textarea></div>
+                        <button type="submit" id="btnSubmitTool" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-2">Registrar</button>
+                    </form>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-history mr-2 text-blue-600" aria-hidden="true"></i> Meu Histórico de Ferramentas</h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow max-h-[400px]">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm z-10"><th scope="col" class="px-3 py-2 font-semibold">Data</th><th scope="col" class="px-3 py-2 font-semibold">Ação</th><th scope="col" class="px-3 py-2 font-semibold">Ferramenta</th></tr></thead>
+                            <tbody>${myTools || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma cautela.</td></tr>`}</tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>`;
         };
 
         window.renderFuncHistory = function() {
@@ -2048,9 +2092,56 @@
             `;
         };
 
+        window.renderEmployeeHistory = function() {
+            if(!window.currentSystemUser) return;
+            const uid = String(window.currentSystemUser.id);
+            
+            const genRows = function(type) {
+                let items = window.safeSort((window.localData[type] || []).filter(function(r) { return String(r.userId) === uid; }), function(a,b) { 
+                    return window.getSafeTime(b) - window.getSafeTime(a); 
+                });
+                
+                if (items.length === 0) return '<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro.</td></tr>';
+                
+                let html = "";
+                for(let i=0; i<items.length; i++) {
+                    let item = items[i];
+                    let statusBadge = "";
+                    if (type === 'quotes') {
+                        let s = item.status || "Pendente"; 
+                        let badgeClass = s === 'Aprovado' ? 'bg-green-600 text-white' : (s === 'Rejeitado' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'); 
+                        statusBadge = '<span class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold ' + badgeClass + '">' + window.escapeHtml(s) + '</span>';
+                    }
+                    
+                    let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Na Fila" aria-hidden="true"></i>' : '';
+                    
+                    html += `
+                    <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                        <td class="p-3">${badgeTg}${window.formatDateBR(item.date)}</td>
+                        <td class="p-3 font-medium">${window.escapeHtml(item.cei || item.ceiId || '')}${statusBadge}</td>
+                        <td class="p-3 text-right whitespace-nowrap">
+                            <button type="button" aria-label="Ver" onclick="window.viewRecord('${type}', '${item.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition mr-1 hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                            <button type="button" aria-label="Editar" onclick="window.editFuncRecord('${type}', '${item.id}')" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded transition mr-1 hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i></button>
+                            <button type="button" aria-label="Excluir" onclick="window.deleteFuncRecord('${type}', '${item.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded transition hover:bg-red-100"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                        </td>
+                    </tr>`;
+                }
+                return html;
+            };
+
+            const rBody = document.getElementById('empHistoryReports'); 
+            if(rBody) rBody.innerHTML = genRows('reports');
+            
+            const qBody = document.getElementById('empHistoryQuotes'); 
+            if(qBody) qBody.innerHTML = genRows('quotes');
+            
+            const tBody = document.getElementById('empHistoryThirdParty'); 
+            if(tBody) tBody.innerHTML = genRows('thirdParty');
+        };
+
         window.renderFuncReportForm = function() {
             return `
-            <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in">
+            <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in">
                 <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
                     <h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-wrench mr-2" aria-hidden="true"></i> <span id="formTitleReports">Registrar Manutenção</span></h3>
                     <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200 font-bold px-3 py-1.5 rounded absolute right-0 transition shadow-sm">Cancelar</button>
@@ -2131,7 +2222,7 @@
                     <div><label for="statusQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Status do Orçamento *</label><select id="statusQuote" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-green-500 text-center font-bold transition"><option value="Pendente">⏳ Pendente de Aprovação</option><option value="Aprovado">✅ Aprovado</option><option value="Rejeitado">❌ Rejeitado</option></select></div>
                     <div><label for="workDoneQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-green-500 transition"></textarea></div>
                     
-                    <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3">
+                    <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 mt-3">
                         <div class="relative flex justify-center items-center mb-3">
                             <h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais Necessários</h4>
                             <button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 text-xs font-medium absolute right-0 transition shadow-sm flex items-center"><i class="fas fa-plus mr-1" aria-hidden="true"></i> Mat.</button>
@@ -2139,7 +2230,7 @@
                         <div id="quoMaterialsContainer" class="space-y-2"><p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p></div>
                     </div>
                     
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3">
                         <label for="photosQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Problema (Telegram)</label>
                         <input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center focus:outline-none" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')">
                         <div id="quoPhotoPreview" class="flex justify-center gap-2 mt-3 overflow-x-auto pb-1 min-h-[60px]"></div>
@@ -2173,7 +2264,7 @@
                     </div>
                     <div><label for="workDoneThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-purple-500 transition"></textarea></div>
                     
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3">
                         <label for="photosThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos (Telegram)</label>
                         <input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center focus:outline-none" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')">
                         <div id="tpPhotoPreview" class="flex justify-center gap-2 mt-3 overflow-x-auto pb-1 min-h-[60px]"></div>
@@ -2186,520 +2277,58 @@
             `;
         };
 
-        // ==========================================
-        // 9. LÓGICA DE FILTROS E EXIBIÇÃO DE LISTAS (ADMIN E FUNC)
-        // ==========================================
-        window.setupAdminFilters = function() { 
-            let activeType = window.activeTab.split('-')[1];
-            if (activeType) {
-                window.applyFilters(activeType); 
-            }
-        };
-        
-        window.applyFilters = function(type) {
-            try {
-                const searchEl = document.getElementById('filterSearch');
-                const startEl = document.getElementById('filterDateStart');
-                const endEl = document.getElementById('filterDateEnd');
-                const sectorEl = document.getElementById('filterSector');
-                const statusEl = document.getElementById('filterStatus');
-
-                const search = searchEl ? searchEl.value.toLowerCase() : "";
-                const start = startEl ? startEl.value : "";
-                const end = endEl ? endEl.value : "";
-                
-                let rawData = window.localData[type];
-                let data = [];
-                if (Array.isArray(rawData)) {
-                    data = rawData.slice();
-                }
-                
-                if(search) { 
-                    data = data.filter(function(item) { 
-                        const ceiStr = String(item.cei || item.ceiId || "").toLowerCase(); 
-                        const userStr = String(item.userName || item.userLogin || "").toLowerCase(); 
-                        const compStr = String(item.companyName || "").toLowerCase(); 
-                        const workStr = String(item.workDone || item.desc || item.tpDesc || "").toLowerCase(); 
-                        return ceiStr.includes(search) || userStr.includes(search) || compStr.includes(search) || workStr.includes(search); 
-                    }); 
-                }
-                
-                if(start) data = data.filter(function(item) { return item.date >= start; });
-                if(end) data = data.filter(function(item) { return item.date <= end; });
-                
-                if(type === 'reports' || type === 'quotes') { 
-                    const sector = sectorEl ? sectorEl.value : ""; 
-                    if(sector === 'func_cftv') {
-                        data = data.filter(function(item) { return item.userRole === 'func_cftv'; }); 
-                    } else if(sector === 'geral') {
-                        data = data.filter(function(item) { return item.userRole !== 'func_cftv'; }); 
-                    }
-                }
-                
-                if(type === 'quotes') { 
-                    const statusF = statusEl ? statusEl.value : ""; 
-                    if(statusF) {
-                        data = data.filter(function(item) { return item.status === statusF; }); 
-                    }
-                }
-                
-                data = window.safeSort(data, function(a,b) { return window.getSafeTime(b) - window.getSafeTime(a); }); 
-                window.currentFilteredData = data; 
-                
-                let tbodyId = type === 'reports' ? 'tableBodyReports' : (type === 'quotes' ? 'tableBodyQuotes' : 'tableBodyThirdParty'); 
-                const tbody = document.getElementById(tbodyId); 
-                
-                if(!tbody) return;
-                
-                if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>';
-                    return;
-                }
-                
-                let trs = "";
-                for(let i=0; i<data.length; i++) {
-                    let item = data[i];
-                    let uName = item.userName || item.userLogin || "Usuário";
-                    let mats = Array.isArray(item.materials) ? item.materials : []; 
-                    
-                    let totalVal = 0;
-                    for(let m=0; m<mats.length; m++) {
-                        let material = mats[m];
-                        totalVal += (parseFloat(material.qtd || material.q || 1) * parseFloat(material.price || material.v || 0));
-                    }
-                    if (isNaN(totalVal)) totalVal = 0;
-                    
-                    let col3 = type === 'reports' ? uName : (type === 'quotes' ? window.formatMoney(totalVal) : String(item.companyName || ""));
-                    
-                    let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Na Fila" aria-hidden="true"></i>' : '';
-                    let teamLabel = item.userRole === 'func_cftv' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">CFTV</span>' : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">GERAL</span>';
-                    
-                    let statusCol = ''; 
-                    if(type === 'quotes') { 
-                        let s = item.status || "Pendente"; 
-                        let badgeClass = s === 'Aprovado' ? 'bg-green-600 text-white' : (s === 'Rejeitado' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'); 
-                        statusCol = '<td class="p-4 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + badgeClass + '">' + window.escapeHtml(s) + '</span></td>'; 
-                    }
-                    
-                    trs += `
-                    <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                        <td class="p-4 text-center"><label class="sr-only" for="chk_${item.id}">Selecionar</label><input type="checkbox" id="chk_${item.id}" class="chk-row-${type}" value="${item.id}"></td>
-                        <td class="p-4">${badgeTg}${window.formatDateBR(item.date)}</td>
-                        <td class="p-4 font-medium">${window.escapeHtml(item.cei || item.ceiId || '')}</td>
-                        <td class="p-4 text-slate-600 dark:text-slate-400 capitalize">${window.escapeHtml(col3)}</td>
-                        ${statusCol}
-                        <td class="p-4 text-center">${teamLabel}</td>
-                        <td class="p-4 text-right flex justify-end gap-1">
-                            <button type="button" aria-label="Ver Detalhes" onclick="window.viewRecord('${type}', '${item.id}')" title="Detalhes" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-1.5 rounded shadow-sm transition"><i class="fas fa-eye" aria-hidden="true"></i></button>
-                            <button type="button" aria-label="Editar" onclick="window.editFuncRecord('${type}', '${item.id}')" title="Editar" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800 px-3 py-1.5 rounded shadow-sm transition"><i class="fas fa-edit" aria-hidden="true"></i></button>
-                            <button type="button" aria-label="Excluir" onclick="window.deleteFuncRecord('${type}', '${item.id}')" title="Excluir" class="text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800 px-3 py-1.5 rounded shadow-sm transition"><i class="fas fa-trash" aria-hidden="true"></i></button>
-                        </td>
-                    </tr>`;
-                }
-                
-                tbody.innerHTML = trs;
-            } catch(e) { console.error("Erro em applyFilters:", e); }
-        };
-
-        // ==========================================
-        // 10. DETALHES DE REGISTROS (VISUALIZAR)
-        // ==========================================
-        window.viewRecord = function(type, id) {
-            let records = window.localData[type] || [];
-            const record = records.find(function(r) { return String(r.id) === String(id); }); 
-            if(!record) { window.showToast("Registro não encontrado", "error"); return; }
+        window.saveToolMovement = async function(e) {
+            e.preventDefault(); 
+            const type = document.getElementById('tType').value; 
+            const date = document.getElementById('tDate').value; 
+            const obs = document.getElementById('tObs').value.trim(); 
+            const toolId = document.getElementById('tToolSelect').value; 
+            const qtd = parseInt(document.getElementById('tQtd').value) || 1;
             
-            const btnPrint = document.getElementById('btnPrintRecord'); 
-            if(btnPrint) {
-                btnPrint.onclick = function() { window.printRecord(type, record); };
-            }
+            if(!toolId) return window.showToast("Selecione uma ferramenta.", "error"); 
             
-            const uName = record.userName || record.userLogin || "Usuário"; 
-            const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
+            const btn = document.getElementById('btnSubmitTool'); 
+            const origText = btn.innerHTML; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>Registrando...'; 
+            btn.disabled = true; 
             
-            let html = `
-            <div class="grid grid-cols-2 gap-y-2 text-sm mb-6 bg-slate-50 dark:bg-slate-700/50 p-4 rounded border border-slate-200 dark:border-slate-600">
-                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Data:</span> ${window.formatDateBR(record.date)}</div>
-                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">CEI:</span> ${window.escapeHtml(record.cei || record.ceiId || '')}</div>
-                <div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Registro por:</span> <span class="capitalize">${window.escapeHtml(uName)}</span></div>`;
-            
-            if(type === 'reports' || type === 'thirdParty') { 
-                html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Horário:</span> ${window.escapeHtml(record.timeStart || '--')} às ${window.escapeHtml(record.timeEnd || '--')}</div>`; 
-            }
-            if(type === 'thirdParty') { 
-                html += `<div class="col-span-2 dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Empresa:</span> ${window.escapeHtml(record.companyName || '')}</div>`; 
-            }
-            if(type === 'reports') { 
-                html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Dificuldade:</span> ${window.escapeHtml(record.difficulty || '-')}</div>`; 
-            }
-            if(type === 'quotes') { 
-                let s = record.status || "Pendente"; 
-                let bClass = s === 'Aprovado' ? 'text-green-600' : (s === 'Rejeitado' ? 'text-red-600' : 'text-amber-500'); 
-                html += `<div class="dark:text-white"><span class="font-bold text-slate-500 dark:text-slate-400">Status:</span> <span class="font-bold ${bClass}">${window.escapeHtml(s)}</span></div>`; 
-            }
-            
-            html += `</div>
-            <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b border-slate-200 dark:border-slate-600 pb-1">${type === 'quotes' ? 'Diagnóstico / Escopo' : 'Serviço Realizado / Descrição'}</h4>
-            <div class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded border border-slate-200 dark:border-slate-600 break-words leading-relaxed">${window.escapeHtml(desc).replace(/\n/g, '<br>')}</div>`;
-            
-            if(record.materials && Array.isArray(record.materials) && record.materials.length > 0) {
-                html += `
-                <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b border-slate-200 dark:border-slate-600 pb-1">Materiais / Custos</h4>
-                <div class="overflow-x-auto w-full mb-6">
-                    <table class="w-full text-xs sm:text-sm text-left border border-slate-200 dark:border-slate-600 min-w-[320px]">
-                        <thead class="bg-slate-100 dark:bg-slate-700">
-                            <tr>
-                                <th scope="col" class="p-2 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 w-12 text-center">Qtd</th>
-                                <th scope="col" class="p-2 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200">Material</th>
-                                <th scope="col" class="p-2 border border-slate-200 dark:border-slate-600 text-right text-slate-700 dark:text-slate-200 whitespace-nowrap">R$ Un.</th>
-                                <th scope="col" class="p-2 border border-slate-200 dark:border-slate-600 text-right text-slate-700 dark:text-slate-200 whitespace-nowrap">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-                        
-                let totalGeral = 0; 
-                for(let m=0; m<record.materials.length; m++) {
-                    let mat = record.materials[m];
-                    const price = parseFloat(mat.price || mat.v || 0); 
-                    const q = parseFloat(mat.qtd || mat.q || 1); 
-                    const total = price * q; 
-                    totalGeral += total; 
-                    html += `
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
-                            <td class="p-2 border border-slate-200 dark:border-slate-600 dark:text-slate-300 text-center font-medium">${q}</td>
-                            <td class="p-2 border border-slate-200 dark:border-slate-600 dark:text-slate-300 break-words min-w-[120px]">${window.escapeHtml(mat.name)} <span class="text-[10px] text-slate-400 block sm:inline mt-1 sm:mt-0">(${window.escapeHtml(mat.brand)||'-'})</span></td>
-                            <td class="p-2 border border-slate-200 dark:border-slate-600 text-right dark:text-slate-300 whitespace-nowrap">${window.formatMoney(price)}</td>
-                            <td class="p-2 border border-slate-200 dark:border-slate-600 font-medium text-right dark:text-slate-300 whitespace-nowrap">${window.formatMoney(total)}</td>
-                        </tr>`; 
-                }
-                
-                if(type === 'reports' || type === 'quotes') { 
-                    html += `
-                        <tr class="bg-blue-50 dark:bg-blue-900/30">
-                            <td colspan="3" class="p-2 border border-blue-100 dark:border-blue-800 text-right font-bold text-blue-800 dark:text-slate-200">TOTAL GERAL:</td>
-                            <td class="p-2 border border-blue-100 dark:border-blue-800 font-bold text-blue-700 dark:text-blue-400 text-right text-sm sm:text-base whitespace-nowrap">${window.formatMoney(totalGeral)}</td>
-                        </tr>`; 
-                } 
-                html += `</tbody></table></div>`;
-            }
-            
-            if(record.obs) { 
-                html += `
-                <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b border-slate-200 dark:border-slate-600 pb-1">Observações</h4>
-                <div class="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap mb-6 bg-yellow-50 dark:bg-yellow-900/20 p-3 border border-yellow-200 dark:border-yellow-700/50 rounded break-words">${window.escapeHtml(record.obs).replace(/\n/g, '<br>')}</div>`; 
-            }
-            
-            if(record.telegramSent) { 
-                html += `<div class="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-green-200 dark:border-green-800 font-medium shadow-sm"><i class="fab fa-telegram text-xl" aria-hidden="true"></i> Enviado ao Telegram com sucesso.</div>`; 
-            } else if(record.pendingTelegram) { 
-                html += `<div class="bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 p-3 rounded-lg flex items-center gap-2 mt-4 border border-amber-200 dark:border-amber-800 font-medium shadow-sm"><i class="fas fa-wifi text-xl" aria-hidden="true"></i> Salvo localmente (Na fila para envio ao Telegram).</div>`; 
-            } else if(record.photos && Array.isArray(record.photos) && record.photos.length > 0) { 
-                html += `<h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 border-b border-slate-200 dark:border-slate-600 pb-1">Fotos (Banco Local)</h4><div class="grid grid-cols-3 sm:grid-cols-4 gap-2">`; 
-                for(let p=0; p<record.photos.length; p++) {
-                    let b64 = record.photos[p];
-                    html += `<a href="${b64}" target="_blank" class="block border border-slate-200 dark:border-slate-600 rounded p-1 hover:border-blue-500 transition focus:outline-none focus:ring-2 focus:ring-blue-500"><img src="${b64}" alt="Foto anexada" class="w-full h-24 object-cover rounded"></a>`; 
-                }
-                html += `</div>`; 
-            }
-            
-            const contentEl = document.getElementById('viewRecordContent');
-            if(contentEl) {
-                contentEl.innerHTML = html; 
-                window.showElement('modalViewRecord');
-            }
-        };
-
-        // ==========================================
-        // 11. EXPORTAÇÃO EXCEL E IMPRESSÃO PDF
-        // ==========================================
-        window.exportToExcel = function(type) {
-            if(!window.currentFilteredData || window.currentFilteredData.length === 0) return window.showToast("Nenhum dado filtrado para exportar.", "error");
-            
-            let exportData = []; 
-            let colWidths = [];
-            
-            try {
-                if(type === 'reports') {
-                    for(let i=0; i<window.currentFilteredData.length; i++) {
-                        let r = window.currentFilteredData[i];
-                        let matsStr = "";
-                        let tGasto = 0;
-                        if(r.materials && Array.isArray(r.materials)){
-                            for(let m=0; m<r.materials.length; m++) {
-                                let mat = r.materials[m];
-                                let q = parseFloat(mat.qtd || mat.q || 1);
-                                let p = parseFloat(mat.price || mat.v || 0);
-                                matsStr += q + "x " + mat.name + " (" + (mat.brand||'') + ") R$" + p + "\n";
-                                tGasto += (q * p);
-                            }
-                        }
-                        exportData.push({ 
-                            'Data': window.formatDateBR(r.date), 
-                            'Creche (CEI)': r.cei || r.ceiId, 
-                            'Técnico': r.userName || r.userLogin, 
-                            'Início': r.timeStart, 
-                            'Término': r.timeEnd, 
-                            'Dificuldade': r.difficulty, 
-                            'Serviço Realizado': String(r.workDone || r.desc || "").replace(/\\n/g, '\n'), 
-                            'Materiais Utilizados': matsStr, 
-                            'Total Gasto (R$)': tGasto, 
-                            'Observação': String(r.obs || "").replace(/\\n/g, '\n'), 
-                            'Enviado Telegram': r.telegramSent ? "Sim" : (r.pendingTelegram ? "Pendente WiFi" : "Não") 
-                        });
-                    }
-                    colWidths = [{wch:12}, {wch:25}, {wch:20}, {wch:10}, {wch:10}, {wch:12}, {wch:50}, {wch:40}, {wch:15}, {wch:40}, {wch:15}];
-                } else if (type === 'quotes') {
-                    for(let i=0; i<window.currentFilteredData.length; i++) {
-                        let r = window.currentFilteredData[i];
-                        let matsStr = "";
-                        let tGasto = 0;
-                        if(r.materials && Array.isArray(r.materials)){
-                            for(let m=0; m<r.materials.length; m++) {
-                                let mat = r.materials[m];
-                                let q = parseFloat(mat.qtd || mat.q || 1);
-                                let p = parseFloat(mat.price || mat.v || 0);
-                                matsStr += q + "x " + mat.name + " R$" + p + "\n";
-                                tGasto += (q * p);
-                            }
-                        }
-                        exportData.push({ 
-                            'Data': window.formatDateBR(r.date), 
-                            'Status': r.status || 'Pendente', 
-                            'Creche (CEI)': r.cei || r.ceiId, 
-                            'Técnico': r.userName || r.userLogin, 
-                            'Diagnóstico/Escopo': String(r.workDone || r.desc || "").replace(/\\n/g, '\n'), 
-                            'Materiais Necessários': matsStr, 
-                            'Total Orçado (R$)': tGasto, 
-                            'Observação': String(r.obs || "").replace(/\\n/g, '\n') 
-                        });
-                    }
-                    colWidths = [{wch:12}, {wch:15}, {wch:25}, {wch:20}, {wch:50}, {wch:40}, {wch:18}, {wch:40}];
-                } else if (type === 'thirdParty') {
-                    for(let i=0; i<window.currentFilteredData.length; i++) {
-                        let r = window.currentFilteredData[i];
-                        exportData.push({ 
-                            'Data': window.formatDateBR(r.date), 
-                            'Creche (CEI)': r.cei || r.ceiId, 
-                            'Técnico Acompanhante': r.userName || r.userLogin, 
-                            'Empresa Terceirizada': r.companyName, 
-                            'Início': r.timeStart, 
-                            'Término': r.timeEnd, 
-                            'Serviço Realizado': String(r.workDone || r.tpDesc || "").replace(/\\n/g, '\n'), 
-                            'Observação': String(r.obs || "").replace(/\\n/g, '\n') 
-                        });
-                    }
-                    colWidths = [{wch:12}, {wch:25}, {wch:25}, {wch:25}, {wch:10}, {wch:10}, {wch:50}, {wch:40}];
-                }
-                
-                if (typeof XLSX === 'undefined') throw new Error("Biblioteca XLSX não carregada.");
-                
-                const ws = XLSX.utils.json_to_sheet(exportData); 
-                ws['!cols'] = colWidths;
-                
-                for (let cell in ws) { 
-                    if (cell.charAt(0) === '!') continue; 
-                    if (typeof ws[cell].v === 'string' && ws[cell].v.indexOf('\n') !== -1) { 
-                        if(!ws[cell].s) ws[cell].s = {}; 
-                        if(!ws[cell].s.alignment) ws[cell].s.alignment = {}; 
-                        ws[cell].s.alignment.wrapText = true; 
-                    } 
-                }
-                const wb = XLSX.utils.book_new(); 
-                XLSX.utils.book_append_sheet(wb, ws, "Relatório LYM"); 
-                
-                const dateNow = new Date(); 
-                let m = String(dateNow.getMonth() + 1);
-                if (m.length === 1) m = '0' + m;
-                let y = dateNow.getFullYear();
-                
-                XLSX.writeFile(wb, "LYM_" + type + "_" + m + "_" + y + ".xlsx"); 
-                window.logAudit('Exportou Excel da tabela: ' + type);
-                window.showToast("Download iniciado!");
-            } catch(e) {
-                console.error("Erro Export Excel", e);
-                window.showToast("Falha ao exportar excel.", "error");
-            }
-        };
-        
-        window.printRecord = function(type, record) {
-            const printArea = document.getElementById('printArea'); 
-            if(!printArea) return;
-            
-            const typeLabel = type === 'reports' ? 'Manutenção' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento'); 
-            const uName = record.userName || record.userLogin || "Usuário"; 
-            const desc = record.workDone || record.desc || record.tpDesc || "Sem descrição";
-            
-            let matsHtml = ''; 
-            let totalValue = 0;
-            
-            if(record.materials && Array.isArray(record.materials) && record.materials.length > 0) {
-                matsHtml = '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word;"><thead><tr style="background: #1e293b; color: white; text-align: left;"><th style="padding: 10px; width: 10%;">Qtd</th><th style="padding: 10px; width: 50%;">Material</th><th style="padding: 10px; text-align:right; width: 20%;">R$ Un.</th><th style="padding: 10px; text-align:right; width: 20%;">Total</th></tr></thead><tbody>';
-                for(let i=0; i<record.materials.length; i++) {
-                    let m = record.materials[i];
-                    const price = parseFloat(m.price || m.v || 0); 
-                    const q = parseFloat(m.qtd || m.q || 1); 
-                    const total = price * q; 
-                    totalValue += total; 
-                    matsHtml += '<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px;">' + q + '</td><td style="padding: 10px; word-break: break-word; white-space: pre-wrap;">' + window.escapeHtml(m.name) + ' (' + window.escapeHtml(m.brand||'-') + ')</td><td style="padding: 10px; text-align:right;">' + window.formatMoney(price) + '</td><td style="padding: 10px; text-align:right;">' + window.formatMoney(total) + '</td></tr>'; 
-                }
-                matsHtml += '<tr style="background: #f1f5f9; font-weight: bold;"><td colspan="3" style="padding: 10px; text-align: right;">TOTAL:</td><td style="padding: 10px; text-align:right; color: #1d4ed8;">' + window.formatMoney(totalValue) + '</td></tr></tbody></table>';
-            }
-            
-            let difH = record.difficulty ? '<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Dificuldade:</span> ' + record.difficulty + '</p>' : '';
-            let locH = '<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Cliente / Local:</span> ' + window.escapeHtml(record.cei || record.ceiId || '') + '</p>';
-            let timeH = record.timeStart ? '<p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Horário:</span> ' + record.timeStart + ' às ' + record.timeEnd + '</p>' : '';
-            let cmpH = record.companyName ? '<p style="margin:0;">color:#334155;"><span style="color:#64748b; font-weight:bold;">Empresa Terceira:</span> ' + window.escapeHtml(record.companyName) + '</p>' : '';
-            let obsH = record.obs ? '<h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Observações</h4><div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 20px;"><p style="margin:0; line-height:1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">' + window.escapeHtml(record.obs).replace(/\n/g, '<br>') + '</p></div>' : '';
-            
-            let docId = String(record.id);
-            if(docId.length > 6) docId = docId.substring(docId.length-6);
-
-            printArea.innerHTML = `
-            <div style="font-family: Arial, sans-serif; color: #334155; max-width: 800px; margin: 0 auto; word-wrap: break-word;">
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #1d4ed8; padding-bottom: 20px; margin-bottom: 20px;">
-                    <div><h1 style="margin:0; font-size: 24px; color:#1d4ed8;">LYM Eletrônicos</h1><p style="margin:5px 0 0; color:#64748b; font-size:14px;">Documento de ${typeLabel}</p></div>
-                    <div style="text-align: right; font-size:14px; color:#64748b;"><p style="margin:0;">Data: <strong>${window.formatDateBR(record.date)}</strong></p><p style="margin:0;">Ref: #LYM-${docId}</p></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 14px;">
-                    <div style="width:48%; word-wrap: break-word;">
-                        <p style="margin:0 0 8px 0; color:#334155;"><span style="color:#64748b; font-weight:bold;">Técnico / Responsável:</span> <span style="text-transform:capitalize;">${window.escapeHtml(uName)}</span></p>
-                        ${difH}
-                    </div>
-                    <div style="width:48%; word-wrap: break-word;">
-                        ${locH}
-                        ${timeH}
-                        ${cmpH}
-                    </div>
-                </div>
-                <h4 style="font-weight:bold; color:#334155; margin-bottom:10px; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Serviço Realizado / Descrição</h4>
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-                    <p style="margin:0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${window.escapeHtml(desc).replace(/\n/g, '<br>')}</p>
-                </div>
-                ${matsHtml}
-                ${obsH}
-                <div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:50px; border-top: 1px solid #e2e8f0; padding-top:20px;">LYM Eletrônicos - Relatório gerado pelo sistema.</div>
-            </div>`;
-            
-            window.showElement('printArea'); 
-            window.print(); 
-            setTimeout(function() { window.hideElement('printArea'); }, 1000);
-        };
-
-        // EXCLUSÃO EM MASSA
-        window.toggleSelectAll = function(source, type) { 
-            const checkboxes = document.querySelectorAll('.chk-row-' + type); 
-            for(let i=0; i<checkboxes.length; i++){
-                checkboxes[i].checked = source.checked;
-            }
-        };
-        
-        window.deleteSelectedRecords = function(type) { 
-            const checkboxes = document.querySelectorAll('.chk-row-' + type + ':checked'); 
-            if(checkboxes.length === 0) return window.showToast("Selecione pelo menos um item para excluir.", "error"); 
-            
-            window.confirmAction(async function() { 
-                const btn = document.getElementById('btnDelSel' + type); 
-                let originalText = "Excluir";
-                if(btn) {
-                    originalText = btn.innerHTML; 
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Apagando...'; 
-                    btn.disabled = true; 
-                }
-                
-                try { 
-                    for(let i=0; i<checkboxes.length; i++) { 
-                        await window.dbDelete(type, checkboxes[i].value); 
-                    } 
-                    window.logAudit('Exclusão em Massa: ' + checkboxes.length + ' itens da tabela ' + type); 
-                    window.showToast(checkboxes.length + ' itens excluídos com sucesso!'); 
-                    
-                    const selectAllCb = document.querySelector('th input[type="checkbox"]'); 
-                    if(selectAllCb) selectAllCb.checked = false; 
-                    
-                    window.setupAdminFilters(); 
-                } catch(e) { 
-                    window.showToast("Erro na exclusão em massa.", "error"); 
-                } finally { 
-                    if(btn) {
-                        btn.innerHTML = originalText; 
-                        btn.disabled = false; 
-                    }
-                } 
-            }); 
-        };
-
-        // BACKUP LOCAL E RESTAURAÇÃO
-        window.downloadLocalBackup = function(isAuto) {
             try { 
-                if(!isAuto) window.showToast("Preparando backup completo...", "info"); 
+                const toolItem = window.localData.tools.find(function(c) { return String(c.id) === String(toolId); }); 
+                if(!toolItem) throw new Error("Ferramenta não encontrada");
                 
-                const backupData = JSON.stringify(window.localData, null, 2); 
-                const blob = new Blob([backupData], { type: "application/json" }); 
-                const url = URL.createObjectURL(blob); 
-                const a = document.createElement("a"); 
-                a.href = url; 
+                let currentStock = parseInt(toolItem.availableStock || 0);
                 
-                const dataAtual = new Date().toISOString().split('T')[0]; 
-                a.download = isAuto ? 'LYM_AutoBackup_' + dataAtual + '.json' : 'LYM_Backup_Total_' + dataAtual + '.json'; 
+                if(type === 'Retirada' && currentStock < qtd) { 
+                    window.showToast("Quantidade indisponível na base!", "error"); 
+                    btn.innerHTML = origText; btn.disabled = false; 
+                    return; 
+                }
                 
-                document.body.appendChild(a); 
-                a.click(); 
-                document.body.removeChild(a); 
-                URL.revokeObjectURL(url); 
+                let newStock = type === 'Retirada' ? currentStock - qtd : currentStock + qtd; 
+                if (type === 'Devolução' && newStock > toolItem.totalStock) newStock = toolItem.totalStock; 
                 
-                if(!isAuto) { 
-                    window.logAudit('Realizou Backup Manual do Banco de Dados'); 
-                    window.showToast("Download do backup concluído com sucesso!"); 
-                } 
-            } catch(e) { 
-                console.error("Erro no backup:", e); 
-                window.showToast("Erro crítico ao gerar arquivo de backup.", "error"); 
-            }
-        };
-        
-        window.triggerRestore = function() { 
-            const fileInput = document.getElementById('restoreFile');
-            if(fileInput) fileInput.click(); 
-        };
-        
-        window.processRestoreFile = function(e) { 
-            const file = e.target.files[0]; 
-            if(!file) return; 
-            
-            const reader = new FileReader(); 
-            reader.onload = async function(ev) { 
-                try { 
-                    const data = JSON.parse(ev.target.result); 
-                    window.confirmAction(async function() { 
-                        window.showToast("Lendo arquivo de backup e restaurando banco de dados. Aguarde...", "info"); 
-                        const colsToRestore = ['ceis', 'users', 'reports', 'quotes', 'thirdParty', 'catalog', 'tools', 'stockMovements', 'toolMovements']; 
-                        let itemsRestored = 0; 
-                        
-                        for(let i=0; i<colsToRestore.length; i++) { 
-                            let col = colsToRestore[i];
-                            if(data[col] && Array.isArray(data[col])) { 
-                                // Sobrescreve local
-                                window.localData[col] = data[col]; 
-                                // Salva no Firebase
-                                for(let j=0; j<data[col].length; j++) { 
-                                    let item = data[col][j];
-                                    await window.dbSave(col, item.id, item); 
-                                    itemsRestored++; 
-                                } 
-                            } 
-                        } 
-                        window.logAudit('Restaurou Ponto de Backup (' + itemsRestored + ' registros processados)'); 
-                        window.showToast("Restauração concluída com sucesso! Atualizando sistema em 2 segundos..."); 
-                        
-                        setTimeout(function() { location.reload(); }, 2000); 
-                    }); 
-                } catch(err) { 
-                    console.error(err); 
-                    window.showToast("O arquivo de backup selecionado é inválido ou está corrompido.", "error"); 
-                } 
-                document.getElementById('restoreFile').value = ''; 
-            }; 
-            reader.readAsText(file); 
+                await window.dbSave('tools', toolItem.id, { availableStock: newStock }); 
+                
+                const recordId = Date.now().toString(); 
+                const recordData = { 
+                    id: recordId, 
+                    userId: window.currentSystemUser.id, 
+                    userName: window.currentSystemUser.login, 
+                    type: type, 
+                    date: date, 
+                    obs: obs, 
+                    toolId: toolItem.id, 
+                    toolName: toolItem.name, 
+                    qtd: qtd, 
+                    timestamp: new Date().toISOString() 
+                }; 
+                
+                await window.dbSave('toolMovements', recordId, recordData); 
+                window.logAudit('Cautela (' + type + '): ' + qtd + 'x ' + toolItem.name); 
+                window.showToast("Cautela registrada com sucesso!"); 
+                document.getElementById('toolMovementForm').reset(); 
+                window.renderActiveTab(); 
+            } catch(err) { window.showToast("Erro ao salvar.", "error"); } finally { btn.innerHTML = origText; btn.disabled = false; } 
         };
 
         // ==========================================
