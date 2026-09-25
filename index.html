@@ -2332,34 +2332,94 @@
         };
 
 // ==========================================
-        // 12. CRUD FUNCIONÁRIO (VISUALIZAR, EDITAR, EXCLUIR)
+        // 12. CRUD FUNCIONÁRIO (VISUALIZAR, EDITAR, EXCLUIR, IMPRIMIR)
         // ==========================================
+        window.previousTab = null;
+
         window.viewRecord = function(type, id) {
             const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
             if(!item) return window.showToast("Registro não encontrado.", "error");
             
-            let html = '<div class="space-y-3 text-sm text-slate-700 dark:text-slate-300">';
-            html += '<p><strong class="dark:text-white">Data:</strong> ' + window.formatDateBR(item.date) + '</p>';
+            const titleEl = document.getElementById('viewRecordTitle');
+            if(titleEl) {
+                titleEl.textContent = type === 'reports' ? 'Detalhes do Serviço' : (type === 'quotes' ? 'Detalhes do Orçamento' : 'Acompanhamento de Terceiro');
+            }
+            
+            let html = '<div class="space-y-4 text-sm text-slate-800 dark:text-slate-200">';
+            
+            html += '<div class="grid grid-cols-2 gap-4 border-b dark:border-slate-700 pb-3">';
+            html += '<div><p class="text-xs text-slate-500 dark:text-slate-400">Data</p><p class="font-bold text-base">' + window.formatDateBR(item.date) + '</p></div>';
             
             if(item.ceiId) {
                 const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
-                html += '<p><strong class="dark:text-white">CEI:</strong> ' + (cei ? window.escapeHtml(cei.name) : window.escapeHtml(item.ceiId)) + '</p>';
+                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400">CEI / Creche</p><p class="font-bold text-base">' + (cei ? window.escapeHtml(cei.name) : window.escapeHtml(item.ceiId)) + '</p></div>';
+            }
+            html += '</div>';
+
+            if(item.userName) {
+                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400">Técnico / Responsável</p><p class="font-medium">' + window.escapeHtml(item.userName) + '</p></div>';
             }
             
-            if(item.workDone) html += '<p><strong class="dark:text-white">Serviço/Escopo:</strong><br>' + window.escapeHtml(item.workDone).replace(/\n/g, '<br>') + '</p>';
-            if(item.obs) html += '<p><strong class="dark:text-white">Observações:</strong><br>' + window.escapeHtml(item.obs).replace(/\n/g, '<br>') + '</p>';
+            if(item.workDone) {
+                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Serviço / Escopo</p><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded border dark:border-slate-700">' + window.escapeHtml(item.workDone).replace(/\n/g, '<br>') + '</div></div>';
+            }
+            
+            if(item.materials && Array.isArray(item.materials) && item.materials.length > 0) {
+                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Materiais Utilizados/Orçados</p><ul class="list-disc pl-5 space-y-1 bg-slate-50 dark:bg-slate-900/50 p-3 rounded border dark:border-slate-700">';
+                item.materials.forEach(function(m) {
+                    html += '<li>' + m.qtd + 'x <strong>' + window.escapeHtml(m.name) + '</strong>' + (m.price ? ' - ' + window.formatMoney(m.price) : '') + '</li>';
+                });
+                html += '</ul></div>';
+            }
+
+            if(item.obs) {
+                html += '<div><p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Observações</p><div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded border dark:border-slate-700">' + window.escapeHtml(item.obs).replace(/\n/g, '<br>') + '</div></div>';
+            }
+
+            if(item.totalPrice) {
+                html += '<div class="mt-4 border-t dark:border-slate-700 pt-3 text-right"><p class="text-xs text-slate-500 dark:text-slate-400">Total do Orçamento</p><p class="font-bold text-xl text-green-600 dark:text-green-400">' + window.formatMoney(item.totalPrice) + '</p></div>';
+            }
+            
             html += '</div>';
             
             const viewContent = document.getElementById('viewRecordContent');
             if(viewContent) viewContent.innerHTML = html;
+
+            const btnPrint = document.getElementById('btnPrintRecord');
+            if(btnPrint) btnPrint.onclick = window.printRecord;
+            
             window.showElement('modalViewRecord');
+        };
+
+        window.printRecord = function() {
+            const content = document.getElementById('viewRecordContent');
+            const printArea = document.getElementById('printArea');
+            if(content && printArea) {
+                const title = document.getElementById('viewRecordTitle') ? document.getElementById('viewRecordTitle').textContent : 'Registro';
+                
+                let printHtml = '<div class="p-8 max-w-4xl mx-auto font-sans text-slate-800 bg-white min-h-screen">';
+                printHtml += '<div class="border-b-2 border-slate-800 pb-4 mb-6 flex justify-between items-center">';
+                printHtml += '<div><h1 class="text-2xl font-bold">LYM Eletrônicos</h1><p class="text-sm text-slate-500">Documento: ' + title + '</p></div>';
+                printHtml += '</div>';
+                
+                printHtml += content.innerHTML;
+                
+                printHtml += '<div class="mt-12 pt-8 border-t border-slate-300 text-center text-xs text-slate-500">';
+                printHtml += 'Gerado pelo LYM APP em ' + new Date().toLocaleString('pt-BR') + ' por ' + (window.currentSystemUser ? window.currentSystemUser.login : 'Sistema');
+                printHtml += '</div></div>';
+                
+                printArea.innerHTML = printHtml;
+                window.print();
+            }
         };
 
         window.editFuncRecord = function(type, id) {
             const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
             if(!item) return window.showToast("Registro não encontrado.", "error");
 
+            window.previousTab = window.activeTab;
             window.editingItemId = id;
+            
             if (type === 'reports') window.activeTab = 'func-reports';
             else if (type === 'quotes') window.activeTab = 'func-quotes';
             else if (type === 'thirdParty') window.activeTab = 'func-thirdParty';
@@ -2385,6 +2445,39 @@
                 if (type === 'thirdParty' && document.getElementById('companyNameThirdParty') && item.companyName) {
                     document.getElementById('companyNameThirdParty').value = item.companyName;
                 }
+
+                if (type === 'quotes' && document.getElementById('statusQuote') && item.status) {
+                    document.getElementById('statusQuote').value = item.status;
+                }
+
+                const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
+                if(matContainerId && item.materials && Array.isArray(item.materials)) {
+                    const container = document.getElementById(matContainerId);
+                    if(container) {
+                        container.innerHTML = ''; 
+                        window.materialCount = 0; 
+                        
+                        if(item.materials.length === 0) {
+                            container.innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>';
+                        } else {
+                            item.materials.forEach(function(mat) {
+                                window.addMaterialRow(matContainerId, false);
+                                const row = container.lastElementChild;
+                                if(row) {
+                                    const nameInput = row.querySelector('.mat-name');
+                                    const brandInput = row.querySelector('.mat-brand');
+                                    const qtdInput = row.querySelector('.mat-qtd');
+                                    const priceInput = row.querySelector('.mat-price');
+                                    
+                                    if(nameInput) nameInput.value = mat.name || '';
+                                    if(brandInput) brandInput.value = mat.brand || '';
+                                    if(qtdInput) qtdInput.value = mat.qtd || 1;
+                                    if(priceInput) priceInput.value = mat.price || '';
+                                }
+                            });
+                        }
+                    }
+                }
                 
                 const cancelBtn = document.getElementById('cancelEditBtn');
                 if(cancelBtn) window.showElement('cancelEditBtn');
@@ -2396,7 +2489,12 @@
                 try {
                     await window.dbDelete(type, id);
                     window.showToast("Registro excluído com sucesso!");
-                    window.renderActiveTab();
+                    
+                    if(window.activeTab.startsWith('admin-')) {
+                        window.applyFilters(type);
+                    } else {
+                        window.renderActiveTab();
+                    }
                 } catch(e) {
                     window.showToast("Erro ao excluir.", "error");
                 }
@@ -2405,6 +2503,12 @@
 
         window.cancelEdit = function() {
             window.editingItemId = null;
+            if(window.previousTab) {
+                window.activeTab = window.previousTab;
+                window.previousTab = null;
+            } else {
+                window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-history';
+            }
             window.renderActiveTab();
         };
 
