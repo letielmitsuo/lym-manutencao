@@ -3011,6 +3011,268 @@
             window.renderActiveTab();
         };
 
+// ==========================================
+        // ATUALIZAÇÃO: TROCA DE TÉCNICOS (ADMIN) E CORREÇÃO DE FERRAMENTAS
+        // ==========================================
+
+        window.openToolModal = function() { 
+            window.editingItemId = null; 
+            const form = document.getElementById('toolForm');
+            if(form) form.reset(); 
+            const title = document.getElementById('modalTitleTool');
+            if(title) title.textContent = 'Nova Ferramenta'; 
+            window.showElement('modalTool'); 
+        };
+
+        window.populateCeiSelect = function() { 
+            const suffixes = ['Rep', 'Quote', 'ThirdParty'];
+            for(let i=0; i<suffixes.length; i++) {
+                let sffx = suffixes[i];
+                const sel = document.getElementById('ceiSelect' + sffx); 
+                if (sel) { 
+                    let sorted = window.safeSort(window.localData.ceis, function(a,b) {
+                        let nameA = a && a.name ? String(a.name) : "";
+                        let nameB = b && b.name ? String(b.name) : "";
+                        return nameA.localeCompare(nameB);
+                    });
+                    
+                    let opts = '<option value="">Selecione a Creche...</option>';
+                    for(let j=0; j<sorted.length; j++) {
+                        let c = sorted[j];
+                        opts += '<option value="' + c.id + '" data-id="' + c.id + '">' + window.escapeHtml(c.name) + '</option>';
+                    }
+                    sel.innerHTML = opts; 
+                } 
+
+                // Injeção do Campo de Troca de Técnico (Apenas Admin)
+                const formId = sffx === 'Rep' ? 'reportForm' : (sffx === 'Quote' ? 'quoteForm' : 'thirdPartyForm');
+                const formEl = document.getElementById(formId);
+                
+                if (formEl && window.currentSystemUser && window.currentSystemUser.role === 'admin') {
+                    let adminContainer = document.getElementById('adminOverride' + sffx);
+                    if (!adminContainer) {
+                        const hiddenInput = document.getElementById('editId' + (sffx === 'Rep' ? 'reports' : (sffx === 'Quote' ? 'quotes' : 'thirdParty')));
+                        adminContainer = document.createElement('div');
+                        adminContainer.id = 'adminOverride' + sffx;
+                        adminContainer.className = "bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 mt-2 mb-4 animate-fade-in";
+                        adminContainer.innerHTML = '<label for="adminUser' + sffx + '" class="block text-[12px] font-bold text-red-700 dark:text-red-400 mb-1 text-center"><i class="fas fa-shield-alt mr-1"></i> Técnico Responsável (Troca via Admin)</label><select id="adminUser' + sffx + '" class="w-full p-2 border border-red-300 dark:border-red-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none focus:border-red-500 text-center transition font-semibold"></select>';
+                        
+                        if(hiddenInput && hiddenInput.parentNode) {
+                            hiddenInput.parentNode.insertBefore(adminContainer, hiddenInput.nextSibling);
+                        } else {
+                            formEl.prepend(adminContainer);
+                        }
+                    }
+                    
+                    adminContainer.classList.remove('hidden');
+                    const adminSelect = document.getElementById('adminUser' + sffx);
+                    if (adminSelect) {
+                        let uOpts = '<option value="">(Manter Atual)</option>';
+                        let sortedUsers = window.safeSort(window.localData.users, function(a,b) { return String(a.login).localeCompare(String(b.login)); });
+                        for(let k=0; k<sortedUsers.length; k++) {
+                            let u = sortedUsers[k];
+                            uOpts += '<option value="' + u.id + '">' + window.escapeHtml(u.login) + ' (' + (u.role === 'func_cftv' ? 'CFTV' : 'Geral') + ')</option>';
+                        }
+                        adminSelect.innerHTML = uOpts;
+                    }
+                } else {
+                    let adminContainer = document.getElementById('adminOverride' + sffx);
+                    if (adminContainer) adminContainer.classList.add('hidden');
+                }
+            }
+        };
+
+        window.editFuncRecord = function(type, id) {
+            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
+            if(!item) return window.showToast("Registro não encontrado.", "error");
+
+            window.previousTab = window.activeTab;
+            window.editingItemId = id;
+            
+            if (type === 'reports') window.activeTab = 'func-reports';
+            else if (type === 'quotes') window.activeTab = 'func-quotes';
+            else if (type === 'thirdParty') window.activeTab = 'func-thirdParty';
+            
+            window.renderActiveTab();
+            
+            setTimeout(function() {
+                let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                
+                const fields = ['date', 'timeStart', 'timeEnd', 'workDone', 'obs'];
+                fields.forEach(function(f) {
+                    const el = document.getElementById(f + sfx);
+                    if(el && item[f]) el.value = item[f];
+                });
+                
+                const elCei = document.getElementById('ceiSelect' + sfx);
+                if(elCei && item.ceiId) elCei.value = item.ceiId;
+                
+                if (type === 'reports' && document.getElementById('diffRep') && item.difficulty) {
+                    document.getElementById('diffRep').value = item.difficulty;
+                }
+                
+                if (type === 'thirdParty' && document.getElementById('companyNameThirdParty') && item.companyName) {
+                    document.getElementById('companyNameThirdParty').value = item.companyName;
+                }
+
+                if (type === 'quotes' && document.getElementById('statusQuote') && item.status) {
+                    document.getElementById('statusQuote').value = item.status;
+                }
+
+                const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
+                if(matContainerId && item.materials && Array.isArray(item.materials)) {
+                    const container = document.getElementById(matContainerId);
+                    if(container) {
+                        container.innerHTML = ''; 
+                        window.materialCount = 0; 
+                        
+                        if(item.materials.length === 0) {
+                            container.innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>';
+                        } else {
+                            item.materials.forEach(function(mat) {
+                                window.addMaterialRow(matContainerId, false);
+                                const row = container.lastElementChild;
+                                if(row) {
+                                    const nameInput = row.querySelector('.mat-name');
+                                    const brandInput = row.querySelector('.mat-brand');
+                                    const qtdInput = row.querySelector('.mat-qtd');
+                                    const priceInput = row.querySelector('.mat-price');
+                                    
+                                    if(nameInput) nameInput.value = mat.name || '';
+                                    if(brandInput) brandInput.value = mat.brand || '';
+                                    if(qtdInput) qtdInput.value = mat.qtd || 1;
+                                    if(priceInput) priceInput.value = mat.price || '';
+                                }
+                            });
+                        }
+                    }
+                }
+
+                // Carrega o usuário original no dropdown do Admin
+                if (window.currentSystemUser.role === 'admin') {
+                    const adminSelect = document.getElementById('adminUser' + sfx);
+                    if (adminSelect) {
+                        const u = window.localData.users.find(function(x) { return x.login === item.userName; });
+                        if (u) adminSelect.value = u.id;
+                        else adminSelect.value = "";
+                    }
+                }
+                
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                if(cancelBtn) window.showElement('cancelEditBtn');
+            }, 150);
+        };
+
+        window.saveRecord = async function(e, type) {
+            e.preventDefault();
+            
+            let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+            
+            let data = {
+                ceiId: document.getElementById('ceiSelect' + sfx).value,
+                date: document.getElementById('date' + sfx).value,
+                timeStart: document.getElementById('timeStart' + sfx).value,
+                timeEnd: document.getElementById('timeEnd' + sfx).value,
+                workDone: document.getElementById('workDone' + sfx).value,
+                obs: document.getElementById('obs' + sfx).value
+            };
+
+            if (type === 'reports') {
+                data.difficulty = document.getElementById('diffRep').value;
+            } else if (type === 'quotes') {
+                data.status = document.getElementById('statusQuote').value;
+            } else if (type === 'thirdParty') {
+                data.companyName = document.getElementById('companyNameThirdParty').value;
+            }
+
+            let materials = [];
+            let totalPrice = 0;
+            const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
+            
+            if (matContainerId) {
+                const container = document.getElementById(matContainerId);
+                if (container) {
+                    const rows = container.querySelectorAll('[id^="mat_"]');
+                    rows.forEach(function(row) {
+                        const n = row.querySelector('.mat-name') ? row.querySelector('.mat-name').value : '';
+                        const b = row.querySelector('.mat-brand') ? row.querySelector('.mat-brand').value : '';
+                        const q = row.querySelector('.mat-qtd') ? parseFloat(row.querySelector('.mat-qtd').value) : 1;
+                        const p = row.querySelector('.mat-price') ? parseFloat(row.querySelector('.mat-price').value) : 0;
+                        
+                        if (n) {
+                            materials.push({ name: n, brand: b, qtd: q, price: p });
+                            totalPrice += (q * p);
+                        }
+                    });
+                }
+                data.materials = materials;
+                data.totalPrice = totalPrice;
+            }
+
+            const editId = window.editingItemId;
+            const id = editId || Date.now().toString();
+
+            let originalRecord = null;
+            if (editId) {
+                originalRecord = (window.localData[type] || []).find(function(x) { return String(x.id) === String(editId); });
+            }
+
+            // Verifica se o Admin alterou o técnico
+            let adminOverrideUser = null;
+            if (window.currentSystemUser.role === 'admin') {
+                const adminSelect = document.getElementById('adminUser' + sfx);
+                if (adminSelect && adminSelect.value) {
+                    adminOverrideUser = window.localData.users.find(function(u) { return String(u.id) === String(adminSelect.value); });
+                }
+            }
+
+            if (originalRecord) {
+                data.userId = adminOverrideUser ? adminOverrideUser.id : originalRecord.userId;
+                data.userName = adminOverrideUser ? adminOverrideUser.login : originalRecord.userName;
+                data.userRole = adminOverrideUser ? adminOverrideUser.role : originalRecord.userRole;
+                data.photos = originalRecord.photos || [];
+                data.telegramSent = originalRecord.telegramSent || false;
+                data.pendingTelegram = originalRecord.pendingTelegram || false;
+            } else {
+                data.userId = adminOverrideUser ? adminOverrideUser.id : window.currentSystemUser.id;
+                data.userName = adminOverrideUser ? adminOverrideUser.login : window.currentSystemUser.login;
+                data.userRole = adminOverrideUser ? adminOverrideUser.role : window.currentSystemUser.role;
+                data.photos = [];
+                data.telegramSent = false;
+                data.pendingTelegram = true;
+            }
+
+            try {
+                const btnId = 'btnSubmit' + (type === 'reports' ? 'Report' : (type === 'quotes' ? 'Quote' : 'ThirdParty'));
+                const btn = document.getElementById(btnId);
+                let origText = "Salvar";
+                
+                if(btn) { 
+                    origText = btn.innerHTML; 
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; 
+                    btn.disabled = true; 
+                }
+                
+                await window.dbSave(type, id, data);
+                window.logAudit((editId ? 'Editou ' : 'Registrou ') + type + ' ID: ' + id);
+                
+                window.showToast("Registro salvo com sucesso!");
+                
+                window.editingItemId = null;
+                
+                if(window.previousTab) {
+                    window.activeTab = window.previousTab;
+                    window.previousTab = null;
+                } else {
+                    window.activeTab = window.currentSystemUser.role === 'admin' ? ('admin-' + type) : 'func-history';
+                }
+                
+                window.renderActiveTab();
+            } catch (err) {
+                window.showToast("Erro ao salvar.", "error");
+            }
+        };
+
         // ==========================================
         // 13. INICIALIZAÇÃO
         // ==========================================
