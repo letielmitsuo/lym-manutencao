@@ -2736,7 +2736,7 @@
         window.loadDraft = function(type) { /* Lógica auxiliar para rascunhos */ };
 
         // Integração direta com Telegram sem passar pelo Banco de Dados
-        window.sendToTelegramDirect = async function(record, files, type) {
+        window.sendToTelegramDirect = async function(record, files, type, isEdit) {
             const token = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
             if (!token) return;
 
@@ -2748,8 +2748,11 @@
 
             let typeLabel = type === 'reports' ? 'SERVIÇO' : (type === 'quotes' ? 'ORÇAMENTO' : 'ACOMP. TERCEIRO');
             let icon = type === 'reports' ? '🔧' : (type === 'quotes' ? '📄' : '👷');
+            
+            // Adiciona a TAG de Atualização se for edição
+            let actionLabel = isEdit ? 'ATUALIZAÇÃO DE' : 'NOVO';
 
-            let msg = `${icon} *NOVO ${typeLabel}*\n`;
+            let msg = `${icon} *${actionLabel} ${typeLabel}*\n`;
             msg += `*Data:* ${window.formatDateBR(record.date)}\n`;
             msg += `*Técnico:* ${record.userName}\n`;
             
@@ -2856,6 +2859,7 @@
 
             const editId = window.editingItemId;
             const id = editId || Date.now().toString();
+            const isEditMode = !!editId; // Variável para rastrear se é edição
 
             let originalRecord = null;
             if (editId) {
@@ -2905,10 +2909,8 @@
                 const photoInput = document.getElementById(photoInputId);
                 const files = photoInput && photoInput.files ? Array.from(photoInput.files) : [];
                 
-                // 3. Chamar função de envio direto para o Telegram (roda em background)
-                if (!editId || files.length > 0) {
-                    window.sendToTelegramDirect(data, files, type);
-                }
+                // 3. Chamar função de envio direto para o Telegram (AGORA ENVIA SEMPRE!)
+                window.sendToTelegramDirect(data, files, type, isEditMode);
                 
                 window.showToast("Registro salvo e enviado ao Telegram!");
                 
