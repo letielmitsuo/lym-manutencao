@@ -2531,6 +2531,16 @@
                         }
                     }
                 }
+
+                // CARREGA O USUÁRIO ORIGINAL NO DROPDOWN DO ADMIN
+                if (window.currentSystemUser.role === 'admin') {
+                    const adminSelect = document.getElementById('adminUser' + sfx);
+                    if (adminSelect) {
+                        const u = window.localData.users.find(function(x) { return x.login === item.userName; });
+                        if (u) adminSelect.value = u.id;
+                        else adminSelect.value = "";
+                    }
+                }
                 
                 const cancelBtn = document.getElementById('cancelEditBtn');
                 if(cancelBtn) window.showElement('cancelEditBtn');
