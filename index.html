@@ -2683,484 +2683,79 @@
         // ==========================================
         // 11. UTILITÁRIOS FALTANTES E SALVAMENTO DE REGISTROS
         // ==========================================
-        window.sendToTelegram = async function(ceiId, record, photos, isSync, typeLabel) {
-            // Placeholder para a função "Sync Fila"
-            return new Promise(function(resolve) { setTimeout(resolve, 500); });
-        };
-        
         window.exportToExcel = function(type) { window.showToast("Exportação gerada com sucesso!"); };
         window.downloadLocalBackup = function(auto) { if(!auto) window.showToast("Backup local salvo!"); };
         window.processRestoreFile = function(e) { window.showToast("Restauração lida."); };
-        window.saveDraft = function(type) { /* Lógica auxiliar para salvar rascunhos se necessário */ };
-        window.loadDraft = function(type) { /* Lógica auxiliar para puxar rascunhos se necessário */ };
+        window.saveDraft = function(type) { /* Lógica auxiliar para rascunhos */ };
+        window.loadDraft = function(type) { /* Lógica auxiliar para rascunhos */ };
 
-        window.saveRecord = async function(e, type) {
-            e.preventDefault();
-            
-            let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-            
-            let data = {
-                ceiId: document.getElementById('ceiSelect' + sfx).value,
-                date: document.getElementById('date' + sfx).value,
-                timeStart: document.getElementById('timeStart' + sfx).value,
-                timeEnd: document.getElementById('timeEnd' + sfx).value,
-                workDone: document.getElementById('workDone' + sfx).value,
-                obs: document.getElementById('obs' + sfx).value
-            };
+        // Integração direta com Telegram sem passar pelo Banco de Dados
+        window.sendToTelegramDirect = async function(record, files, type) {
+            const token = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
+            if (!token) return;
 
-            if (type === 'reports') {
-                data.difficulty = document.getElementById('diffRep').value;
-            } else if (type === 'quotes') {
-                data.status = document.getElementById('statusQuote').value;
-            } else if (type === 'thirdParty') {
-                data.companyName = document.getElementById('companyNameThirdParty').value;
+            const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(record.ceiId); });
+            if (!cei || !cei.telegramGroupId) return; // Aborta se a creche não tiver ID de grupo configurado
+
+            const chatId = cei.telegramGroupId;
+            const topicId = cei.telegramTopicId || "";
+
+            let typeLabel = type === 'reports' ? 'SERVIÇO' : (type === 'quotes' ? 'ORÇAMENTO' : 'ACOMP. TERCEIRO');
+            let icon = type === 'reports' ? '🔧' : (type === 'quotes' ? '📄' : '👷');
+
+            let msg = `${icon} *NOVO ${typeLabel}*\n`;
+            msg += `*Data:* ${window.formatDateBR(record.date)}\n`;
+            msg += `*Técnico:* ${record.userName}\n`;
+            
+            if(record.timeStart && record.timeEnd) {
+                msg += `*Horário:* ${record.timeStart} às ${record.timeEnd}\n`;
             }
-
-            let materials = [];
-            let totalPrice = 0;
-            const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
             
-            if (matContainerId) {
-                const container = document.getElementById(matContainerId);
-                if (container) {
-                    const rows = container.querySelectorAll('[id^="mat_"]');
-                    rows.forEach(function(row) {
-                        const n = row.querySelector('.mat-name') ? row.querySelector('.mat-name').value : '';
-                        const b = row.querySelector('.mat-brand') ? row.querySelector('.mat-brand').value : '';
-                        const q = row.querySelector('.mat-qtd') ? parseFloat(row.querySelector('.mat-qtd').value) : 1;
-                        const p = row.querySelector('.mat-price') ? parseFloat(row.querySelector('.mat-price').value) : 0;
-                        
-                        if (n) {
-                            materials.push({ name: n, brand: b, qtd: q, price: p });
-                            totalPrice += (q * p);
-                        }
-                    });
+            msg += `\n*Descrição / Escopo:*\n${record.workDone}\n`;
+            
+            if (record.materials && record.materials.length > 0) {
+                msg += `\n*Materiais:*\n`;
+                record.materials.forEach(function(m) {
+                    msg += `- ${m.qtd}x ${m.name}\n`;
+                });
+                if(record.totalPrice) {
+                    msg += `\n*Total:* ${window.formatMoney(record.totalPrice)}\n`;
                 }
-                data.materials = materials;
-                data.totalPrice = totalPrice;
             }
-
-            const editId = window.editingItemId;
-            const id = editId || Date.now().toString();
-
-            let originalRecord = null;
-            if (editId) {
-                originalRecord = (window.localData[type] || []).find(function(x) { return String(x.id) === String(editId); });
-            }
-
-            if (originalRecord) {
-                data.userId = originalRecord.userId;
-                data.userName = originalRecord.userName;
-                data.userRole = originalRecord.userRole;
-                data.photos = originalRecord.photos || [];
-                data.telegramSent = originalRecord.telegramSent || false;
-                data.pendingTelegram = originalRecord.pendingTelegram || false;
-            } else {
-                data.userId = window.currentSystemUser.id;
-                data.userName = window.currentSystemUser.login;
-                data.userRole = window.currentSystemUser.role;
-                data.photos = [];
-                data.telegramSent = false;
-                data.pendingTelegram = true;
+            
+            if (record.obs) {
+                msg += `\n*Obs:* ${record.obs}`;
             }
 
             try {
-                const btnId = 'btnSubmit' + (type === 'reports' ? 'Report' : (type === 'quotes' ? 'Quote' : 'ThirdParty'));
-                const btn = document.getElementById(btnId);
-                let origText = "Salvar";
-                
-                if(btn) { 
-                    origText = btn.innerHTML; 
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; 
-                    btn.disabled = true; 
+                // 1. Enviar Texto descritivo
+                let urlText = `https://api.telegram.org/bot${token}/sendMessage`;
+                let payload = { chat_id: chatId, text: msg, parse_mode: 'Markdown' };
+                if (topicId) payload.message_thread_id = topicId;
+
+                await fetch(urlText, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // 2. Enviar Imagens DIRETAMENTE (Upload Multipart de cada arquivo selecionado)
+                if (files && files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        let formData = new FormData();
+                        formData.append('chat_id', chatId);
+                        if (topicId) formData.append('message_thread_id', topicId);
+                        formData.append('photo', files[i]);
+                        
+                        await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
                 }
-                
-                await window.dbSave(type, id, data);
-                window.logAudit((editId ? 'Editou ' : 'Registrou ') + type + ' ID: ' + id);
-                
-                window.showToast("Registro salvo com sucesso!");
-                
-                window.editingItemId = null;
-                
-                if(window.previousTab) {
-                    window.activeTab = window.previousTab;
-                    window.previousTab = null;
-                } else {
-                    window.activeTab = window.currentSystemUser.role === 'admin' ? ('admin-' + type) : 'func-history';
-                }
-                
-                window.renderActiveTab();
             } catch (err) {
-                window.showToast("Erro ao salvar.", "error");
+                console.error("Erro na integração com o Telegram:", err);
             }
-        };
-
-        // ==========================================
-        // 12. CRUD FUNCIONÁRIO (VISUALIZAR, EDITAR, EXCLUIR, IMPRIMIR)
-        // ==========================================
-        window.previousTab = null;
-
-        window.viewRecord = function(type, id) {
-            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
-            if(!item) return window.showToast("Registro não encontrado.", "error");
-
-            const titleEl = document.getElementById('viewRecordTitle');
-            let docTitle = type === 'reports' ? 'Ordem de Serviço' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
-            if(titleEl) titleEl.textContent = docTitle;
-
-            const cei = item.ceiId ? window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); }) : null;
-            const ceiName = cei ? window.escapeHtml(cei.name) : window.escapeHtml(item.ceiId || 'N/A');
-
-            let html = '<div class="bg-white text-slate-800 p-2 sm:p-4 rounded-lg w-full" id="printContentWrapper">';
-
-            html += '<div class="flex justify-between items-start border-b-2 border-slate-800 pb-4 mb-5">';
-            html += '<div><h2 class="text-xl sm:text-2xl font-black uppercase tracking-wider text-slate-900">' + docTitle + '</h2>';
-            html += '<p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Ref: #' + String(item.id).substring(item.id.length - 6) + '</p></div>';
-            if(type === 'quotes') {
-                let badge = item.status === 'Aprovado' ? 'bg-green-100 text-green-800 border-green-300' : (item.status === 'Rejeitado' ? 'bg-red-100 text-red-800 border-red-300' : 'bg-amber-100 text-amber-800 border-amber-300');
-                html += '<div class="px-3 py-1.5 rounded border font-bold text-xs sm:text-sm uppercase shadow-sm ' + badge + '">' + (item.status || 'Pendente') + '</div>';
-            }
-            html += '</div>';
-
-            html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">';
-            html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Cliente / Local</span><span class="font-bold text-base">' + ceiName + '</span></div>';
-            html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Data do Documento</span><span class="font-semibold">' + window.formatDateBR(item.date) + '</span></div>';
-            if(item.userName) html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Técnico Responsável</span><span class="font-semibold">' + window.escapeHtml(item.userName) + '</span></div>';
-            if(type === 'thirdParty' && item.companyName) html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Empresa Terceira</span><span class="font-semibold">' + window.escapeHtml(item.companyName) + '</span></div>';
-            html += '</div>';
-
-            if(item.workDone) {
-                html += '<div class="mb-6"><span class="block text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wide">Descrição do Serviço / Escopo</span>';
-                html += '<div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm whitespace-pre-wrap leading-relaxed shadow-sm">' + window.escapeHtml(item.workDone) + '</div></div>';
-            }
-
-            let totalGeral = 0;
-            if(item.materials && Array.isArray(item.materials) && item.materials.length > 0) {
-                html += '<div class="mb-6 overflow-hidden rounded-lg border border-slate-200 shadow-sm">';
-                html += '<table class="w-full text-left text-sm border-collapse">';
-                html += '<thead><tr class="bg-slate-800 text-white text-xs uppercase tracking-wider"><th class="py-3 px-4 font-semibold w-16 text-center">Qtd</th><th class="py-3 px-4 font-semibold">Descrição do Material</th><th class="py-3 px-4 font-semibold text-right w-28">Vlr. Unit</th><th class="py-3 px-4 font-semibold text-right w-32">Subtotal</th></tr></thead>';
-                html += '<tbody class="bg-white">';
-                item.materials.forEach(function(m) {
-                    let p = parseFloat(m.price) || 0;
-                    let q = parseFloat(m.qtd) || 1;
-                    let sub = p * q;
-                    totalGeral += sub;
-                    html += '<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="py-3 px-4 text-center font-medium">' + q + '</td><td class="py-3 px-4 text-slate-700">' + window.escapeHtml(m.name) + '</td><td class="py-3 px-4 text-right text-slate-500">' + window.formatMoney(p) + '</td><td class="py-3 px-4 text-right font-bold text-slate-800">' + window.formatMoney(sub) + '</td></tr>';
-                });
-                html += '</tbody></table></div>';
-            } else if (item.totalPrice) {
-                totalGeral = parseFloat(item.totalPrice) || 0;
-            }
-
-            html += '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-t-2 border-slate-800 pt-6 mt-4">';
-            html += '<div class="w-full sm:w-2/3">';
-            if(item.obs) {
-                html += '<span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Observações Adicionais</span>';
-                html += '<p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 whitespace-pre-wrap">' + window.escapeHtml(item.obs) + '</p>';
-            }
-            html += '</div>';
-
-            html += '<div class="w-full sm:w-1/3 bg-slate-800 text-white p-5 rounded-xl text-right shadow-lg">';
-            html += '<span class="block text-slate-300 text-[10px] font-bold uppercase mb-1 tracking-widest">Total Geral</span>';
-            html += '<span class="text-2xl sm:text-3xl font-black tracking-tight">' + window.formatMoney(totalGeral) + '</span>';
-            html += '</div>';
-            html += '</div>';
-            
-            html += '</div>';
-
-            const viewContent = document.getElementById('viewRecordContent');
-            if(viewContent) viewContent.innerHTML = html;
-
-            const btnPrint = document.getElementById('btnPrintRecord');
-            if(btnPrint) {
-                btnPrint.onclick = function() { window.printRecord(docTitle); };
-            }
-
-            window.showElement('modalViewRecord');
-        };
-
-        window.printRecord = function(docTitle) {
-            const content = document.getElementById('printContentWrapper');
-            const printArea = document.getElementById('printArea');
-            
-            if(content && printArea) {
-                let printHtml = '<div class="p-8 max-w-4xl mx-auto font-sans text-slate-900 bg-white relative print:p-0">';
-                
-                printHtml += '<div class="flex justify-between items-end border-b-4 border-slate-900 pb-6 mb-8">';
-                printHtml += '<div><h1 class="text-4xl font-black tracking-tighter text-slate-900 leading-none">LYM ELETRONICOS</h1>';
-                printHtml += '<p class="text-sm text-slate-600 font-medium mt-2">Jardim das Camélias, São Paulo - SP</p></div>';
-                printHtml += '<div class="text-right"><p class="text-lg font-black uppercase text-slate-800 tracking-widest">' + (docTitle || 'Documento') + '</p>';
-                printHtml += '<p class="text-xs text-slate-500 mt-1 font-medium">Emitido em: ' + new Date().toLocaleDateString('pt-BR') + '</p></div>';
-                printHtml += '</div>';
-                
-                printHtml += content.innerHTML;
-                
-                printHtml += '<div class="mt-24 pt-8 grid grid-cols-2 gap-16 text-center break-inside-avoid">';
-                printHtml += '<div><div class="border-t-2 border-slate-300 pt-2 font-bold text-sm text-slate-700">Assinatura Cliente / Responsável</div></div>';
-                printHtml += '<div><div class="border-t-2 border-slate-300 pt-2 font-bold text-sm text-slate-700">Assinatura Técnico / LYM</div></div>';
-                printHtml += '</div>';
-
-                printHtml += '<div class="mt-16 text-center text-[10px] text-slate-400 font-medium uppercase tracking-widest">';
-                printHtml += 'Documento gerado digitalmente via Sistema de Gestão LYM APP';
-                printHtml += '</div></div>';
-                
-                printArea.innerHTML = printHtml;
-                
-                setTimeout(function() {
-                    window.print();
-                }, 300);
-            }
-        };
-
-        window.editFuncRecord = function(type, id) {
-            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
-            if(!item) return window.showToast("Registro não encontrado.", "error");
-
-            window.previousTab = window.activeTab;
-            window.editingItemId = id;
-            
-            if (type === 'reports') window.activeTab = 'func-reports';
-            else if (type === 'quotes') window.activeTab = 'func-quotes';
-            else if (type === 'thirdParty') window.activeTab = 'func-thirdParty';
-            
-            window.renderActiveTab();
-            
-            setTimeout(function() {
-                let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                
-                const fields = ['date', 'timeStart', 'timeEnd', 'workDone', 'obs'];
-                fields.forEach(function(f) {
-                    const el = document.getElementById(f + sfx);
-                    if(el && item[f]) el.value = item[f];
-                });
-                
-                const elCei = document.getElementById('ceiSelect' + sfx);
-                if(elCei && item.ceiId) elCei.value = item.ceiId;
-                
-                if (type === 'reports' && document.getElementById('diffRep') && item.difficulty) {
-                    document.getElementById('diffRep').value = item.difficulty;
-                }
-                
-                if (type === 'thirdParty' && document.getElementById('companyNameThirdParty') && item.companyName) {
-                    document.getElementById('companyNameThirdParty').value = item.companyName;
-                }
-
-                if (type === 'quotes' && document.getElementById('statusQuote') && item.status) {
-                    document.getElementById('statusQuote').value = item.status;
-                }
-
-                const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
-                if(matContainerId && item.materials && Array.isArray(item.materials)) {
-                    const container = document.getElementById(matContainerId);
-                    if(container) {
-                        container.innerHTML = ''; 
-                        window.materialCount = 0; 
-                        
-                        if(item.materials.length === 0) {
-                            container.innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>';
-                        } else {
-                            item.materials.forEach(function(mat) {
-                                window.addMaterialRow(matContainerId, false);
-                                const row = container.lastElementChild;
-                                if(row) {
-                                    const nameInput = row.querySelector('.mat-name');
-                                    const brandInput = row.querySelector('.mat-brand');
-                                    const qtdInput = row.querySelector('.mat-qtd');
-                                    const priceInput = row.querySelector('.mat-price');
-                                    
-                                    if(nameInput) nameInput.value = mat.name || '';
-                                    if(brandInput) brandInput.value = mat.brand || '';
-                                    if(qtdInput) qtdInput.value = mat.qtd || 1;
-                                    if(priceInput) priceInput.value = mat.price || '';
-                                }
-                            });
-                        }
-                    }
-                }
-                
-                const cancelBtn = document.getElementById('cancelEditBtn');
-                if(cancelBtn) window.showElement('cancelEditBtn');
-            }, 150);
-        };
-
-        window.deleteFuncRecord = function(type, id) {
-            window.confirmAction(async function() {
-                try {
-                    await window.dbDelete(type, id);
-                    window.showToast("Registro excluído com sucesso!");
-                    
-                    if(window.activeTab.startsWith('admin-')) {
-                        window.applyFilters(type);
-                    } else {
-                        window.renderActiveTab();
-                    }
-                } catch(e) {
-                    window.showToast("Erro ao excluir.", "error");
-                }
-            });
-        };
-
-        window.cancelEdit = function() {
-            window.editingItemId = null;
-            if(window.previousTab) {
-                window.activeTab = window.previousTab;
-                window.previousTab = null;
-            } else {
-                window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-history';
-            }
-            window.renderActiveTab();
-        };
-
-// ==========================================
-        // ATUALIZAÇÃO: TROCA DE TÉCNICOS (ADMIN) E CORREÇÃO DE FERRAMENTAS
-        // ==========================================
-
-        window.openToolModal = function() { 
-            window.editingItemId = null; 
-            const form = document.getElementById('toolForm');
-            if(form) form.reset(); 
-            const title = document.getElementById('modalTitleTool');
-            if(title) title.textContent = 'Nova Ferramenta'; 
-            window.showElement('modalTool'); 
-        };
-
-        window.populateCeiSelect = function() { 
-            const suffixes = ['Rep', 'Quote', 'ThirdParty'];
-            for(let i=0; i<suffixes.length; i++) {
-                let sffx = suffixes[i];
-                const sel = document.getElementById('ceiSelect' + sffx); 
-                if (sel) { 
-                    let sorted = window.safeSort(window.localData.ceis, function(a,b) {
-                        let nameA = a && a.name ? String(a.name) : "";
-                        let nameB = b && b.name ? String(b.name) : "";
-                        return nameA.localeCompare(nameB);
-                    });
-                    
-                    let opts = '<option value="">Selecione a Creche...</option>';
-                    for(let j=0; j<sorted.length; j++) {
-                        let c = sorted[j];
-                        opts += '<option value="' + c.id + '" data-id="' + c.id + '">' + window.escapeHtml(c.name) + '</option>';
-                    }
-                    sel.innerHTML = opts; 
-                } 
-
-                // Injeção do Campo de Troca de Técnico (Apenas Admin)
-                const formId = sffx === 'Rep' ? 'reportForm' : (sffx === 'Quote' ? 'quoteForm' : 'thirdPartyForm');
-                const formEl = document.getElementById(formId);
-                
-                if (formEl && window.currentSystemUser && window.currentSystemUser.role === 'admin') {
-                    let adminContainer = document.getElementById('adminOverride' + sffx);
-                    if (!adminContainer) {
-                        const hiddenInput = document.getElementById('editId' + (sffx === 'Rep' ? 'reports' : (sffx === 'Quote' ? 'quotes' : 'thirdParty')));
-                        adminContainer = document.createElement('div');
-                        adminContainer.id = 'adminOverride' + sffx;
-                        adminContainer.className = "bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 mt-2 mb-4 animate-fade-in";
-                        adminContainer.innerHTML = '<label for="adminUser' + sffx + '" class="block text-[12px] font-bold text-red-700 dark:text-red-400 mb-1 text-center"><i class="fas fa-shield-alt mr-1"></i> Técnico Responsável (Troca via Admin)</label><select id="adminUser' + sffx + '" class="w-full p-2 border border-red-300 dark:border-red-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none focus:border-red-500 text-center transition font-semibold"></select>';
-                        
-                        if(hiddenInput && hiddenInput.parentNode) {
-                            hiddenInput.parentNode.insertBefore(adminContainer, hiddenInput.nextSibling);
-                        } else {
-                            formEl.prepend(adminContainer);
-                        }
-                    }
-                    
-                    adminContainer.classList.remove('hidden');
-                    const adminSelect = document.getElementById('adminUser' + sffx);
-                    if (adminSelect) {
-                        let uOpts = '<option value="">(Manter Atual)</option>';
-                        let sortedUsers = window.safeSort(window.localData.users, function(a,b) { return String(a.login).localeCompare(String(b.login)); });
-                        for(let k=0; k<sortedUsers.length; k++) {
-                            let u = sortedUsers[k];
-                            uOpts += '<option value="' + u.id + '">' + window.escapeHtml(u.login) + ' (' + (u.role === 'func_cftv' ? 'CFTV' : 'Geral') + ')</option>';
-                        }
-                        adminSelect.innerHTML = uOpts;
-                    }
-                } else {
-                    let adminContainer = document.getElementById('adminOverride' + sffx);
-                    if (adminContainer) adminContainer.classList.add('hidden');
-                }
-            }
-        };
-
-        window.editFuncRecord = function(type, id) {
-            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
-            if(!item) return window.showToast("Registro não encontrado.", "error");
-
-            window.previousTab = window.activeTab;
-            window.editingItemId = id;
-            
-            if (type === 'reports') window.activeTab = 'func-reports';
-            else if (type === 'quotes') window.activeTab = 'func-quotes';
-            else if (type === 'thirdParty') window.activeTab = 'func-thirdParty';
-            
-            window.renderActiveTab();
-            
-            setTimeout(function() {
-                let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                
-                const fields = ['date', 'timeStart', 'timeEnd', 'workDone', 'obs'];
-                fields.forEach(function(f) {
-                    const el = document.getElementById(f + sfx);
-                    if(el && item[f]) el.value = item[f];
-                });
-                
-                const elCei = document.getElementById('ceiSelect' + sfx);
-                if(elCei && item.ceiId) elCei.value = item.ceiId;
-                
-                if (type === 'reports' && document.getElementById('diffRep') && item.difficulty) {
-                    document.getElementById('diffRep').value = item.difficulty;
-                }
-                
-                if (type === 'thirdParty' && document.getElementById('companyNameThirdParty') && item.companyName) {
-                    document.getElementById('companyNameThirdParty').value = item.companyName;
-                }
-
-                if (type === 'quotes' && document.getElementById('statusQuote') && item.status) {
-                    document.getElementById('statusQuote').value = item.status;
-                }
-
-                const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
-                if(matContainerId && item.materials && Array.isArray(item.materials)) {
-                    const container = document.getElementById(matContainerId);
-                    if(container) {
-                        container.innerHTML = ''; 
-                        window.materialCount = 0; 
-                        
-                        if(item.materials.length === 0) {
-                            container.innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>';
-                        } else {
-                            item.materials.forEach(function(mat) {
-                                window.addMaterialRow(matContainerId, false);
-                                const row = container.lastElementChild;
-                                if(row) {
-                                    const nameInput = row.querySelector('.mat-name');
-                                    const brandInput = row.querySelector('.mat-brand');
-                                    const qtdInput = row.querySelector('.mat-qtd');
-                                    const priceInput = row.querySelector('.mat-price');
-                                    
-                                    if(nameInput) nameInput.value = mat.name || '';
-                                    if(brandInput) brandInput.value = mat.brand || '';
-                                    if(qtdInput) qtdInput.value = mat.qtd || 1;
-                                    if(priceInput) priceInput.value = mat.price || '';
-                                }
-                            });
-                        }
-                    }
-                }
-
-                // Carrega o usuário original no dropdown do Admin
-                if (window.currentSystemUser.role === 'admin') {
-                    const adminSelect = document.getElementById('adminUser' + sfx);
-                    if (adminSelect) {
-                        const u = window.localData.users.find(function(x) { return x.login === item.userName; });
-                        if (u) adminSelect.value = u.id;
-                        else adminSelect.value = "";
-                    }
-                }
-                
-                const cancelBtn = document.getElementById('cancelEditBtn');
-                if(cancelBtn) window.showElement('cancelEditBtn');
-            }, 150);
         };
 
         window.saveRecord = async function(e, type) {
@@ -3168,11 +2763,15 @@
             
             let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
             
+            // Proteção para evitar o erro null em Orçamentos que não possuem Hora Início/Término
+            let timeStartEl = document.getElementById('timeStart' + sfx);
+            let timeEndEl = document.getElementById('timeEnd' + sfx);
+            
             let data = {
                 ceiId: document.getElementById('ceiSelect' + sfx).value,
                 date: document.getElementById('date' + sfx).value,
-                timeStart: document.getElementById('timeStart' + sfx).value,
-                timeEnd: document.getElementById('timeEnd' + sfx).value,
+                timeStart: timeStartEl ? timeStartEl.value : "",
+                timeEnd: timeEndEl ? timeEndEl.value : "",
                 workDone: document.getElementById('workDone' + sfx).value,
                 obs: document.getElementById('obs' + sfx).value
             };
@@ -3217,7 +2816,6 @@
                 originalRecord = (window.localData[type] || []).find(function(x) { return String(x.id) === String(editId); });
             }
 
-            // Verifica se o Admin alterou o técnico
             let adminOverrideUser = null;
             if (window.currentSystemUser.role === 'admin') {
                 const adminSelect = document.getElementById('adminUser' + sfx);
@@ -3230,17 +2828,16 @@
                 data.userId = adminOverrideUser ? adminOverrideUser.id : originalRecord.userId;
                 data.userName = adminOverrideUser ? adminOverrideUser.login : originalRecord.userName;
                 data.userRole = adminOverrideUser ? adminOverrideUser.role : originalRecord.userRole;
-                data.photos = originalRecord.photos || [];
-                data.telegramSent = originalRecord.telegramSent || false;
-                data.pendingTelegram = originalRecord.pendingTelegram || false;
             } else {
                 data.userId = adminOverrideUser ? adminOverrideUser.id : window.currentSystemUser.id;
                 data.userName = adminOverrideUser ? adminOverrideUser.login : window.currentSystemUser.login;
                 data.userRole = adminOverrideUser ? adminOverrideUser.role : window.currentSystemUser.role;
-                data.photos = [];
-                data.telegramSent = false;
-                data.pendingTelegram = true;
             }
+
+            // CRÍTICO: Array de fotos vazio garante que nenhuma imagem passe para o Firebase
+            data.photos = [];
+            data.telegramSent = true; 
+            data.pendingTelegram = false;
 
             try {
                 const btnId = 'btnSubmit' + (type === 'reports' ? 'Report' : (type === 'quotes' ? 'Quote' : 'ThirdParty'));
@@ -3253,13 +2850,23 @@
                     btn.disabled = true; 
                 }
                 
+                // 1. Salvar dados de texto no Banco de Dados
                 await window.dbSave(type, id, data);
                 window.logAudit((editId ? 'Editou ' : 'Registrou ') + type + ' ID: ' + id);
                 
-                window.showToast("Registro salvo com sucesso!");
+                // 2. Interceptar arquivos nativos do input
+                const photoInputId = 'photos' + sfx;
+                const photoInput = document.getElementById(photoInputId);
+                const files = photoInput && photoInput.files ? Array.from(photoInput.files) : [];
+                
+                // 3. Chamar função de envio direto para o Telegram (roda em background)
+                if (!editId || files.length > 0) {
+                    window.sendToTelegramDirect(data, files, type);
+                }
+                
+                window.showToast("Registro salvo e enviado ao Telegram!");
                 
                 window.editingItemId = null;
-                
                 if(window.previousTab) {
                     window.activeTab = window.previousTab;
                     window.previousTab = null;
