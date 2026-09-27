@@ -1058,6 +1058,42 @@
                     }
                     sel.innerHTML = opts; 
                 } 
+
+                // INJEÇÃO DO CAMPO DE TROCA DE TÉCNICO (APENAS ADMIN)
+                const formId = sffx === 'Rep' ? 'reportForm' : (sffx === 'Quote' ? 'quoteForm' : 'thirdPartyForm');
+                const formEl = document.getElementById(formId);
+                
+                if (formEl && window.currentSystemUser && window.currentSystemUser.role === 'admin') {
+                    let adminContainer = document.getElementById('adminOverride' + sffx);
+                    if (!adminContainer) {
+                        const hiddenInput = document.getElementById('editId' + (sffx === 'Rep' ? 'reports' : (sffx === 'Quote' ? 'quotes' : 'thirdParty')));
+                        adminContainer = document.createElement('div');
+                        adminContainer.id = 'adminOverride' + sffx;
+                        adminContainer.className = "bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 mt-2 mb-4 animate-fade-in";
+                        adminContainer.innerHTML = '<label for="adminUser' + sffx + '" class="block text-[12px] font-bold text-red-700 dark:text-red-400 mb-1 text-center"><i class="fas fa-shield-alt mr-1"></i> Técnico Responsável (Troca via Admin)</label><select id="adminUser' + sffx + '" class="w-full p-2 border border-red-300 dark:border-red-700 bg-white dark:bg-slate-800 dark:text-white rounded-lg outline-none focus:border-red-500 text-center transition font-semibold"></select>';
+                        
+                        if(hiddenInput && hiddenInput.parentNode) {
+                            hiddenInput.parentNode.insertBefore(adminContainer, hiddenInput.nextSibling);
+                        } else {
+                            formEl.prepend(adminContainer);
+                        }
+                    }
+                    
+                    adminContainer.classList.remove('hidden');
+                    const adminSelect = document.getElementById('adminUser' + sffx);
+                    if (adminSelect) {
+                        let uOpts = '<option value="">(Manter Atual)</option>';
+                        let sortedUsers = window.safeSort(window.localData.users, function(a,b) { return String(a.login).localeCompare(String(b.login)); });
+                        for(let k=0; k<sortedUsers.length; k++) {
+                            let u = sortedUsers[k];
+                            uOpts += '<option value="' + u.id + '">' + window.escapeHtml(u.login) + ' (' + (u.role === 'func_cftv' ? 'CFTV' : 'Geral') + ')</option>';
+                        }
+                        adminSelect.innerHTML = uOpts;
+                    }
+                } else {
+                    let adminContainer = document.getElementById('adminOverride' + sffx);
+                    if (adminContainer) adminContainer.classList.add('hidden');
+                }
             }
         };
 
