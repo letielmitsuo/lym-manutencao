@@ -2801,13 +2801,13 @@
                     }
                 }
 
-                // 3. GERAR PDF ESTILIZADO E ENVIAR COMO DOCUMENTO
+                // 3. GERAR PDF ESTILIZADO E ENVIAR COMO DOCUMENTO (Correção da página em branco)
                 let docTitle = type === 'reports' ? 'ORDEM DE SERVIÇO' : (type === 'quotes' ? 'ORÇAMENTO' : 'ACOMPANHAMENTO');
                 let ceiName = cei ? window.escapeHtml(cei.name) : window.escapeHtml(record.ceiId || 'N/A');
                 let refId = String(record.id || Date.now()).substring(String(record.id || "").length - 6);
                 
-                // Monta a estrutura HTML invisível com CSS Inline para o renderizador de PDF
-                let htmlPdf = '<div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b; background: white; width: 794px;">'; // Largura aproximada de A4
+                // Monta a estrutura HTML
+                let htmlPdf = '<div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b; background: white; width: 794px;">';
                 htmlPdf += '<div style="border-bottom: 2px solid #1e293b; padding-bottom: 15px; margin-bottom: 25px;">';
                 htmlPdf += '<h2 style="font-size: 28px; font-weight: 900; text-transform: uppercase; margin: 0; letter-spacing: 1px;">' + docTitle + '</h2>';
                 htmlPdf += '<p style="font-size: 14px; color: #64748b; margin: 5px 0 0 0;">Ref: #' + refId + '</p>';
@@ -2854,33 +2854,23 @@
                 }
                 htmlPdf += '</div>';
                 
-                // Bloco escuro de Total idêntico ao modelo
                 htmlPdf += '<div style="width: 40%; background: #1e293b; color: white; padding: 25px 20px; border-radius: 12px; text-align: right; box-sizing: border-box;">';
                 htmlPdf += '<span style="display: block; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #cbd5e1; margin-bottom: 8px; letter-spacing: 1px;">Total Geral</span>';
                 htmlPdf += '<span style="font-size: 32px; font-weight: 900;">' + window.formatMoney(totalGeral) + '</span>';
                 htmlPdf += '</div>';
                 htmlPdf += '</div></div>';
 
-                // Criar container invisível para injetar no html2pdf
-                let tempDiv = document.createElement('div');
-                tempDiv.innerHTML = htmlPdf;
-                tempDiv.style.position = 'absolute';
-                tempDiv.style.left = '-9999px';
-                document.body.appendChild(tempDiv);
-
-                // Configuração do conversor de PDF
+                // Configuração do conversor de PDF (agora converte direto da string de HTML)
                 let opt = {
-                    margin:       [10, 0, 10, 0], // Margem topo, direita, baixo, esquerda
+                    margin:       [10, 0, 10, 0],
                     filename:     `${docTitle}_${refId}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // Gera o Blob do PDF, envia para o Telegram e descarta o div oculto
-                html2pdf().set(opt).from(tempDiv).outputPdf('blob').then(async function(pdfBlob) {
-                    document.body.removeChild(tempDiv); 
-                    
+                // Gera o Blob do PDF e envia para o Telegram
+                html2pdf().set(opt).from(htmlPdf).outputPdf('blob').then(async function(pdfBlob) {
                     let pdfFormData = new FormData();
                     pdfFormData.append('chat_id', chatId);
                     if (topicId) pdfFormData.append('message_thread_id', topicId);
@@ -2895,6 +2885,18 @@
             } catch (err) {
                 console.error("Erro na integração com o Telegram:", err);
             }
+        };
+
+        // ==========================================
+        // FUNÇÃO +NOVA FERRAMENTA RECUPERADA
+        // ==========================================
+        window.openToolModal = function() { 
+            window.editingItemId = null; 
+            const form = document.getElementById('toolForm');
+            if(form) form.reset(); 
+            const title = document.getElementById('modalTitleTool');
+            if(title) title.textContent = 'Nova Ferramenta'; 
+            window.showElement('modalTool'); 
         };
 
         window.saveRecord = async function(e, type) {
