@@ -2600,9 +2600,9 @@
         // --- FERRAMENTAS ---
         window.openToolModal = function() { 
             window.editingItemId = null; 
-            const form = document.getElementById('toolForm'); 
+            const form = document.getElementById('toolForm');
             if(form) form.reset(); 
-            const title = document.getElementById('modalTitleTool'); 
+            const title = document.getElementById('modalTitleTool');
             if(title) title.textContent = 'Nova Ferramenta'; 
             window.showElement('modalTool'); 
         };
@@ -2618,19 +2618,40 @@
                 availableStock: total 
             }; 
             const id = window.editingItemId || Date.now().toString(); 
-            if(window.editingItemId){ 
+            
+            if(window.editingItemId) { 
                 const old = (window.localData.tools || []).find(function(x) { return String(x.id) === String(window.editingItemId); }); 
                 if(old) { data.availableStock = old.availableStock + (total - old.totalStock); } 
             } 
+            
             await window.dbSave('tools', id, data); 
             window.hideElement('modalTool'); 
             window.showToast('Ferramenta salva com sucesso!'); 
             window.renderActiveTab(); 
         };
         
-        window.editTool = function(id) { const item = window.localData.tools.find(function(x) { return x.id === id; }); if(!item) return; window.editingItemId = id; document.getElementById('toolName').value = item.name||''; document.getElementById('toolBarcode').value = item.barcode||''; document.getElementById('toolBrand').value = item.brand||''; document.getElementById('toolTotal').value = item.totalStock||1; document.getElementById('modalTitleTool').textContent = 'Editar Ferramenta'; window.showElement('modalTool'); };
-        window.deleteTool = function(id) { window.confirmAction(async function() { await window.dbDelete('tools', id); window.showToast('Ferramenta excluída!'); window.renderActiveTab(); }); };
-        
+        window.editTool = function(id) { 
+            const item = window.localData.tools.find(function(x) { return String(x.id) === String(id); }); 
+            if(!item) return; 
+            
+            window.editingItemId = id; 
+            document.getElementById('toolName').value = item.name || ''; 
+            document.getElementById('toolBarcode').value = item.barcode || ''; 
+            document.getElementById('toolBrand').value = item.brand || ''; 
+            document.getElementById('toolTotal').value = item.totalStock || 1; 
+            
+            const title = document.getElementById('modalTitleTool');
+            if(title) title.textContent = 'Editar Ferramenta'; 
+            window.showElement('modalTool'); 
+        };
+
+        window.deleteTool = function(id) { 
+            window.confirmAction(async function() { 
+                await window.dbDelete('tools', id); 
+                window.showToast('Ferramenta excluída!'); 
+                window.renderActiveTab(); 
+            }); 
+        };
         // ==========================================
         // 10. RENDERIZAÇÃO DE TABELAS (FILTROS)
         // ==========================================
