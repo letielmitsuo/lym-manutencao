@@ -3045,6 +3045,60 @@
             }
         };
 
+// ==========================================
+        // GESTÃO DE FERRAMENTAS (FORÇANDO ATIVAÇÃO)
+        // ==========================================
+        window.openToolModal = function() { 
+            window.editingItemId = null; 
+            const form = document.getElementById('toolForm');
+            if(form) form.reset(); 
+            const title = document.getElementById('modalTitleTool');
+            if(title) title.textContent = 'Nova Ferramenta'; 
+            window.showElement('modalTool'); 
+        };
+        
+        window.saveTool = async function(e) { 
+            e.preventDefault(); 
+            const total = parseInt(document.getElementById('toolTotal').value) || 1; 
+            const data = { 
+                name: document.getElementById('toolName').value, 
+                barcode: document.getElementById('toolBarcode').value, 
+                brand: document.getElementById('toolBrand').value, 
+                totalStock: total, 
+                availableStock: total 
+            }; 
+            const id = window.editingItemId || Date.now().toString(); 
+            if(window.editingItemId){ 
+                const old = (window.localData.tools || []).find(function(x) { return String(x.id) === String(window.editingItemId); }); 
+                if(old) { data.availableStock = old.availableStock + (total - old.totalStock); } 
+            } 
+            await window.dbSave('tools', id, data); 
+            window.hideElement('modalTool'); 
+            window.showToast('Ferramenta salva com sucesso!'); 
+            window.renderActiveTab(); 
+        };
+        
+        window.editTool = function(id) { 
+            const item = window.localData.tools.find(function(x) { return String(x.id) === String(id); }); 
+            if(!item) return; 
+            window.editingItemId = id; 
+            document.getElementById('toolName').value = item.name||''; 
+            document.getElementById('toolBarcode').value = item.barcode||''; 
+            document.getElementById('toolBrand').value = item.brand||''; 
+            document.getElementById('toolTotal').value = item.totalStock||1; 
+            const title = document.getElementById('modalTitleTool');
+            if(title) title.textContent = 'Editar Ferramenta'; 
+            window.showElement('modalTool'); 
+        };
+
+        window.deleteTool = function(id) { 
+            window.confirmAction(async function() { 
+                await window.dbDelete('tools', id); 
+                window.showToast('Ferramenta excluída!'); 
+                window.renderActiveTab(); 
+            }); 
+        };
+        
         // ==========================================
         // 13. INICIALIZAÇÃO
         // ==========================================
