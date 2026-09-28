@@ -2449,6 +2449,154 @@
                 window.showToast("Erro ao salvar.", "error");
             }
         };
+
+        // ==========================================
+        // 12. FUNÇÕES DE VISUALIZAR, EDITAR E EXCLUIR REGISTROS
+        // ==========================================
+
+        // Abre o Modal para Visualizar o Registro Completo
+        window.viewRecord = function(type, id) {
+            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
+            if (!item) return window.showToast("Registro não encontrado.", "error");
+
+            const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
+            const ceiName = cei ? cei.name : (item.ceiId || "Desconhecido");
+
+            let html = '<div class="space-y-3 text-sm text-slate-700 dark:text-slate-300">';
+            html += '<p><strong>Data:</strong> ' + window.formatDateBR(item.date) + '</p>';
+            html += '<p><strong>Local (CEI):</strong> ' + window.escapeHtml(ceiName) + '</p>';
+            html += '<p><strong>Técnico Responsável:</strong> ' + window.escapeHtml(item.userName) + '</p>';
+            
+            if (item.timeStart && item.timeEnd) {
+                html += '<p><strong>Horário:</strong> ' + window.escapeHtml(item.timeStart) + ' às ' + window.escapeHtml(item.timeEnd) + '</p>';
+            }
+
+            if (item.status) html += '<p><strong>Status:</strong> ' + window.escapeHtml(item.status) + '</p>';
+            if (item.difficulty) html += '<p><strong>Dificuldade:</strong> ' + window.escapeHtml(item.difficulty) + '</p>';
+            if (item.companyName) html += '<p><strong>Empresa Terceira:</strong> ' + window.escapeHtml(item.companyName) + '</p>';
+
+            html += '<div class="mt-4"><strong class="block mb-1">Descrição / Serviço Realizado:</strong><div class="bg-slate-50 dark:bg-slate-900 p-3 rounded border dark:border-slate-700 whitespace-pre-wrap">' + window.escapeHtml(item.workDone || 'Nenhuma descrição.') + '</div></div>';
+
+            if (item.materials && item.materials.length > 0) {
+                html += '<div class="mt-4"><strong class="block mb-2">Materiais / Custos:</strong><ul class="list-disc pl-5 space-y-1">';
+                item.materials.forEach(function(m) {
+                    html += '<li>' + m.qtd + 'x ' + window.escapeHtml(m.name) + ' - ' + window.formatMoney(m.price) + ' (Sub: ' + window.formatMoney(m.qtd * m.price) + ')</li>';
+                });
+                html += '</ul>';
+                if (item.totalPrice) {
+                    html += '<p class="mt-3 text-right text-lg font-bold text-slate-800 dark:text-white">Total Geral: ' + window.formatMoney(item.totalPrice) + '</p>';
+                }
+                html += '</div>';
+            }
+
+            if (item.obs) {
+                html += '<div class="mt-4"><strong class="block mb-1">Observações Adicionais:</strong><div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded border border-yellow-100 dark:border-yellow-800 whitespace-pre-wrap">' + window.escapeHtml(item.obs) + '</div></div>';
+            }
+
+            html += '</div>';
+
+            const modalTitle = type === 'reports' ? 'Detalhes do Serviço' : (type === 'quotes' ? 'Detalhes do Orçamento' : 'Detalhes do Acompanhamento');
+            document.getElementById('viewRecordTitle').textContent = modalTitle;
+            document.getElementById('viewRecordContent').innerHTML = html;
+            window.showElement('modalViewRecord');
+        };
+
+        // Carrega os dados na aba de Rascunho/Edição e redireciona o usuário para ela
+        window.editFuncRecord = function(type, id) {
+            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
+            if (!item) return window.showToast("Registro não encontrado.", "error");
+
+            window.editingItemId = id;
+            window.previousTab = window.activeTab;
+
+            // Redireciona para a aba correta de edição
+            if (type === 'reports') window.activeTab = 'func-reports';
+            else if (type === 'quotes') window.activeTab = 'func-quotes';
+            else if (type === 'thirdParty') window.activeTab = 'func-thirdParty';
+
+            window.renderActiveTab();
+
+            // Aguarda 150ms para o DOM da nova aba renderizar e preenche os campos
+            setTimeout(function() {
+                let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
+                
+                const ceiSelect = document.getElementById('ceiSelect' + sfx);
+                if(ceiSelect) ceiSelect.value = item.ceiId || '';
+                
+                const dateInput = document.getElementById('date' + sfx);
+                if(dateInput) dateInput.value = item.date || '';
+
+                const timeStartInput = document.getElementById('timeStart' + sfx);
+                if(timeStartInput) timeStartInput.value = item.timeStart || '';
+
+                const timeEndInput = document.getElementById('timeEnd' + sfx);
+                if(timeEndInput) timeEndInput.value = item.timeEnd || '';
+
+                const workDoneInput = document.getElementById('workDone' + sfx);
+                if(workDoneInput) workDoneInput.value = item.workDone || '';
+
+                const obsInput = document.getElementById('obs' + sfx);
+                if(obsInput) obsInput.value = item.obs || '';
+
+                if (type === 'reports') {
+                    const diffRep = document.getElementById('diffRep');
+                    if(diffRep) diffRep.value = item.difficulty || 'Médio';
+                } else if (type === 'quotes') {
+                    const statusQuote = document.getElementById('statusQuote');
+                    if(statusQuote) statusQuote.value = item.status || 'Pendente';
+                } else if (type === 'thirdParty') {
+                    const companyNameThirdParty = document.getElementById('companyNameThirdParty');
+                    if(companyNameThirdParty) companyNameThirdParty.value = item.companyName || '';
+                }
+
+                // Lógica de preenchimento dos materiais (linhas dinâmicas)
+                const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
+                if(matContainerId && item.materials && item.materials.length > 0) {
+                    const container = document.getElementById(matContainerId);
+                    if(container) {
+                        const italicText = container.querySelector('.italic'); 
+                        if(italicText) italicText.remove();
+                        
+                        // Limpa campos vazios antes de popular
+                        const rows = container.querySelectorAll('[id^="mat_"]');
+                        rows.forEach(r => r.remove());
+
+                        // Adiciona e preenche cada material
+                        item.materials.forEach(function(m) {
+                            window.addMaterialRow(matContainerId, false);
+                            const lastRow = container.lastElementChild;
+                            if(lastRow) {
+                                const nEl = lastRow.querySelector('.mat-name'); if(nEl) nEl.value = m.name;
+                                const bEl = lastRow.querySelector('.mat-brand'); if(bEl) bEl.value = m.brand || '';
+                                const qEl = lastRow.querySelector('.mat-qtd'); if(qEl) qEl.value = m.qtd;
+                                const pEl = lastRow.querySelector('.mat-price'); if(pEl) pEl.value = m.price;
+                            }
+                        });
+                    }
+                }
+                
+                // Se o Administrador for trocar a autoria do registro
+                if (window.currentSystemUser && window.currentSystemUser.role === 'admin') {
+                    const adminSelect = document.getElementById('adminUser' + sfx);
+                    if (adminSelect) adminSelect.value = item.userId || '';
+                }
+
+            }, 150);
+        };
+
+        // Pede Confirmação e Exclui o Registro do Banco
+        window.deleteFuncRecord = function(type, id) {
+            window.confirmAction(async function() {
+                try {
+                    await window.dbDelete(type, id);
+                    window.showToast("Registro excluído com sucesso!");
+                    window.applyFilters(type);
+                    window.logAudit('Excluiu ' + type + ' ID: ' + id);
+                } catch(e) {
+                    window.showToast("Erro ao excluir o registro.", "error");
+                }
+            });
+        };
         
         // ==========================================
         // 13. INICIALIZAÇÃO
