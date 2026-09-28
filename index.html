@@ -286,8 +286,8 @@
     </div>
 
     <!-- ==================== MODAL FERRAMENTA (CORREÇÃO APLICADA) ==================== -->
-    <div id="modalTool" role="dialog" aria-modal="true" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+    <div id="modalTool" role="dialog" aria-modal="true" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
                 <h3 class="font-bold text-lg dark:text-white text-center w-full" id="modalTitleTool">Nova Ferramenta</h3>
                 <button type="button" aria-label="Fechar" onclick="window.hideElement('modalTool')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-4 transition"><i class="fas fa-times text-lg" aria-hidden="true"></i></button>
@@ -403,7 +403,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- LÓGICA JAVASCRIPT MASTER (Totalmente Segura)                              -->
+    <!-- LÓGICA JAVASCRIPT MASTER (Limpa e Refatorada)                             -->
     <!-- ========================================================================= -->
     
     <script>
@@ -1077,7 +1077,6 @@
                     sel.innerHTML = opts; 
                 } 
 
-                // INJEÇÃO DO CAMPO DE TROCA DE TÉCNICO (APENAS ADMIN)
                 const formId = sffx === 'Rep' ? 'reportForm' : (sffx === 'Quote' ? 'quoteForm' : 'thirdPartyForm');
                 const formEl = document.getElementById(formId);
                 
@@ -1129,7 +1128,6 @@
                 onScanSuccess(decodedText); 
             }, 
             function(errorMessage) { 
-                // Evitar spam de console logs vazios do leitor
             }).catch(function(err) { 
                 window.showToast("Erro ao abrir a câmera. Verifique as permissões do navegador.", "error"); 
                 window.stopScanner(); 
@@ -1993,604 +1991,81 @@
         };
 
         // ==========================================
-        // 8. RENDERIZADORES DE TELAS FUNCIONÁRIOS E ADDONS FALTANTES
+        // 9. CRUD ADMINISTRADOR E GESTÃO DE FERRAMENTAS
         // ==========================================
-        window.renderFuncStockForm = function() {
-            return `
-            <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-5 animate-fade-in">
-                <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                    <h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-box-open mr-2" aria-hidden="true"></i> Meu Almoxarifado</h3>
-                </div>
-                <form id="stockForm" onsubmit="window.saveStockMovement(event)" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label for="stkType" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Movimento *</label>
-                            <select id="stkType" required class="w-full p-2 border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-slate-800 dark:text-white rounded-lg outline-none focus:border-blue-500 text-center font-bold transition">
-                                <option value="Retirada">Retirar do Estoque</option>
-                                <option value="Devolução">Devolver ao Estoque</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="stkDate" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label>
-                            <input type="date" id="stkDate" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-blue-500 text-center transition" value="${new Date().toISOString().split('T')[0]}">
-                        </div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <div class="relative flex justify-center items-center mb-3">
-                            <h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais</h4>
-                            <button type="button" onclick="window.addStockMovementRow('stockMovementsContainer')" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium absolute right-0 transition shadow-sm"><i class="fas fa-plus mr-1" aria-hidden="true"></i> Item</button>
-                        </div>
-                        <div id="stockMovementsContainer" class="space-y-2">
-                            <p class="text-xs text-slate-400 italic text-center p-2">Nenhum material adicionado.</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="stkObs" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Motivo / Observação</label>
-                        <textarea id="stkObs" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-blue-500 text-sm transition"></textarea>
-                    </div>
-                    <button type="submit" id="btnSubmitStock" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-2">Registrar Movimento</button>
-                </form>
-            </div>
-            `;
+        
+        // --- CRECHES (CEIs) ---
+        window.openCeiModal = function() { window.editingItemId = null; document.getElementById('ceiForm').reset(); document.getElementById('modalTitleCei').textContent = 'Nova Creche'; window.showElement('modalCei'); };
+        window.saveCei = async function(e) { e.preventDefault(); const n = document.getElementById('ceiName').value; const tId = document.getElementById('ceiTelegramId').value; const tTopic = document.getElementById('ceiTelegramTopicId').value; const id = window.editingItemId || Date.now().toString(); await window.dbSave('ceis', id, { name: n, telegramGroupId: tId, telegramTopicId: tTopic }); window.hideElement('modalCei'); window.showToast('Creche salva com sucesso!'); window.renderActiveTab(); };
+        window.editCei = function(id) { const item = window.localData.ceis.find(function(x) { return x.id === id; }); if(!item) return; window.editingItemId = id; document.getElementById('ceiName').value = item.name||''; document.getElementById('ceiTelegramId').value = item.telegramGroupId||''; document.getElementById('ceiTelegramTopicId').value = item.telegramTopicId||''; document.getElementById('modalTitleCei').textContent = 'Editar Creche'; window.showElement('modalCei'); };
+        window.deleteCei = function(id) { window.confirmAction(async function() { await window.dbDelete('ceis', id); window.showToast('Creche excluída!'); window.renderActiveTab(); }); };
+
+        // --- USUÁRIOS ---
+        window.openUserModal = function() { window.editingItemId = null; document.getElementById('userForm').reset(); document.getElementById('modalTitleUser').textContent = 'Novo Usuário'; window.showElement('modalUser'); };
+        window.saveUser = async function(e) { e.preventDefault(); const login = document.getElementById('newUsername').value; const role = document.getElementById('newRole').value; const pass = document.getElementById('newPassword').value; const id = window.editingItemId || Date.now().toString(); await window.dbSave('users', id, { login: login, role: role, pass: pass, password: pass }); window.hideElement('modalUser'); window.showToast('Usuário salvo com sucesso!'); window.renderActiveTab(); };
+        window.editUser = function(id) { const item = window.localData.users.find(function(x) { return x.id === id; }); if(!item) return; window.editingItemId = id; document.getElementById('newUsername').value = item.login||''; document.getElementById('newRole').value = item.role||'funcionario'; document.getElementById('newPassword').value = item.pass||''; document.getElementById('modalTitleUser').textContent = 'Editar Usuário'; window.showElement('modalUser'); };
+        window.deleteUser = function(id) { window.confirmAction(async function() { await window.dbDelete('users', id); window.showToast('Usuário excluído!'); window.renderActiveTab(); }); };
+
+        // --- CATÁLOGO (ALMOXARIFADO) ---
+        window.openCatalogModal = function() { window.editingItemId = null; document.getElementById('catalogForm').reset(); document.getElementById('modalTitleCatalog').textContent = 'Novo Item'; window.showElement('modalCatalog'); };
+        window.saveCatalog = async function(e) { e.preventDefault(); const data = { name: document.getElementById('catName').value, category: document.getElementById('catCategory').value, barcode: document.getElementById('catBarcode').value, brand: document.getElementById('catBrand').value, price: parseFloat(document.getElementById('catPrice').value)||0, stock: parseFloat(document.getElementById('catStock').value)||0 }; const id = window.editingItemId || Date.now().toString(); await window.dbSave('catalog', id, data); window.hideElement('modalCatalog'); window.showToast('Item salvo com sucesso!'); window.renderActiveTab(); };
+        window.editCatalog = function(id) { const item = window.localData.catalog.find(function(x) { return x.id === id; }); if(!item) return; window.editingItemId = id; document.getElementById('catName').value = item.name||''; document.getElementById('catCategory').value = item.category||'Outros'; document.getElementById('catBarcode').value = item.barcode||''; document.getElementById('catBrand').value = item.brand||''; document.getElementById('catPrice').value = item.price||''; document.getElementById('catStock').value = item.stock||0; document.getElementById('modalTitleCatalog').textContent = 'Editar Item'; window.showElement('modalCatalog'); };
+        window.deleteCatalog = function(id) { window.confirmAction(async function() { await window.dbDelete('catalog', id); window.showToast('Item excluído!'); window.renderActiveTab(); }); };
+
+        // --- FERRAMENTAS ---
+        window.openToolModal = function() { 
+            window.editingItemId = null; 
+            const form = document.getElementById('toolForm');
+            if(form) form.reset(); 
+            const title = document.getElementById('modalTitleTool');
+            if(title) title.textContent = 'Nova Ferramenta'; 
+            window.showElement('modalTool'); 
         };
-
-        window.renderFuncTools = function() {
-            const uid = String(window.currentSystemUser.id);
-            
-            let myTools = window.safeSort((window.localData.toolMovements || []).filter(function(r) { return String(r.userId) === uid; }), function(a,b) { 
-                return window.getSafeTime(b) - window.getSafeTime(a); 
-            }).slice(0, 50).map(function(m) { 
-                let badgeClass = m.type === 'Retirada' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'; 
-                return `<tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition"><td class="px-3 py-2 text-sm">${window.formatDateBR(m.date)}</td><td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${m.type}</span></td><td class="px-3 py-2 text-xs text-slate-600 dark:text-slate-400 leading-tight">${m.qtd}x ${window.escapeHtml(m.toolName)}</td></tr>`; 
-            }).join("");
-            
-            let options = '<option value="">Selecione a ferramenta...</option>' + window.safeSort(window.localData.tools || [], function(a,b) { 
-                return String(a.name||'').localeCompare(String(b.name||'')); 
-            }).map(function(c) { 
-                return `<option value="${c.id}">${window.escapeHtml(c.name)} (Livre: ${c.availableStock})</option>`; 
-            }).join('');
-            
-            return `
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-5">
-                    <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                        <h3 class="text-lg font-bold text-amber-700 dark:text-amber-400 text-center w-full"><i class="fas fa-toolbox mr-2" aria-hidden="true"></i> Cautela de Ferramentas</h3>
-                    </div>
-                    <form id="toolMovementForm" onsubmit="window.saveToolMovement(event)" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><label for="tType" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Ação *</label><select id="tType" required class="w-full p-2 border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-slate-800 dark:text-white rounded-lg outline-none focus:border-amber-500 text-center font-bold transition"><option value="Retirada">Pegar Emprestado</option><option value="Devolução">Devolver à Base</option></select></div>
-                            <div><label for="tDate" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="tDate" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-amber-500 text-center transition" value="${new Date().toISOString().split('T')[0]}"></div>
-                        </div>
-                        <div>
-                            <label for="tToolSelect" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Ferramenta *</label>
-                            <div class="flex gap-1">
-                                <button type="button" aria-label="Ler Código" onclick="window.scanForTool()" class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700 transition"><i class="fas fa-barcode" aria-hidden="true"></i></button>
-                                <select id="tToolSelect" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded outline-none focus:border-amber-500 text-sm transition">${options}</select>
-                            </div>
-                        </div>
-                        <div><label for="tQtd" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Quantidade *</label><input type="number" id="tQtd" required min="1" step="1" value="1" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-amber-500 text-center transition"></div>
-                        <div><label for="tObs" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observação / Estado</label><textarea id="tObs" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-amber-500 text-sm transition" placeholder="Ex: Furadeira entregue sem a broca 6"></textarea></div>
-                        <button type="submit" id="btnSubmitTool" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-2">Registrar</button>
-                    </form>
-                </div>
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
-                    <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 relative flex justify-center items-center">
-                        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full"><i class="fas fa-history mr-2 text-blue-600" aria-hidden="true"></i> Meu Histórico de Ferramentas</h3>
-                    </div>
-                    <div class="overflow-x-auto flex-grow max-h-[400px]">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
-                            <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm z-10"><th scope="col" class="px-3 py-2 font-semibold">Data</th><th scope="col" class="px-3 py-2 font-semibold">Ação</th><th scope="col" class="px-3 py-2 font-semibold">Ferramenta</th></tr></thead>
-                            <tbody>${myTools || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma cautela.</td></tr>`}</tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>`;
-        };
-
-        window.renderFuncHistory = function() {
-            return `
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in mb-6 flex flex-col">
-                <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fas fa-wrench mr-2 text-blue-500" aria-hidden="true"></i> Minhas Manutenções</h3>
-                    <button type="button" onclick="window.processTelegramQueue()" class="text-xs bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded shadow-sm transition font-bold flex items-center"><i class="fas fa-sync-alt mr-1" aria-hidden="true"></i> Sync Fila</button>
-                </div>
-                <div class="overflow-x-auto flex-grow">
-                    <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
-                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th><th scope="col" class="p-3 font-semibold text-right">Ações</th></tr></thead>
-                        <tbody id="empHistoryReports"></tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in mb-6 flex flex-col">
-                <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                    <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-file-invoice mr-2 text-green-500" aria-hidden="true"></i> Meus Orçamentos</h3>
-                </div>
-                <div class="overflow-x-auto flex-grow">
-                    <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
-                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th><th scope="col" class="p-3 font-semibold text-right">Ações</th></tr></thead>
-                        <tbody id="empHistoryQuotes"></tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in flex flex-col">
-                <div class="p-3 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                    <h3 class="font-bold text-slate-700 dark:text-slate-200 text-center"><i class="fas fa-eye mr-2 text-purple-500" aria-hidden="true"></i> Acompanhamentos Terceiros</h3>
-                </div>
-                <div class="overflow-x-auto flex-grow">
-                    <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
-                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th><th scope="col" class="p-3 font-semibold text-right">Ações</th></tr></thead>
-                        <tbody id="empHistoryThirdParty"></tbody>
-                    </table>
-                </div>
-            </div>
-            `;
-        };
-
-        window.renderEmployeeHistory = function() {
-            if(!window.currentSystemUser) return;
-            const uid = String(window.currentSystemUser.id);
-            
-            const genRows = function(type) {
-                let items = window.safeSort((window.localData[type] || []).filter(function(r) { return String(r.userId) === uid; }), function(a,b) { 
-                    return window.getSafeTime(b) - window.getSafeTime(a); 
-                });
-                
-                if (items.length === 0) return '<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro.</td></tr>';
-                
-                let html = "";
-                for(let i=0; i<items.length; i++) {
-                    let item = items[i];
-                    let statusBadge = "";
-                    if (type === 'quotes') {
-                        let s = item.status || "Pendente"; 
-                        let badgeClass = s === 'Aprovado' ? 'bg-green-600 text-white' : (s === 'Rejeitado' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'); 
-                        statusBadge = '<span class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold ' + badgeClass + '">' + window.escapeHtml(s) + '</span>';
-                    }
-                    
-                    let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Na Fila" aria-hidden="true"></i>' : '';
-                    
-                    html += `
-                    <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                        <td class="p-3">${badgeTg}${window.formatDateBR(item.date)}</td>
-                        <td class="p-3 font-medium">${window.escapeHtml(item.cei || item.ceiId || '')}${statusBadge}</td>
-                        <td class="p-3 text-right whitespace-nowrap">
-                            <button type="button" aria-label="Ver" onclick="window.viewRecord('${type}', '${item.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition mr-1 hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i></button>
-                            <button type="button" aria-label="Editar" onclick="window.editFuncRecord('${type}', '${item.id}')" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded transition mr-1 hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i></button>
-                            <button type="button" aria-label="Excluir" onclick="window.deleteFuncRecord('${type}', '${item.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded transition hover:bg-red-100"><i class="fas fa-trash" aria-hidden="true"></i></button>
-                        </td>
-                    </tr>`;
-                }
-                return html;
-            };
-
-            const rBody = document.getElementById('empHistoryReports'); 
-            if(rBody) rBody.innerHTML = genRows('reports');
-            
-            const qBody = document.getElementById('empHistoryQuotes'); 
-            if(qBody) qBody.innerHTML = genRows('quotes');
-            
-            const tBody = document.getElementById('empHistoryThirdParty'); 
-            if(tBody) tBody.innerHTML = genRows('thirdParty');
-        };
-
-        window.renderFuncReportForm = function() {
-            return `
-            <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in">
-                <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                    <h3 class="text-lg font-bold text-blue-800 dark:text-blue-400 text-center w-full"><i class="fas fa-wrench mr-2" aria-hidden="true"></i> <span id="formTitleReports">Registrar Manutenção</span></h3>
-                    <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200 font-bold px-3 py-1.5 rounded absolute right-0 transition shadow-sm">Cancelar</button>
-                </div>
-                <form id="reportForm" onsubmit="window.saveRecord(event, 'reports')" class="space-y-3">
-                    <input type="hidden" id="editIdreports">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label for="ceiSelectRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label>
-                            <select id="ceiSelectRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-blue-500 text-center transition"></select>
-                        </div>
-                        <div>
-                            <label for="dateRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label>
-                            <input type="date" id="dateRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-blue-500 text-center transition" value="${new Date().toISOString().split('T')[0]}">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label for="timeStartRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Início *</label>
-                            <input type="time" id="timeStartRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-blue-500 text-center transition">
-                        </div>
-                        <div>
-                            <label for="timeEndRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Término *</label>
-                            <input type="time" id="timeEndRep" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-blue-500 text-center transition">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="workDoneRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Descrição do Serviço *</label>
-                        <textarea id="workDoneRep" required rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-blue-500 transition"></textarea>
-                    </div>
-                    <div>
-                        <label for="diffRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Dificuldade *</label>
-                        <select id="diffRep" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-blue-500 text-center transition">
-                            <option value="Fácil">Fácil</option><option value="Médio" selected>Médio</option><option value="Difícil">Difícil</option>
-                        </select>
-                    </div>
-                    
-                    <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3">
-                        <div class="relative flex justify-center items-center mb-3">
-                            <h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais Utilizados</h4>
-                            <button type="button" onclick="window.addMaterialRow('materialsContainer')" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-xs font-medium absolute right-0 transition shadow-sm flex items-center"><i class="fas fa-plus mr-1" aria-hidden="true"></i> Mat.</button>
-                        </div>
-                        <div id="materialsContainer" class="space-y-2">
-                            <p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-3">
-                        <label for="photosRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Serviço (Telegram)</label>
-                        <input type="file" id="photosRep" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center focus:outline-none" onchange="window.handlePhotoSelection(event, 'repPhotoPreview')">
-                        <div id="repPhotoPreview" class="flex justify-center gap-2 mt-3 overflow-x-auto pb-1 min-h-[60px]"></div>
-                    </div>
-                    
-                    <div>
-                        <label for="obsRep" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Observações (Opcional)</label>
-                        <textarea id="obsRep" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-blue-500 transition"></textarea>
-                    </div>
-                    
-                    <button type="submit" id="btnSubmitReport" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-4">Salvar Serviço</button>
-                </form>
-            </div>
-            `;
-        };
-
-        window.renderFuncQuoteForm = function() {
-            return `
-            <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in">
-                <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                    <h3 class="text-lg font-bold text-green-700 dark:text-green-400 text-center w-full"><i class="fas fa-file-invoice mr-2" aria-hidden="true"></i> <span id="formTitleQuotes">Novo Orçamento</span></h3>
-                    <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200 font-bold px-3 py-1.5 rounded absolute right-0 transition shadow-sm">Cancelar</button>
-                </div>
-                <form id="quoteForm" onsubmit="window.saveRecord(event, 'quotes')" class="space-y-3">
-                    <input type="hidden" id="editIdquotes">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div><label for="ceiSelectQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelectQuote" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-green-500 text-center transition"></select></div>
-                        <div><label for="dateQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="dateQuote" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-green-500 text-center transition" value="${new Date().toISOString().split('T')[0]}"></div>
-                    </div>
-                    <div><label for="statusQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Status do Orçamento *</label><select id="statusQuote" class="w-full p-2 border dark:border-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-green-500 text-center font-bold transition"><option value="Pendente">⏳ Pendente de Aprovação</option><option value="Aprovado">✅ Aprovado</option><option value="Rejeitado">❌ Rejeitado</option></select></div>
-                    <div><label for="workDoneQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Diagnóstico / Escopo *</label><textarea id="workDoneQuote" required rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-green-500 transition"></textarea></div>
-                    
-                    <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 mt-3">
-                        <div class="relative flex justify-center items-center mb-3">
-                            <h4 class="font-bold text-slate-700 dark:text-slate-200 text-center w-full text-sm">Materiais Necessários</h4>
-                            <button type="button" onclick="window.addMaterialRow('quoMaterialsContainer')" class="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 text-xs font-medium absolute right-0 transition shadow-sm flex items-center"><i class="fas fa-plus mr-1" aria-hidden="true"></i> Mat.</button>
-                        </div>
-                        <div id="quoMaterialsContainer" class="space-y-2"><p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p></div>
-                    </div>
-                    
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3">
-                        <label for="photosQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos do Problema (Telegram)</label>
-                        <input type="file" id="photosQuote" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center focus:outline-none" onchange="window.handlePhotoSelection(event, 'quoPhotoPreview')">
-                        <div id="quoPhotoPreview" class="flex justify-center gap-2 mt-3 overflow-x-auto pb-1 min-h-[60px]"></div>
-                    </div>
-                    
-                    <div><label for="obsQuote" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs do Orçamento</label><textarea id="obsQuote" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-green-500 transition"></textarea></div>
-                    
-                    <button type="submit" id="btnSubmitQuote" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-4">Salvar Orçamento</button>
-                </form>
-            </div>
-            `;
-        };
-
-        window.renderFuncThirdPartyForm = function() {
-            return `
-            <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in">
-                <div class="relative flex justify-center items-center mb-4 border-b dark:border-slate-700 pb-2">
-                    <h3 class="text-lg font-bold text-purple-700 dark:text-purple-400 text-center w-full"><i class="fas fa-eye mr-2" aria-hidden="true"></i> <span id="formTitleThirdParty">Acompanhamento Terceiros</span></h3>
-                    <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200 font-bold px-3 py-1.5 rounded absolute right-0 transition shadow-sm">Cancelar</button>
-                </div>
-                <form id="thirdPartyForm" onsubmit="window.saveRecord(event, 'thirdParty')" class="space-y-3">
-                    <input type="hidden" id="editIdthirdParty">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div><label for="ceiSelectThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">CEI (Creche) *</label><select id="ceiSelectThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-purple-500 text-center transition"></select></div>
-                        <div><label for="dateThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Data *</label><input type="date" id="dateThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-purple-500 text-center transition" value="${new Date().toISOString().split('T')[0]}"></div>
-                    </div>
-                    <div><label for="companyNameThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Nome da Empresa *</label><input type="text" id="companyNameThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-purple-500 text-center transition"></div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><label for="timeStartThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Início *</label><input type="time" id="timeStartThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-purple-500 text-center transition"></div>
-                        <div><label for="timeEndThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Hora Término *</label><input type="time" id="timeEndThirdParty" required class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg outline-none focus:border-purple-500 text-center transition"></div>
-                    </div>
-                    <div><label for="workDoneThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Serviço Realizado *</label><textarea id="workDoneThirdParty" required rows="3" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-purple-500 transition"></textarea></div>
-                    
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 mt-3">
-                        <label for="photosThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-2 text-center">Fotos (Telegram)</label>
-                        <input type="file" id="photosThirdParty" multiple accept="image/*" class="w-full text-xs dark:text-slate-400 text-center focus:outline-none" onchange="window.handlePhotoSelection(event, 'tpPhotoPreview')">
-                        <div id="tpPhotoPreview" class="flex justify-center gap-2 mt-3 overflow-x-auto pb-1 min-h-[60px]"></div>
-                    </div>
-                    
-                    <div><label for="obsThirdParty" class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">Obs / Problemas</label><textarea id="obsThirdParty" rows="2" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg resize-none outline-none focus:border-purple-500 transition"></textarea></div>
-                    <button type="submit" id="btnSubmitThirdParty" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-md mt-4">Salvar Acompanhamento</button>
-                </form>
-            </div>
-            `;
-        };
-
-        window.saveToolMovement = async function(e) {
+        
+        window.saveTool = async function(e) { 
             e.preventDefault(); 
-            const type = document.getElementById('tType').value; 
-            const date = document.getElementById('tDate').value; 
-            const obs = document.getElementById('tObs').value.trim(); 
-            const toolId = document.getElementById('tToolSelect').value; 
-            const qtd = parseInt(document.getElementById('tQtd').value) || 1;
+            const total = parseInt(document.getElementById('toolTotal').value) || 1; 
+            const data = { 
+                name: document.getElementById('toolName').value, 
+                barcode: document.getElementById('toolBarcode').value, 
+                brand: document.getElementById('toolBrand').value, 
+                totalStock: total, 
+                availableStock: total 
+            }; 
+            const id = window.editingItemId || Date.now().toString(); 
             
-            if(!toolId) return window.showToast("Selecione uma ferramenta.", "error"); 
+            if(window.editingItemId) { 
+                const old = (window.localData.tools || []).find(function(x) { return String(x.id) === String(window.editingItemId); }); 
+                if(old) { data.availableStock = old.availableStock + (total - old.totalStock); } 
+            } 
             
-            const btn = document.getElementById('btnSubmitTool'); 
-            const origText = btn.innerHTML; 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>Registrando...'; 
-            btn.disabled = true; 
+            await window.dbSave('tools', id, data); 
+            window.hideElement('modalTool'); 
+            window.showToast('Ferramenta salva com sucesso!'); 
+            window.renderActiveTab(); 
+        };
+        
+        window.editTool = function(id) { 
+            const item = window.localData.tools.find(function(x) { return String(x.id) === String(id); }); 
+            if(!item) return; 
             
-            try { 
-                const toolItem = window.localData.tools.find(function(c) { return String(c.id) === String(toolId); }); 
-                if(!toolItem) throw new Error("Ferramenta não encontrada");
-                
-                let currentStock = parseInt(toolItem.availableStock || 0);
-                
-                if(type === 'Retirada' && currentStock < qtd) { 
-                    window.showToast("Quantidade indisponível na base!", "error"); 
-                    btn.innerHTML = origText; btn.disabled = false; 
-                    return; 
-                }
-                
-                let newStock = type === 'Retirada' ? currentStock - qtd : currentStock + qtd; 
-                if (type === 'Devolução' && newStock > toolItem.totalStock) newStock = toolItem.totalStock; 
-                
-                await window.dbSave('tools', toolItem.id, { availableStock: newStock }); 
-                
-                const recordId = Date.now().toString(); 
-                const recordData = { 
-                    id: recordId, 
-                    userId: window.currentSystemUser.id, 
-                    userName: window.currentSystemUser.login, 
-                    type: type, 
-                    date: date, 
-                    obs: obs, 
-                    toolId: toolItem.id, 
-                    toolName: toolItem.name, 
-                    qtd: qtd, 
-                    timestamp: new Date().toISOString() 
-                }; 
-                
-                await window.dbSave('toolMovements', recordId, recordData); 
-                window.logAudit('Cautela (' + type + '): ' + qtd + 'x ' + toolItem.name); 
-                window.showToast("Cautela registrada com sucesso!"); 
-                document.getElementById('toolMovementForm').reset(); 
+            window.editingItemId = id; 
+            document.getElementById('toolName').value = item.name || ''; 
+            document.getElementById('toolBarcode').value = item.barcode || ''; 
+            document.getElementById('toolBrand').value = item.brand || ''; 
+            document.getElementById('toolTotal').value = item.totalStock || 1; 
+            
+            const title = document.getElementById('modalTitleTool');
+            if(title) title.textContent = 'Editar Ferramenta'; 
+            window.showElement('modalTool'); 
+        };
+
+        window.deleteTool = function(id) { 
+            window.confirmAction(async function() { 
+                await window.dbDelete('tools', id); 
+                window.showToast('Ferramenta excluída!'); 
                 window.renderActiveTab(); 
-            } catch(err) { window.showToast("Erro ao salvar.", "error"); } finally { btn.innerHTML = origText; btn.disabled = false; } 
-        };
-
-        // ==========================================
-        // 12. CRUD FUNCIONÁRIO (VISUALIZAR, EDITAR, EXCLUIR, IMPRIMIR)
-        // ==========================================
-        window.previousTab = null;
-
-        window.viewRecord = function(type, id) {
-            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
-            if(!item) return window.showToast("Registro não encontrado.", "error");
-
-            const titleEl = document.getElementById('viewRecordTitle');
-            let docTitle = type === 'reports' ? 'Ordem de Serviço' : (type === 'quotes' ? 'Orçamento' : 'Acompanhamento');
-            if(titleEl) titleEl.textContent = docTitle;
-
-            const cei = item.ceiId ? window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); }) : null;
-            const ceiName = cei ? window.escapeHtml(cei.name) : window.escapeHtml(item.ceiId || 'N/A');
-
-            let html = '<div class="bg-white text-slate-800 p-2 sm:p-4 rounded-lg w-full" id="printContentWrapper">';
-
-            html += '<div class="flex justify-between items-start border-b-2 border-slate-800 pb-4 mb-5">';
-            html += '<div><h2 class="text-xl sm:text-2xl font-black uppercase tracking-wider text-slate-900">' + docTitle + '</h2>';
-            html += '<p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Ref: #' + String(item.id).substring(item.id.length - 6) + '</p></div>';
-            if(type === 'quotes') {
-                let badge = item.status === 'Aprovado' ? 'bg-green-100 text-green-800 border-green-300' : (item.status === 'Rejeitado' ? 'bg-red-100 text-red-800 border-red-300' : 'bg-amber-100 text-amber-800 border-amber-300');
-                html += '<div class="px-3 py-1.5 rounded border font-bold text-xs sm:text-sm uppercase shadow-sm ' + badge + '">' + (item.status || 'Pendente') + '</div>';
-            }
-            html += '</div>';
-
-            html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">';
-            html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Cliente / Local</span><span class="font-bold text-base">' + ceiName + '</span></div>';
-            html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Data do Documento</span><span class="font-semibold">' + window.formatDateBR(item.date) + '</span></div>';
-            if(item.userName) html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Técnico Responsável</span><span class="font-semibold">' + window.escapeHtml(item.userName) + '</span></div>';
-            if(type === 'thirdParty' && item.companyName) html += '<div><span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Empresa Terceira</span><span class="font-semibold">' + window.escapeHtml(item.companyName) + '</span></div>';
-            html += '</div>';
-
-            if(item.workDone) {
-                html += '<div class="mb-6"><span class="block text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wide">Descrição do Serviço / Escopo</span>';
-                html += '<div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm whitespace-pre-wrap leading-relaxed shadow-sm">' + window.escapeHtml(item.workDone) + '</div></div>';
-            }
-
-            let totalGeral = 0;
-            if(item.materials && Array.isArray(item.materials) && item.materials.length > 0) {
-                html += '<div class="mb-6 overflow-hidden rounded-lg border border-slate-200 shadow-sm">';
-                html += '<table class="w-full text-left text-sm border-collapse">';
-                html += '<thead><tr class="bg-slate-800 text-white text-xs uppercase tracking-wider"><th class="py-3 px-4 font-semibold w-16 text-center">Qtd</th><th class="py-3 px-4 font-semibold">Descrição do Material</th><th class="py-3 px-4 font-semibold text-right w-28">Vlr. Unit</th><th class="py-3 px-4 font-semibold text-right w-32">Subtotal</th></tr></thead>';
-                html += '<tbody class="bg-white">';
-                item.materials.forEach(function(m) {
-                    let p = parseFloat(m.price) || 0;
-                    let q = parseFloat(m.qtd) || 1;
-                    let sub = p * q;
-                    totalGeral += sub;
-                    html += '<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="py-3 px-4 text-center font-medium">' + q + '</td><td class="py-3 px-4 text-slate-700">' + window.escapeHtml(m.name) + '</td><td class="py-3 px-4 text-right text-slate-500">' + window.formatMoney(p) + '</td><td class="py-3 px-4 text-right font-bold text-slate-800">' + window.formatMoney(sub) + '</td></tr>';
-                });
-                html += '</tbody></table></div>';
-            } else if (item.totalPrice) {
-                totalGeral = parseFloat(item.totalPrice) || 0;
-            }
-
-            html += '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-t-2 border-slate-800 pt-6 mt-4">';
-            html += '<div class="w-full sm:w-2/3">';
-            if(item.obs) {
-                html += '<span class="block text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-wide">Observações Adicionais</span>';
-                html += '<p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 whitespace-pre-wrap">' + window.escapeHtml(item.obs) + '</p>';
-            }
-            html += '</div>';
-
-            html += '<div class="w-full sm:w-1/3 bg-slate-800 text-white p-5 rounded-xl text-right shadow-lg">';
-            html += '<span class="block text-slate-300 text-[10px] font-bold uppercase mb-1 tracking-widest">Total Geral</span>';
-            html += '<span class="text-2xl sm:text-3xl font-black tracking-tight">' + window.formatMoney(totalGeral) + '</span>';
-            html += '</div>';
-            html += '</div>';
-            
-            html += '</div>';
-
-            const viewContent = document.getElementById('viewRecordContent');
-            if(viewContent) viewContent.innerHTML = html;
-
-            const btnPrint = document.getElementById('btnPrintRecord');
-            if(btnPrint) {
-                btnPrint.onclick = function() { window.printRecord(docTitle); };
-            }
-
-            window.showElement('modalViewRecord');
-        };
-
-        window.printRecord = function(docTitle) {
-            const content = document.getElementById('printContentWrapper');
-            const printArea = document.getElementById('printArea');
-            
-            if(content && printArea) {
-                let printHtml = '<div class="p-8 max-w-4xl mx-auto font-sans text-slate-900 bg-white relative print:p-0">';
-                
-                printHtml += '<div class="flex justify-between items-end border-b-4 border-slate-900 pb-6 mb-8">';
-                printHtml += '<div><h1 class="text-4xl font-black tracking-tighter text-slate-900 leading-none">LYM ELETRONICOS</h1>';
-                printHtml += '<p class="text-sm text-slate-600 font-medium mt-2">Jardim das Camélias, São Paulo - SP</p></div>';
-                printHtml += '<div class="text-right"><p class="text-lg font-black uppercase text-slate-800 tracking-widest">' + (docTitle || 'Documento') + '</p>';
-                printHtml += '<p class="text-xs text-slate-500 mt-1 font-medium">Emitido em: ' + new Date().toLocaleDateString('pt-BR') + '</p></div>';
-                printHtml += '</div>';
-                
-                printHtml += content.innerHTML;
-                
-                printHtml += '<div class="mt-24 pt-8 grid grid-cols-2 gap-16 text-center break-inside-avoid">';
-                printHtml += '<div><div class="border-t-2 border-slate-300 pt-2 font-bold text-sm text-slate-700">Assinatura Cliente / Responsável</div></div>';
-                printHtml += '<div><div class="border-t-2 border-slate-300 pt-2 font-bold text-sm text-slate-700">Assinatura Técnico / LYM</div></div>';
-                printHtml += '</div>';
-
-                printHtml += '<div class="mt-16 text-center text-[10px] text-slate-400 font-medium uppercase tracking-widest">';
-                printHtml += 'Documento gerado digitalmente via Sistema de Gestão LYM APP';
-                printHtml += '</div></div>';
-                
-                printArea.innerHTML = printHtml;
-                
-                setTimeout(function() {
-                    window.print();
-                }, 300);
-            }
-        };
-
-        window.editFuncRecord = function(type, id) {
-            const item = (window.localData[type] || []).find(function(x) { return String(x.id) === String(id); });
-            if(!item) return window.showToast("Registro não encontrado.", "error");
-
-            window.previousTab = window.activeTab;
-            window.editingItemId = id;
-            
-            if (type === 'reports') window.activeTab = 'func-reports';
-            else if (type === 'quotes') window.activeTab = 'func-quotes';
-            else if (type === 'thirdParty') window.activeTab = 'func-thirdParty';
-            
-            window.renderActiveTab();
-            
-            setTimeout(function() {
-                let sfx = type === 'reports' ? 'Rep' : (type === 'quotes' ? 'Quote' : 'ThirdParty');
-                
-                const fields = ['date', 'timeStart', 'timeEnd', 'workDone', 'obs'];
-                fields.forEach(function(f) {
-                    const el = document.getElementById(f + sfx);
-                    if(el && item[f]) el.value = item[f];
-                });
-                
-                const elCei = document.getElementById('ceiSelect' + sfx);
-                if(elCei && item.ceiId) elCei.value = item.ceiId;
-                
-                if (type === 'reports' && document.getElementById('diffRep') && item.difficulty) {
-                    document.getElementById('diffRep').value = item.difficulty;
-                }
-                
-                if (type === 'thirdParty' && document.getElementById('companyNameThirdParty') && item.companyName) {
-                    document.getElementById('companyNameThirdParty').value = item.companyName;
-                }
-
-                if (type === 'quotes' && document.getElementById('statusQuote') && item.status) {
-                    document.getElementById('statusQuote').value = item.status;
-                }
-
-                const matContainerId = type === 'reports' ? 'materialsContainer' : (type === 'quotes' ? 'quoMaterialsContainer' : null);
-                if(matContainerId && item.materials && Array.isArray(item.materials)) {
-                    const container = document.getElementById(matContainerId);
-                    if(container) {
-                        container.innerHTML = ''; 
-                        window.materialCount = 0; 
-                        
-                        if(item.materials.length === 0) {
-                            container.innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>';
-                        } else {
-                            item.materials.forEach(function(mat) {
-                                window.addMaterialRow(matContainerId, false);
-                                const row = container.lastElementChild;
-                                if(row) {
-                                    const nameInput = row.querySelector('.mat-name');
-                                    const brandInput = row.querySelector('.mat-brand');
-                                    const qtdInput = row.querySelector('.mat-qtd');
-                                    const priceInput = row.querySelector('.mat-price');
-                                    
-                                    if(nameInput) nameInput.value = mat.name || '';
-                                    if(brandInput) brandInput.value = mat.brand || '';
-                                    if(qtdInput) qtdInput.value = mat.qtd || 1;
-                                    if(priceInput) priceInput.value = mat.price || '';
-                                }
-                            });
-                        }
-                    }
-                }
-
-                // CARREGA O USUÁRIO ORIGINAL NO DROPDOWN DO ADMIN
-                if (window.currentSystemUser.role === 'admin') {
-                    const adminSelect = document.getElementById('adminUser' + sfx);
-                    if (adminSelect) {
-                        const u = window.localData.users.find(function(x) { return x.login === item.userName; });
-                        if (u) adminSelect.value = u.id;
-                        else adminSelect.value = "";
-                    }
-                }
-                
-                const cancelBtn = document.getElementById('cancelEditBtn');
-                if(cancelBtn) window.showElement('cancelEditBtn');
-            }, 150);
-        };
-
-        window.deleteFuncRecord = function(type, id) {
-            window.confirmAction(async function() {
-                try {
-                    await window.dbDelete(type, id);
-                    window.showToast("Registro excluído com sucesso!");
-                    
-                    if(window.activeTab.startsWith('admin-')) {
-                        window.applyFilters(type);
-                    } else {
-                        window.renderActiveTab();
-                    }
-                } catch(e) {
-                    window.showToast("Erro ao excluir.", "error");
-                }
-            });
-        };
-
-        window.cancelEdit = function() {
-            window.editingItemId = null;
-            if(window.previousTab) {
-                window.activeTab = window.previousTab;
-                window.previousTab = null;
-            } else {
-                window.activeTab = window.currentSystemUser.role === 'admin' ? 'dashboard' : 'func-history';
-            }
-            window.renderActiveTab();
+            }); 
         };
 
         // ==========================================
