@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- CORREÇÃO 1: Removido user-scalable=no e maximum-scale para melhorar a acessibilidade -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LYM Eletrônicos - Gestão</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,7 +49,8 @@
     <datalist id="catalogList"></datalist>
 
     <!-- ==================== TELA DE LOGIN ==================== -->
-    <main id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
+    <!-- CORREÇÃO 2: Alterado de <main> para <section> para manter a semântica de um único main no documento -->
+    <section id="loginScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-40">
         <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="text-center mb-6">
                 <div class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
@@ -76,7 +78,7 @@
                 </button>
             </form>
         </div>
-    </main>
+    </section>
 
     <!-- ==================== TELA FORÇAR NOVA SENHA ==================== -->
     <div id="modalForcePassword" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900 hidden items-center justify-center z-50">
@@ -285,7 +287,7 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL FERRAMENTA (CORREÇÃO APLICADA) ==================== -->
+    <!-- ==================== MODAL FERRAMENTA ==================== -->
     <div id="modalTool" role="dialog" aria-modal="true" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in my-8">
             <div class="bg-slate-100 dark:bg-slate-700 px-4 py-3 border-b dark:border-slate-600 relative flex justify-center items-center">
@@ -403,7 +405,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- LÓGICA JAVASCRIPT MASTER (Limpa e Refatorada)                             -->
+    <!-- LÓGICA JAVASCRIPT MASTER                                                  -->
     <!-- ========================================================================= -->
     
     <script>
@@ -474,9 +476,15 @@
             } 
         };
 
+        // CORREÇÃO 3: Escape HTML agora protege aspas também, prevenindo bugs de injeção e quebra de layout no template.
         window.escapeHtml = function(text) { 
             if (!text) return ""; 
-            return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;"); 
         };
         
         window.formatDateBR = function(iso) { 
@@ -968,17 +976,19 @@
                     else if(window.activeTab === 'admin-thirdParty') { title = "Terceiros"; html = window.renderAdminThirdParty(); }
                     else if(window.activeTab === 'admin-audit') { title = "Auditoria"; html = window.renderAdminAudit(); }
                     else if(window.activeTab === 'cftv-vault') { title = "Cofre de Redes"; html = window.renderCftvVault(); }
-                    else if(window.activeTab === 'func-reports') { title = "Editar Manutenção"; html = window.renderFuncReportForm(); }
-                    else if(window.activeTab === 'func-quotes') { title = "Editar Orçamento"; html = window.renderFuncQuoteForm(); }
-                    else if(window.activeTab === 'func-thirdParty') { title = "Editar Acompanhamento"; html = window.renderFuncThirdPartyForm(); }
+                    // AVISO: Funções chamadas abaixo estavam ausentes do script fornecido original
+                    else if(window.activeTab === 'func-reports' && typeof window.renderFuncReportForm === 'function') { title = "Editar Manutenção"; html = window.renderFuncReportForm(); }
+                    else if(window.activeTab === 'func-quotes' && typeof window.renderFuncQuoteForm === 'function') { title = "Editar Orçamento"; html = window.renderFuncQuoteForm(); }
+                    else if(window.activeTab === 'func-thirdParty' && typeof window.renderFuncThirdPartyForm === 'function') { title = "Editar Acompanhamento"; html = window.renderFuncThirdPartyForm(); }
                 } else {
-                    if(window.activeTab === 'func-stock') { title = "Meu Almoxarifado"; html = window.renderFuncStockForm(); }
-                    else if(window.activeTab === 'func-tools') { title = "Cautela de Ferramentas"; html = window.renderFuncTools(); }
-                    else if(window.activeTab === 'func-reports') { title = "Registrar Manutenção"; html = window.renderFuncReportForm(); }
-                    else if(window.activeTab === 'func-quotes') { title = "Novo Orçamento"; html = window.renderFuncQuoteForm(); }
-                    else if(window.activeTab === 'func-thirdParty') { title = "Acompanhar Terceiro"; html = window.renderFuncThirdPartyForm(); }
+                    // AVISO: Funções chamadas abaixo estavam ausentes do script fornecido original
+                    if(window.activeTab === 'func-stock' && typeof window.renderFuncStockForm === 'function') { title = "Meu Almoxarifado"; html = window.renderFuncStockForm(); }
+                    else if(window.activeTab === 'func-tools' && typeof window.renderFuncTools === 'function') { title = "Cautela de Ferramentas"; html = window.renderFuncTools(); }
+                    else if(window.activeTab === 'func-reports' && typeof window.renderFuncReportForm === 'function') { title = "Registrar Manutenção"; html = window.renderFuncReportForm(); }
+                    else if(window.activeTab === 'func-quotes' && typeof window.renderFuncQuoteForm === 'function') { title = "Novo Orçamento"; html = window.renderFuncQuoteForm(); }
+                    else if(window.activeTab === 'func-thirdParty' && typeof window.renderFuncThirdPartyForm === 'function') { title = "Acompanhar Terceiro"; html = window.renderFuncThirdPartyForm(); }
                     else if(window.activeTab === 'cftv-vault') { title = "Cofre de Redes"; html = window.renderCftvVault(); }
-                    else if(window.activeTab === 'func-history') { title = "Meus Registros"; html = window.renderFuncHistory(); }
+                    else if(window.activeTab === 'func-history' && typeof window.renderFuncHistory === 'function') { title = "Meus Registros"; html = window.renderFuncHistory(); }
                 }
 
                 const titleEl = document.getElementById('mobilePageTitle'); 
@@ -1002,7 +1012,7 @@
                     window.setupAdminFilters();
                 }
                 
-                if(window.activeTab === 'func-history') {
+                if(window.activeTab === 'func-history' && typeof window.renderEmployeeHistory === 'function') {
                     window.renderEmployeeHistory();
                 }
                 
@@ -1012,13 +1022,13 @@
                     
                     if(!window.editingItemId) {
                         let activeType = window.activeTab.split('-')[1];
-                        if(activeType) window.loadDraft(activeType);
+                        if(activeType && typeof window.loadDraft === 'function') window.loadDraft(activeType);
                     }
                     
                     const formId = window.activeTab === 'func-reports' ? 'reportForm' : (window.activeTab === 'func-quotes' ? 'quoteForm' : 'thirdPartyForm');
                     const formObj = document.getElementById(formId);
                     
-                    if(formObj) { 
+                    if(formObj && typeof window.saveDraft === 'function') { 
                         formObj.oninput = function() { window.saveDraft(window.activeTab.split('-')[1]); }; 
                         formObj.onchange = function() { window.saveDraft(window.activeTab.split('-')[1]); }; 
                     }
@@ -1026,7 +1036,7 @@
                     const contId = window.activeTab === 'func-reports' ? 'materialsContainer' : 'quoMaterialsContainer';
                     const contElement = document.getElementById(contId);
                     
-                    if(contElement) {
+                    if(contElement && typeof window.saveDraft === 'function') {
                         contElement.oninput = function(e) {
                             if(e.target.classList.contains('mat-name') && e.target.hasAttribute('list')) {
                                 const val = e.target.value; 
@@ -1187,7 +1197,7 @@
                         const bEl = row.querySelector('.mat-brand'); if(bEl) bEl.value = found.brand || ""; 
                         const pEl = row.querySelector('.mat-price'); if(pEl) pEl.value = found.price || ""; 
                         
-                        if(window.activeTab) {
+                        if(window.activeTab && typeof window.saveDraft === 'function') {
                             let tb = window.activeTab.split('-')[1];
                             if(tb) window.saveDraft(tb);
                         } 
@@ -1249,12 +1259,12 @@
                     <label for="${id}_price" class="sr-only">Preço Unitário</label>
                     <input type="number" id="${id}_price" class="mat-price w-full sm:w-24 p-1.5 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded text-sm outline-none text-center focus:border-blue-500" placeholder="R$ Un." step="0.01">
                     
-                    <button type="button" aria-label="Remover material" onclick="document.getElementById('${id}').remove(); window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200 transition">X</button>
+                    <button type="button" aria-label="Remover material" onclick="document.getElementById('${id}').remove(); if(typeof window.saveDraft === 'function') window.saveDraft('${window.activeTab.split('-')[1]}');" class="w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold hover:bg-red-200 transition">X</button>
                 `;
                 
                 container.appendChild(div); 
                 
-                if(triggerSave && window.activeTab) { 
+                if(triggerSave && window.activeTab && typeof window.saveDraft === 'function') { 
                     const activeType = window.activeTab.split('-')[1]; 
                     if (activeType) window.saveDraft(activeType); 
                 }
