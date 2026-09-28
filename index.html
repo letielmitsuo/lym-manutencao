@@ -2735,21 +2735,19 @@
         window.saveDraft = function(type) { /* Lógica auxiliar para rascunhos */ };
         window.loadDraft = function(type) { /* Lógica auxiliar para rascunhos */ };
 
-        // Integração direta com Telegram sem passar pelo Banco de Dados
+        // Integração direta com Telegram sem passar pelo Banco de Dados (Com envio de PDF)
         window.sendToTelegramDirect = async function(record, files, type, isEdit) {
             const token = "8891515283:AAFhFKktpfr6wEQUF1UXCUcOJecAg8m7nKY";
             if (!token) return;
 
             const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(record.ceiId); });
-            if (!cei || !cei.telegramGroupId) return; // Aborta se a creche não tiver ID de grupo configurado
+            if (!cei || !cei.telegramGroupId) return;
 
             const chatId = cei.telegramGroupId;
             const topicId = cei.telegramTopicId || "";
 
             let typeLabel = type === 'reports' ? 'SERVIÇO' : (type === 'quotes' ? 'ORÇAMENTO' : 'ACOMP. TERCEIRO');
             let icon = type === 'reports' ? '🔧' : (type === 'quotes' ? '📄' : '👷');
-            
-            // Adiciona a TAG de Atualização se for edição
             let actionLabel = isEdit ? 'ATUALIZAÇÃO DE' : 'NOVO';
 
             let msg = `${icon} *${actionLabel} ${typeLabel}*\n`;
@@ -2788,7 +2786,7 @@
                     body: JSON.stringify(payload)
                 });
 
-                // 2. Enviar Imagens DIRETAMENTE (Upload Multipart de cada arquivo selecionado)
+                // 2. Enviar Imagens DIRETAMENTE (Upload Multipart)
                 if (files && files.length > 0) {
                     for (let i = 0; i < files.length; i++) {
                         let formData = new FormData();
@@ -2802,6 +2800,98 @@
                         });
                     }
                 }
+
+                // 3. GERAR PDF ESTILIZADO E ENVIAR COMO DOCUMENTO
+                let docTitle = type === 'reports' ? 'ORDEM DE SERVIÇO' : (type === 'quotes' ? 'ORÇAMENTO' : 'ACOMPANHAMENTO');
+                let ceiName = cei ? window.escapeHtml(cei.name) : window.escapeHtml(record.ceiId || 'N/A');
+                let refId = String(record.id || Date.now()).substring(String(record.id || "").length - 6);
+                
+                // Monta a estrutura HTML invisível com CSS Inline para o renderizador de PDF
+                let htmlPdf = '<div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b; background: white; width: 794px;">'; // Largura aproximada de A4
+                htmlPdf += '<div style="border-bottom: 2px solid #1e293b; padding-bottom: 15px; margin-bottom: 25px;">';
+                htmlPdf += '<h2 style="font-size: 28px; font-weight: 900; text-transform: uppercase; margin: 0; letter-spacing: 1px;">' + docTitle + '</h2>';
+                htmlPdf += '<p style="font-size: 14px; color: #64748b; margin: 5px 0 0 0;">Ref: #' + refId + '</p>';
+                htmlPdf += '</div>';
+
+                htmlPdf += '<table style="width: 100%; margin-bottom: 30px; font-size: 14px;"><tr>';
+                htmlPdf += '<td style="width: 50%;"><span style="display: block; font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Cliente / Local</span><strong style="font-size: 18px;">' + ceiName + '</strong></td>';
+                htmlPdf += '<td style="width: 50%;"><span style="display: block; font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Data do Documento</span><strong style="font-size: 16px;">' + window.formatDateBR(record.date) + '</strong></td>';
+                htmlPdf += '</tr><tr>';
+                htmlPdf += '<td style="padding-top: 20px;"><span style="display: block; font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Técnico Responsável</span><strong style="font-size: 16px;">' + window.escapeHtml(record.userName) + '</strong></td>';
+                if(type === 'thirdParty' && record.companyName) {
+                    htmlPdf += '<td style="padding-top: 20px;"><span style="display: block; font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Empresa Terceira</span><strong style="font-size: 16px;">' + window.escapeHtml(record.companyName) + '</strong></td>';
+                }
+                htmlPdf += '</tr></table>';
+
+                if(record.workDone) {
+                    htmlPdf += '<div style="margin-bottom: 30px;"><span style="display: block; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 10px;">Descrição do Serviço / Escopo</span>';
+                    htmlPdf += '<div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 15px; white-space: pre-wrap; line-height: 1.5;">' + window.escapeHtml(record.workDone) + '</div></div>';
+                }
+
+                let totalGeral = 0;
+                if(record.materials && Array.isArray(record.materials) && record.materials.length > 0) {
+                    htmlPdf += '<div style="margin-bottom: 30px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">';
+                    htmlPdf += '<table style="width: 100%; text-align: left; font-size: 14px; border-collapse: collapse;">';
+                    htmlPdf += '<thead style="background: #1e293b; color: white;"><tr><th style="padding: 12px; text-align: center; width: 60px;">QTD</th><th style="padding: 12px;">DESCRIÇÃO DO MATERIAL</th><th style="padding: 12px; text-align: right; width: 110px;">VLR. UNIT</th><th style="padding: 12px; text-align: right; width: 120px;">SUBTOTAL</th></tr></thead>';
+                    htmlPdf += '<tbody style="background: white;">';
+                    record.materials.forEach(function(m) {
+                        let p = parseFloat(m.price) || 0;
+                        let q = parseFloat(m.qtd) || 1;
+                        let sub = p * q;
+                        totalGeral += sub;
+                        htmlPdf += '<tr style="border-top: 1px solid #f1f5f9;"><td style="padding: 12px; text-align: center; font-weight: bold;">' + q + '</td><td style="padding: 12px; color: #475569;">' + window.escapeHtml(m.name) + '</td><td style="padding: 12px; text-align: right; color: #64748b;">' + window.formatMoney(p) + '</td><td style="padding: 12px; text-align: right; font-weight: bold; color: #0f172a;">' + window.formatMoney(sub) + '</td></tr>';
+                    });
+                    htmlPdf += '</tbody></table></div>';
+                } else if (record.totalPrice) {
+                    totalGeral = parseFloat(record.totalPrice) || 0;
+                }
+
+                htmlPdf += '<div style="margin-top: 30px; border-top: 2px solid #1e293b; padding-top: 30px; display: flex; justify-content: space-between; align-items: flex-end;">';
+                htmlPdf += '<div style="width: 55%;">';
+                if(record.obs) {
+                    htmlPdf += '<span style="display: block; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Observações Adicionais</span>';
+                    htmlPdf += '<p style="font-size: 13px; color: #475569; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap; margin: 0; line-height: 1.5;">' + window.escapeHtml(record.obs) + '</p>';
+                }
+                htmlPdf += '</div>';
+                
+                // Bloco escuro de Total idêntico ao modelo
+                htmlPdf += '<div style="width: 40%; background: #1e293b; color: white; padding: 25px 20px; border-radius: 12px; text-align: right; box-sizing: border-box;">';
+                htmlPdf += '<span style="display: block; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #cbd5e1; margin-bottom: 8px; letter-spacing: 1px;">Total Geral</span>';
+                htmlPdf += '<span style="font-size: 32px; font-weight: 900;">' + window.formatMoney(totalGeral) + '</span>';
+                htmlPdf += '</div>';
+                htmlPdf += '</div></div>';
+
+                // Criar container invisível para injetar no html2pdf
+                let tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlPdf;
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px';
+                document.body.appendChild(tempDiv);
+
+                // Configuração do conversor de PDF
+                let opt = {
+                    margin:       [10, 0, 10, 0], // Margem topo, direita, baixo, esquerda
+                    filename:     `${docTitle}_${refId}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Gera o Blob do PDF, envia para o Telegram e descarta o div oculto
+                html2pdf().set(opt).from(tempDiv).outputPdf('blob').then(async function(pdfBlob) {
+                    document.body.removeChild(tempDiv); 
+                    
+                    let pdfFormData = new FormData();
+                    pdfFormData.append('chat_id', chatId);
+                    if (topicId) pdfFormData.append('message_thread_id', topicId);
+                    pdfFormData.append('document', pdfBlob, opt.filename);
+                    
+                    await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
+                        method: 'POST',
+                        body: pdfFormData
+                    });
+                });
+
             } catch (err) {
                 console.error("Erro na integração com o Telegram:", err);
             }
