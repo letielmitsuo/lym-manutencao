@@ -2598,7 +2598,14 @@
         window.deleteCatalog = function(id) { window.confirmAction(async function() { await window.dbDelete('catalog', id); window.showToast('Item excluído!'); window.renderActiveTab(); }); };
 
         // --- FERRAMENTAS ---
-        window.openToolModal = function() { window.editingItemId = null; document.getElementById('toolForm').reset(); document.getElementById('modalTitleTool').textContent = 'Nova Ferramenta'; window.showElement('modalTool'); };
+        window.openToolModal = function() { 
+            window.editingItemId = null; 
+            const form = document.getElementById('toolForm'); 
+            if(form) form.reset(); 
+            const title = document.getElementById('modalTitleTool'); 
+            if(title) title.textContent = 'Nova Ferramenta'; 
+            window.showElement('modalTool'); 
+        };
         
         window.saveTool = async function(e) { 
             e.preventDefault(); 
@@ -2623,7 +2630,7 @@
         
         window.editTool = function(id) { const item = window.localData.tools.find(function(x) { return x.id === id; }); if(!item) return; window.editingItemId = id; document.getElementById('toolName').value = item.name||''; document.getElementById('toolBarcode').value = item.barcode||''; document.getElementById('toolBrand').value = item.brand||''; document.getElementById('toolTotal').value = item.totalStock||1; document.getElementById('modalTitleTool').textContent = 'Editar Ferramenta'; window.showElement('modalTool'); };
         window.deleteTool = function(id) { window.confirmAction(async function() { await window.dbDelete('tools', id); window.showToast('Ferramenta excluída!'); window.renderActiveTab(); }); };
-
+        
         // ==========================================
         // 10. RENDERIZAÇÃO DE TABELAS (FILTROS)
         // ==========================================
@@ -2801,13 +2808,12 @@
                     }
                 }
 
-                // 3. GERAR PDF ESTILIZADO E ENVIAR COMO DOCUMENTO (Correção da página em branco)
+                // 3. GERAR PDF ESTILIZADO E ENVIAR COMO DOCUMENTO (Correção de centralização)
                 let docTitle = type === 'reports' ? 'ORDEM DE SERVIÇO' : (type === 'quotes' ? 'ORÇAMENTO' : 'ACOMPANHAMENTO');
                 let ceiName = cei ? window.escapeHtml(cei.name) : window.escapeHtml(record.ceiId || 'N/A');
                 let refId = String(record.id || Date.now()).substring(String(record.id || "").length - 6);
                 
-                // Monta a estrutura HTML
-                let htmlPdf = '<div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b; background: white; width: 794px;">';
+                let htmlPdf = '<div style="padding: 10px; font-family: Arial, sans-serif; color: #1e293b; background: white; width: 100%; box-sizing: border-box;">';
                 htmlPdf += '<div style="border-bottom: 2px solid #1e293b; padding-bottom: 15px; margin-bottom: 25px;">';
                 htmlPdf += '<h2 style="font-size: 28px; font-weight: 900; text-transform: uppercase; margin: 0; letter-spacing: 1px;">' + docTitle + '</h2>';
                 htmlPdf += '<p style="font-size: 14px; color: #64748b; margin: 5px 0 0 0;">Ref: #' + refId + '</p>';
@@ -2846,30 +2852,28 @@
                     totalGeral = parseFloat(record.totalPrice) || 0;
                 }
 
-                htmlPdf += '<div style="margin-top: 30px; border-top: 2px solid #1e293b; padding-top: 30px; display: flex; justify-content: space-between; align-items: flex-end;">';
-                htmlPdf += '<div style="width: 55%;">';
+                htmlPdf += '<table style="width: 100%; margin-top: 30px; border-top: 2px solid #1e293b; padding-top: 30px;"><tr>';
+                htmlPdf += '<td style="width: 55%; vertical-align: bottom;">';
                 if(record.obs) {
                     htmlPdf += '<span style="display: block; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Observações Adicionais</span>';
-                    htmlPdf += '<p style="font-size: 13px; color: #475569; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap; margin: 0; line-height: 1.5;">' + window.escapeHtml(record.obs) + '</p>';
+                    htmlPdf += '<div style="font-size: 13px; color: #475569; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap; margin: 0; line-height: 1.5;">' + window.escapeHtml(record.obs) + '</div>';
                 }
-                htmlPdf += '</div>';
-                
-                htmlPdf += '<div style="width: 40%; background: #1e293b; color: white; padding: 25px 20px; border-radius: 12px; text-align: right; box-sizing: border-box;">';
+                htmlPdf += '</td>';
+                htmlPdf += '<td style="width: 5%;"></td>';
+                htmlPdf += '<td style="width: 40%; background: #1e293b; color: white; padding: 25px 20px; border-radius: 12px; text-align: right; box-sizing: border-box; vertical-align: bottom;">';
                 htmlPdf += '<span style="display: block; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #cbd5e1; margin-bottom: 8px; letter-spacing: 1px;">Total Geral</span>';
                 htmlPdf += '<span style="font-size: 32px; font-weight: 900;">' + window.formatMoney(totalGeral) + '</span>';
-                htmlPdf += '</div>';
-                htmlPdf += '</div></div>';
+                htmlPdf += '</td>';
+                htmlPdf += '</tr></table></div>';
 
-                // Configuração do conversor de PDF (agora converte direto da string de HTML)
                 let opt = {
-                    margin:       [10, 0, 10, 0],
+                    margin:       [15, 15, 15, 15], 
                     filename:     `${docTitle}_${refId}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 },
+                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // Gera o Blob do PDF e envia para o Telegram
                 html2pdf().set(opt).from(htmlPdf).outputPdf('blob').then(async function(pdfBlob) {
                     let pdfFormData = new FormData();
                     pdfFormData.append('chat_id', chatId);
