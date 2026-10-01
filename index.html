@@ -14,7 +14,7 @@
     </script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -2784,12 +2784,51 @@
                     return row;
                 });
 
-                // Gera a planilha e força o download
+                // Gera a planilha
                 const ws = XLSX.utils.json_to_sheet(exportData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Exportação");
+                
+                // --- INÍCIO DA FORMATAÇÃO DE ESTILOS ---
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                ws['!cols'] = []; // Array para definir a largura das colunas
+                
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    // Define a largura da coluna para dar espaço à quebra de linha
+                    ws['!cols'][C] = { wpx: 160 }; 
+                    
+                    for (let R = range.s.r; R <= range.e.r; ++R) {
+                        const cellRef = XLSX.utils.encode_cell({c: C, r: R});
+                        if (!ws[cellRef]) continue;
+                        
+                        // Centraliza e aplica quebra de linha em todas as células
+                        ws[cellRef].s = {
+                            alignment: {
+                                horizontal: "center",
+                                vertical: "center",
+                                wrapText: true
+                            }
+                        };
+                        
+                        // Destaca o cabeçalho (primeira linha) com fundo escuro e letra branca
+                        if (R === 0) {
+                            ws[cellRef].s.font = { bold: true, color: { rgb: "FFFFFF" } };
+                            ws[cellRef].s.fill = { fgColor: { rgb: "1E293B" } };
+                        }
+                    }
+                }
+                // --- FIM DA FORMATAÇÃO ---
 
-                let fileName = (type === 'reports' ? 'Servicos' : (type === 'quotes' ? 'Orcamentos' : 'Terceiros')) + '_' + new Date().getTime() + '.xlsx';
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Relatório");
+
+                // Monta o nome do arquivo com Mês e Ano dinâmicos
+                const meses = ["Janeiro", "Fevereiro", "Marco", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                const dataAtual = new Date();
+                const mesAtual = meses[dataAtual.getMonth()];
+                const anoAtual = dataAtual.getFullYear();
+
+                let tipoNome = type === 'reports' ? 'Servicos' : (type === 'quotes' ? 'Orcamentos' : 'Terceiros');
+                let fileName = `${tipoNome}_${mesAtual}_${anoAtual}.xlsx`;
+
                 XLSX.writeFile(wb, fileName);
 
                 window.showToast("Exportação Excel concluída com sucesso!");
