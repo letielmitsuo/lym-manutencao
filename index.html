@@ -2720,7 +2720,84 @@
         // ==========================================
         // 11. UTILITÁRIOS FALTANTES E SALVAMENTO DE REGISTROS
         // ==========================================
-        window.exportToExcel = function(type) { window.showToast("Exportação gerada com sucesso!"); };
+        window.exportToExcel = function(type) {
+            try {
+                let data = window.localData[type] || [];
+                
+                // Pega os filtros atuais da tela
+                const searchVal = document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : "";
+                const dateStart = document.getElementById('filterDateStart') ? document.getElementById('filterDateStart').value : "";
+                const dateEnd = document.getElementById('filterDateEnd') ? document.getElementById('filterDateEnd').value : "";
+                const sector = document.getElementById('filterSector') ? document.getElementById('filterSector').value : "";
+                const status = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : "";
+
+                // Filtra os dados igualzinho aparece na tabela
+                let filtered = data.filter(function(item) {
+                    let match = true;
+                    const searchStr = (item.ceiId + " " + item.userName + " " + item.workDone + " " + item.companyName).toLowerCase();
+                    
+                    if (searchVal && !searchStr.includes(searchVal)) {
+                         const cei = window.localData.ceis.find(function(c) { return c.id === item.ceiId; });
+                         if (!cei || !cei.name.toLowerCase().includes(searchVal)) match = false;
+                    }
+                    if (dateStart && item.date < dateStart) match = false;
+                    if (dateEnd && item.date > dateEnd) match = false;
+                    if (sector && item.userRole !== sector) match = false;
+                    if (status && item.status !== status) match = false;
+                    
+                    return match;
+                });
+
+                if (filtered.length === 0) {
+                    return window.showToast("Não há dados para exportar com estes filtros.", "error");
+                }
+
+                // Monta as colunas formatadas para o Excel
+                let exportData = filtered.map(function(item) {
+                    const cei = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
+                    const ceiName = cei ? cei.name : item.ceiId;
+                    
+                    let row = {
+                        "Data": window.formatDateBR(item.date),
+                        "Cliente/CEI": ceiName,
+                        "Técnico": item.userName || "-",
+                        "Equipe": item.userRole === 'func_cftv' ? 'CFTV' : 'Geral'
+                    };
+
+                    if (type === 'reports') {
+                        row["Dificuldade"] = item.difficulty || "-";
+                        row["Início"] = item.timeStart || "-";
+                        row["Término"] = item.timeEnd || "-";
+                        row["Serviço Realizado"] = item.workDone || "-";
+                    } else if (type === 'quotes') {
+                        row["Status"] = item.status || "Pendente";
+                        row["Total (R$)"] = item.totalPrice || 0;
+                        row["Escopo do Orçamento"] = item.workDone || "-";
+                    } else if (type === 'thirdParty') {
+                        row["Empresa Terceira"] = item.companyName || "-";
+                        row["Início"] = item.timeStart || "-";
+                        row["Término"] = item.timeEnd || "-";
+                        row["Serviço Realizado"] = item.workDone || "-";
+                    }
+
+                    row["Observações"] = item.obs || "-";
+                    return row;
+                });
+
+                // Gera a planilha e força o download
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Exportação");
+
+                let fileName = (type === 'reports' ? 'Servicos' : (type === 'quotes' ? 'Orcamentos' : 'Terceiros')) + '_' + new Date().getTime() + '.xlsx';
+                XLSX.writeFile(wb, fileName);
+
+                window.showToast("Exportação Excel concluída com sucesso!");
+            } catch(e) {
+                console.error("Erro ao gerar Excel:", e);
+                window.showToast("Erro ao gerar arquivo Excel.", "error");
+            }
+        };
         window.downloadLocalBackup = function(auto) { if(!auto) window.showToast("Backup local salvo!"); };
         window.processRestoreFile = function(e) { window.showToast("Restauração lida."); };
         window.saveDraft = function(type) { /* Lógica auxiliar para rascunhos */ };
