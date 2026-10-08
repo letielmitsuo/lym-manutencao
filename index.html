@@ -2132,12 +2132,19 @@
             if(!window.currentSystemUser) return;
             const uid = String(window.currentSystemUser.id);
             
+            // Pega o ano e mês atual no formato YYYY-MM
+            const today = new Date();
+            const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            
             const genRows = function(type) {
-                let items = window.safeSort((window.localData[type] || []).filter(function(r) { return String(r.userId) === uid; }), function(a,b) { 
+                let items = window.safeSort((window.localData[type] || []).filter(function(r) { 
+                    // Filtra pelo usuário logado E pelo mês atual
+                    return String(r.userId) === uid && r.date && String(r.date).startsWith(currentMonth); 
+                }), function(a,b) { 
                     return window.getSafeTime(b) - window.getSafeTime(a); 
                 });
                 
-                if (items.length === 0) return '<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro.</td></tr>';
+                if (items.length === 0) return '<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum registro encontrado neste mês.</td></tr>';
                 
                 let html = "";
                 for(let i=0; i<items.length; i++) {
@@ -2151,10 +2158,14 @@
                     
                     let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Na Fila" aria-hidden="true"></i>' : '';
                     
+                    // Busca o nome real da creche na base de dados usando o ID
+                    const ceiObj = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
+                    const ceiName = ceiObj ? ceiObj.name : (item.cei || item.ceiId || 'Desconhecido');
+                    
                     html += `
                     <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
                         <td class="p-3">${badgeTg}${window.formatDateBR(item.date)}</td>
-                        <td class="p-3 font-medium">${window.escapeHtml(item.cei || item.ceiId || '')}${statusBadge}</td>
+                        <td class="p-3 font-medium">${window.escapeHtml(ceiName)}${statusBadge}</td>
                         <td class="p-3 text-right whitespace-nowrap">
                             <button type="button" aria-label="Ver" onclick="window.viewRecord('${type}', '${item.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition mr-1 hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i></button>
                             <button type="button" aria-label="Editar" onclick="window.editFuncRecord('${type}', '${item.id}')" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded transition mr-1 hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i></button>
@@ -2164,6 +2175,16 @@
                 }
                 return html;
             };
+
+            const rBody = document.getElementById('empHistoryReports'); 
+            if(rBody) rBody.innerHTML = genRows('reports');
+            
+            const qBody = document.getElementById('empHistoryQuotes'); 
+            if(qBody) qBody.innerHTML = genRows('quotes');
+            
+            const tBody = document.getElementById('empHistoryThirdParty'); 
+            if(tBody) tBody.innerHTML = genRows('thirdParty');
+        };
 
             const rBody = document.getElementById('empHistoryReports'); 
             if(rBody) rBody.innerHTML = genRows('reports');
