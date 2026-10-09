@@ -1717,6 +1717,16 @@
             let sectorHTML = "";
             let statusHTML = "";
             
+            // Calcula o primeiro e o último dia do mês atual para o filtro padrão
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const firstDay = y + '-' + m + '-01';
+            
+            // O dia "0" do próximo mês nos dá o último dia do mês atual
+            const lastDayObj = new Date(y, today.getMonth() + 1, 0);
+            const lastDay = y + '-' + m + '-' + String(lastDayObj.getDate()).padStart(2, '0');
+            
             if(type === 'reports' || type === 'quotes') {
                 sectorHTML = `
                     <div>
@@ -1750,11 +1760,11 @@
                     </div>
                     <div>
                         <label for="filterDateStart" class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Início</label>
-                        <input type="date" id="filterDateStart" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none focus:border-blue-500 text-center">
+                        <input type="date" id="filterDateStart" value="${firstDay}" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none focus:border-blue-500 text-center">
                     </div>
                     <div>
                         <label for="filterDateEnd" class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 text-center">Data Fim</label>
-                        <input type="date" id="filterDateEnd" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none focus:border-blue-500 text-center">
+                        <input type="date" id="filterDateEnd" value="${lastDay}" class="w-full p-2 border dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white rounded-lg text-sm outline-none focus:border-blue-500 text-center">
                     </div>
                     ${sectorHTML}
                     ${statusHTML}
