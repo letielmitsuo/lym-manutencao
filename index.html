@@ -1451,12 +1451,12 @@
                 let c = sortedCeis[i];
                 trs += `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                    <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
-                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.telegramGroupId || '-')}</td>
-                    <td class="px-3 py-2 text-right space-x-2">
+                    <td class="px-3 py-2 text-left space-x-2 w-28 whitespace-nowrap">
                         <button type="button" aria-label="Editar Creche" onclick="window.editCei('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-edit" aria-hidden="true"></i></button>
                         <button type="button" aria-label="Excluir Creche" onclick="window.deleteCei('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </td>
+                    <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
+                    <td class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">${window.escapeHtml(c.telegramGroupId || '-')}</td>
                 </tr>
                 `;
             }
@@ -1473,9 +1473,9 @@
                         <table class="w-full text-left border-collapse whitespace-nowrap">
                             <thead>
                                 <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
+                                    <th scope="col" class="px-3 py-2 font-semibold">Ações</th>
                                     <th scope="col" class="px-3 py-2 font-semibold">Nome</th>
                                     <th scope="col" class="px-3 py-2 font-semibold">Telegram</th>
-                                    <th scope="col" class="px-3 py-2 font-semibold text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhuma creche.</td></tr>`}</tbody>
@@ -1497,13 +1497,13 @@
                 let u = sortedUsers[i];
                 trs += `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                    <td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td>
-                    <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-600 text-white' : 'bg-emerald-600 text-white'}">${String(u.role).toUpperCase()}</span></td>
-                    <td class="px-3 py-2 text-right space-x-1">
+                    <td class="px-3 py-2 text-left space-x-1 whitespace-nowrap">
                         <button type="button" aria-label="Resetar Senha" onclick="window.resetUserPassword('${u.id}')" title="Resetar Senha" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded transition"><i class="fas fa-key" aria-hidden="true"></i></button>
                         <button type="button" aria-label="Editar" onclick="window.editUser('${u.id}')" title="Editar" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-edit" aria-hidden="true"></i></button>
                         <button type="button" aria-label="Apagar" onclick="window.deleteUser('${u.id}')" title="Apagar" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </td>
+                    <td class="px-3 py-2 font-medium">${window.escapeHtml(u.login || u.username)}</td>
+                    <td class="px-3 py-2 text-sm"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-600 text-white' : 'bg-emerald-600 text-white'}">${String(u.role).toUpperCase()}</span></td>
                 </tr>
                 `;
             }
@@ -1518,9 +1518,9 @@
                         <table class="w-full text-left border-collapse whitespace-nowrap">
                             <thead>
                                 <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
+                                    <th scope="col" class="px-3 py-2 font-semibold">Ações</th>
                                     <th scope="col" class="px-3 py-2 font-semibold">Login</th>
                                     <th scope="col" class="px-3 py-2 font-semibold">Nível</th>
-                                    <th scope="col" class="px-3 py-2 font-semibold text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>${trs || `<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum usuário.</td></tr>`}</tbody>
@@ -1542,15 +1542,15 @@
                 let c = sortedCat[i];
                 trs += `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                    <td class="px-3 py-2 text-left space-x-1 whitespace-nowrap">
+                        <button type="button" aria-label="Editar" onclick="window.editCatalog('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-edit" aria-hidden="true"></i></button>
+                        <button type="button" aria-label="Excluir" onclick="window.deleteCatalog('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                    </td>
                     <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
                     <td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td>
                     <td class="px-3 py-2 text-sm">${window.escapeHtml(c.category || '-')}</td>
                     <td class="px-3 py-2 text-sm text-right">${window.formatMoney(c.price)}</td>
                     <td class="px-3 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 text-center">${c.stock}</td>
-                    <td class="px-3 py-2 text-right space-x-1">
-                        <button type="button" aria-label="Editar" onclick="window.editCatalog('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-edit" aria-hidden="true"></i></button>
-                        <button type="button" aria-label="Excluir" onclick="window.deleteCatalog('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash" aria-hidden="true"></i></button>
-                    </td>
                 </tr>
                 `;
             }
@@ -1592,12 +1592,12 @@
                             <table class="w-full text-left border-collapse whitespace-nowrap">
                                 <thead>
                                     <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm z-10">
+                                        <th scope="col" class="px-3 py-2 font-semibold">Ações</th>
                                         <th scope="col" class="px-3 py-2 font-semibold">Material</th>
                                         <th scope="col" class="px-3 py-2 font-semibold">Marca</th>
                                         <th scope="col" class="px-3 py-2 font-semibold">Categoria</th>
                                         <th scope="col" class="px-3 py-2 font-semibold text-right">Preço Un.</th>
                                         <th scope="col" class="px-3 py-2 font-semibold text-center">Qtd Base</th>
-                                        <th scope="col" class="px-3 py-2 font-semibold text-right">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>${trs || `<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum material cadastrado.</td></tr>`}</tbody>
@@ -1639,14 +1639,14 @@
                 let statusClass = c.availableStock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; 
                 trs += `
                 <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                    <td class="px-3 py-2 text-left space-x-1 whitespace-nowrap">
+                        <button type="button" aria-label="Editar" onclick="window.editTool('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-edit" aria-hidden="true"></i></button>
+                        <button type="button" aria-label="Excluir" onclick="window.deleteTool('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                    </td>
                     <td class="px-3 py-2 font-medium">${window.escapeHtml(c.name)}</td>
                     <td class="px-3 py-2 text-sm">${window.escapeHtml(c.brand || '-')}</td>
                     <td class="px-3 py-2 text-sm font-bold text-center">${c.totalStock}</td>
                     <td class="px-3 py-2 text-sm font-bold ${statusClass} text-center">${c.availableStock}</td>
-                    <td class="px-3 py-2 text-right space-x-1">
-                        <button type="button" aria-label="Editar" onclick="window.editTool('${c.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-edit" aria-hidden="true"></i></button>
-                        <button type="button" aria-label="Excluir" onclick="window.deleteTool('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash" aria-hidden="true"></i></button>
-                    </td>
                 </tr>
                 `; 
             }
@@ -1680,11 +1680,11 @@
                             <table class="w-full text-left border-collapse whitespace-nowrap">
                                 <thead>
                                     <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm sticky top-0 shadow-sm z-10">
+                                        <th scope="col" class="px-3 py-2 font-semibold">Ações</th>
                                         <th scope="col" class="px-3 py-2 font-semibold">Ferramenta</th>
                                         <th scope="col" class="px-3 py-2 font-semibold">Marca</th>
                                         <th scope="col" class="px-3 py-2 font-semibold text-center">Total Empresa</th>
                                         <th scope="col" class="px-3 py-2 font-semibold text-center">Na Base</th>
-                                        <th scope="col" class="px-3 py-2 font-semibold text-right">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>${trs || `<tr><td colspan="5" class="p-6 text-center text-slate-400">Nenhuma ferramenta.</td></tr>`}</tbody>
@@ -1793,11 +1793,11 @@
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
                                 <th scope="col" class="px-3 py-2 w-10 text-center"><input type="checkbox" aria-label="Selecionar todos" onclick="window.toggleSelectAll(this, 'reports')"></th>
+                                <th scope="col" class="px-3 py-2 font-semibold">Ações</th>
                                 <th scope="col" class="px-3 py-2 font-semibold">Data</th>
                                 <th scope="col" class="px-3 py-2 font-semibold">CEI</th>
-                                <th scope="col" class="px-3 py-2 font-semibold">Técnico</th>
+                                <th scope="col" class="px-3 py-2 font-semibold text-center">Técnico</th>
                                 <th scope="col" class="px-3 py-2 font-semibold text-center">Equipe</th>
-                                <th scope="col" class="px-3 py-2 font-semibold text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tableBodyReports"></tbody>
@@ -1814,12 +1814,12 @@
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
                                 <th scope="col" class="px-3 py-2 w-10 text-center"><input type="checkbox" aria-label="Selecionar todos" onclick="window.toggleSelectAll(this, 'quotes')"></th>
+                                <th scope="col" class="px-3 py-2 font-semibold">Ações</th>
                                 <th scope="col" class="px-3 py-2 font-semibold">Data</th>
                                 <th scope="col" class="px-3 py-2 font-semibold">CEI</th>
-                                <th scope="col" class="px-3 py-2 font-semibold">Total Orçado</th>
+                                <th scope="col" class="px-3 py-2 font-semibold text-center">Total Orçado</th>
                                 <th scope="col" class="px-3 py-2 font-semibold text-center">Status</th>
                                 <th scope="col" class="px-3 py-2 font-semibold text-center">Equipe</th>
-                                <th scope="col" class="px-3 py-2 font-semibold text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tableBodyQuotes"></tbody>
@@ -1836,11 +1836,11 @@
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm">
                                 <th scope="col" class="px-3 py-2 w-10 text-center"><input type="checkbox" aria-label="Selecionar todos" onclick="window.toggleSelectAll(this, 'thirdParty')"></th>
+                                <th scope="col" class="px-3 py-2 font-semibold">Ações</th>
                                 <th scope="col" class="px-3 py-2 font-semibold">Data</th>
                                 <th scope="col" class="px-3 py-2 font-semibold">CEI</th>
-                                <th scope="col" class="px-3 py-2 font-semibold">Empresa</th>
+                                <th scope="col" class="px-3 py-2 font-semibold text-center">Empresa</th>
                                 <th scope="col" class="px-3 py-2 font-semibold text-center">Equipe</th>
-                                <th scope="col" class="px-3 py-2 font-semibold text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tableBodyThirdParty"></tbody>
@@ -2106,7 +2106,7 @@
                 </div>
                 <div class="overflow-x-auto flex-grow">
                     <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
-                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th><th scope="col" class="p-3 font-semibold text-right">Ações</th></tr></thead>
+                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Ações</th><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th></tr></thead>
                         <tbody id="empHistoryReports"></tbody>
                     </table>
                 </div>
@@ -2118,7 +2118,7 @@
                 </div>
                 <div class="overflow-x-auto flex-grow">
                     <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
-                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th><th scope="col" class="p-3 font-semibold text-right">Ações</th></tr></thead>
+                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Ações</th><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th></tr></thead>
                         <tbody id="empHistoryQuotes"></tbody>
                     </table>
                 </div>
@@ -2130,7 +2130,7 @@
                 </div>
                 <div class="overflow-x-auto flex-grow">
                     <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
-                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th><th scope="col" class="p-3 font-semibold text-right">Ações</th></tr></thead>
+                        <thead><tr class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"><th scope="col" class="p-3 font-semibold">Ações</th><th scope="col" class="p-3 font-semibold">Data</th><th scope="col" class="p-3 font-semibold">CEI</th></tr></thead>
                         <tbody id="empHistoryThirdParty"></tbody>
                     </table>
                 </div>
@@ -2161,19 +2161,18 @@
                     
                     let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Na Fila" aria-hidden="true"></i>' : '';
                     
-                    // CORREÇÃO: Busca o nome correto da CEI no banco local usando o ID
                     let ceiObj = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
                     let ceiNameDisplay = ceiObj ? window.escapeHtml(ceiObj.name) : window.escapeHtml(item.cei || item.ceiId || '');
                     
                     html += `
                     <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                        <td class="p-3">${badgeTg}${window.formatDateBR(item.date)}</td>
-                        <td class="p-3 font-medium">${ceiNameDisplay}${statusBadge}</td>
-                        <td class="p-3 text-right whitespace-nowrap">
+                        <td class="p-3 text-left whitespace-nowrap w-32">
                             <button type="button" aria-label="Ver" onclick="window.viewRecord('${type}', '${item.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition mr-1 hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i></button>
                             <button type="button" aria-label="Editar" onclick="window.editFuncRecord('${type}', '${item.id}')" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded transition mr-1 hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i></button>
                             <button type="button" aria-label="Excluir" onclick="window.deleteFuncRecord('${type}', '${item.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded transition hover:bg-red-100"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </td>
+                        <td class="p-3">${badgeTg}${window.formatDateBR(item.date)}</td>
+                        <td class="p-3 font-medium">${ceiNameDisplay}${statusBadge}</td>
                     </tr>`;
                 }
                 return html;
@@ -2701,14 +2700,15 @@
 
                 html += '<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">' +
                     '<td class="px-3 py-2 text-center w-10"><input type="checkbox" class="row-checkbox" value="' + item.id + '"></td>' +
-                    '<td class="px-3 py-2 text-sm whitespace-nowrap">' + window.formatDateBR(item.date) + '</td>' +
-                    '<td class="px-3 py-2 font-medium w-full">' + window.escapeHtml(ceiName) + '</td>' +
-                    extraCols +
-                    '<td class="px-3 py-2 text-right space-x-2 whitespace-nowrap">' +
+                    '<td class="px-3 py-2 text-left space-x-2 whitespace-nowrap w-32">' +
                         '<button type="button" onclick="window.viewRecord(\'' + type + '\', \'' + item.id + '\')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-eye"></i></button>' +
                         '<button type="button" onclick="window.editFuncRecord(\'' + type + '\', \'' + item.id + '\')" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded transition"><i class="fas fa-edit"></i></button>' +
                         '<button type="button" onclick="window.deleteFuncRecord(\'' + type + '\', \'' + item.id + '\')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash"></i></button>' +
-                    '</td></tr>';
+                    '</td>' +
+                    '<td class="px-3 py-2 text-sm whitespace-nowrap">' + window.formatDateBR(item.date) + '</td>' +
+                    '<td class="px-3 py-2 font-medium w-full">' + window.escapeHtml(ceiName) + '</td>' +
+                    extraCols +
+                '</tr>';
             });
             tableBody.innerHTML = html;
         };
