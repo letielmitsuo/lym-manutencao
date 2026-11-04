@@ -1457,47 +1457,6 @@
                 } 
             } catch(e){ console.error("Chart Error", e); } 
         };
-                
-                if(document.getElementById('chartMonths')) { 
-                    const monthsMap = {}; 
-                    const addMonth = function(dateStr, type) { 
-                        if(!dateStr) return; 
-                        const ym = dateStr.substring(0, 7); 
-                        if(!monthsMap[ym]) monthsMap[ym] = {rep: 0, quo: 0}; 
-                        monthsMap[ym][type]++; 
-                    }; 
-                    
-                    window.localData.reports.forEach(function(r) { addMonth(r.date, 'rep'); }); 
-                    window.localData.quotes.forEach(function(r) { addMonth(r.date, 'quo'); }); 
-                    
-                    const sortedMonths = Object.keys(monthsMap).sort(); 
-                    const repData = sortedMonths.map(function(m) { return monthsMap[m].rep; }); 
-                    const quoData = sortedMonths.map(function(m) { return monthsMap[m].quo; }); 
-                    
-                    if(window.lymCharts.months) window.lymCharts.months.destroy(); 
-                    
-                    window.lymCharts.months = new Chart(document.getElementById('chartMonths'), { 
-                        type: 'line', 
-                        data: { 
-                            labels: sortedMonths.map(function(m) { return m.split('-').reverse().join('/'); }), 
-                            datasets: [
-                                { label: 'Serviços', data: repData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }, 
-                                { label: 'Orçamentos', data: quoData, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.2)', fill: true, tension: 0.3 }
-                            ] 
-                        }, 
-                        options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false, 
-                            scales: { 
-                                x: { ticks: { color: fontColor, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }, 
-                                y: { ticks: { color: fontColor, stepSize: 1, font:{size:10} }, grid: { color: isDark ? '#334155' : '#e2e8f0' } } 
-                            }, 
-                            plugins: { legend: { position: 'bottom', labels: { color: fontColor, font:{size:10} } } } 
-                        } 
-                    }); 
-                } 
-            } catch(e){ console.error("Chart Error", e); } 
-        };
 
         window.renderAdminCeis = function() { 
             let sortedCeis = window.safeSort(window.localData.ceis, function(a,b) {
