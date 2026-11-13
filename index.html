@@ -1025,14 +1025,13 @@
                     
                     const contId = window.activeTab === 'func-reports' ? 'materialsContainer' : 'quoMaterialsContainer';
                     const contElement = document.getElementById(contId);
-                    
                     if(contElement) {
                         contElement.oninput = function(e) {
                             if(e.target.classList.contains('mat-name') && e.target.hasAttribute('list')) {
                                 const val = e.target.value; 
                                 const found = window.localData.catalog.find(function(c) { 
-                                    let cName = c.name ? String(c.name).toLowerCase() : "";
-                                    let vName = val ? String(val).toLowerCase() : "";
+                                    let cName = c.name ? String(c.name).trim().toLowerCase() : "";
+                                    let vName = val ? String(val).trim().toLowerCase() : "";
                                     return cName === vName; 
                                 });
                                 
@@ -1040,10 +1039,13 @@
                                     const p = e.target.closest('[id^="mat_"]'); 
                                     if(p) { 
                                         const bEl = p.querySelector('.mat-brand'); 
-                                        if(bEl) bEl.value = found.brand || ""; 
+                                        if(bEl && !bEl.value) bEl.value = found.brand || ""; 
                                         
                                         const pEl = p.querySelector('.mat-price'); 
-                                        if(pEl) pEl.value = found.price || ""; 
+                                        // Puxa o valor exato cadastrado no banco de dados
+                                        if(pEl && (!pEl.value || pEl.value === "")) { 
+                                            pEl.value = found.price || ""; 
+                                        } 
                                         
                                         window.saveDraft(window.activeTab.split('-')[1]); 
                                     } 
@@ -1187,7 +1189,10 @@
                     if(row) { 
                         const nEl = row.querySelector('.mat-name'); if(nEl) nEl.value = found.name; 
                         const bEl = row.querySelector('.mat-brand'); if(bEl) bEl.value = found.brand || ""; 
-                        const pEl = row.querySelector('.mat-price'); if(pEl) pEl.value = found.price || ""; 
+                        const pEl = row.querySelector('.mat-price'); 
+                        
+                        // Puxa o valor exato cadastrado no banco de dados
+                        if(pEl) pEl.value = found.price || "";
                         
                         if(window.activeTab) {
                             let tb = window.activeTab.split('-')[1];
