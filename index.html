@@ -1026,7 +1026,7 @@
                     const contId = window.activeTab === 'func-reports' ? 'materialsContainer' : 'quoMaterialsContainer';
                     const contElement = document.getElementById(contId);
                     if(contElement) {
-                        contElement.oninput = function(e) {
+                        const atualizarValores = function(e) {
                             if(e.target.classList.contains('mat-name') && e.target.hasAttribute('list')) {
                                 const val = e.target.value; 
                                 const found = window.localData.catalog.find(function(c) { 
@@ -1039,19 +1039,22 @@
                                     const p = e.target.closest('[id^="mat_"]'); 
                                     if(p) { 
                                         const bEl = p.querySelector('.mat-brand'); 
-                                        if(bEl && !bEl.value) bEl.value = found.brand || ""; 
+                                        // Força a atualização da marca sempre que encontrar o item
+                                        if(bEl) bEl.value = found.brand || ""; 
                                         
                                         const pEl = p.querySelector('.mat-price'); 
-                                        // Puxa o valor exato cadastrado no banco de dados
-                                        if(pEl && (!pEl.value || pEl.value === "")) { 
-                                            pEl.value = found.price || ""; 
-                                        } 
+                                        // Força a atualização do preço puxando o valor exato
+                                        if(pEl) pEl.value = found.price !== undefined ? found.price : ""; 
                                         
-                                        window.saveDraft(window.activeTab.split('-')[1]); 
+                                        if(window.activeTab) window.saveDraft(window.activeTab.split('-')[1]); 
                                     } 
                                 }
                             }
                         };
+                        
+                        // Adiciona os dois eventos para garantir que a seleção na lista funciona em qualquer ecrã
+                        contElement.oninput = atualizarValores;
+                        contElement.onchange = atualizarValores;
                     }
                 }
             } catch (err) {
@@ -1192,13 +1195,13 @@
                         const pEl = row.querySelector('.mat-price'); 
                         
                         // Puxa o valor exato cadastrado no banco de dados
-                        if(pEl) pEl.value = found.price || "";
+                        if(pEl) pEl.value = found.price !== undefined ? found.price : ""; 
                         
                         if(window.activeTab) {
                             let tb = window.activeTab.split('-')[1];
                             if(tb) window.saveDraft(tb);
                         } 
-                        window.showToast("Produto adicionado!"); 
+                        window.showToast("Produto adicionado com sucesso!"); 
                     } 
                 } else { window.showToast("Produto não consta no banco.", "error"); } 
             }); 
