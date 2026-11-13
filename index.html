@@ -2207,20 +2207,27 @@
                 for(let i=0; i<items.length; i++) {
                     let item = items[i];
                     let statusBadge = "";
+                    let convertBtn = ""; // Novo botão de conversão
+                    
                     if (type === 'quotes') {
                         let s = item.status || "Pendente"; 
                         let badgeClass = s === 'Aprovado' ? 'bg-green-600 text-white' : (s === 'Rejeitado' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'); 
                         statusBadge = '<span class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold ' + badgeClass + '">' + window.escapeHtml(s) + '</span>';
+                        
+                        // Se for orçamento aprovado, mostra o botão
+                        if (s === 'Aprovado') {
+                            convertBtn = `<button type="button" aria-label="Gerar Serviço" onclick="window.convertQuoteToReport('${item.id}')" class="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded transition mr-1 hover:bg-emerald-100" title="Transformar em Serviço Realizado"><i class="fas fa-share" aria-hidden="true"></i></button>`;
+                        }
                     }
                     
                     let badgeTg = item.pendingTelegram ? '<i class="fas fa-wifi text-amber-500 mr-2" title="Na Fila" aria-hidden="true"></i>' : '';
-                    
                     let ceiObj = window.localData.ceis.find(function(c) { return String(c.id) === String(item.ceiId); });
                     let ceiNameDisplay = ceiObj ? window.escapeHtml(ceiObj.name) : window.escapeHtml(item.cei || item.ceiId || '');
                     
                     html += `
                     <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                        <td class="p-3 text-left whitespace-nowrap w-32">
+                        <td class="p-3 text-left whitespace-nowrap w-32 sm:w-40">
+                            ${convertBtn}
                             <button type="button" aria-label="Ver" onclick="window.viewRecord('${type}', '${item.id}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition mr-1 hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i></button>
                             <button type="button" aria-label="Editar" onclick="window.editFuncRecord('${type}', '${item.id}')" class="text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded transition mr-1 hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i></button>
                             <button type="button" aria-label="Excluir" onclick="window.deleteFuncRecord('${type}', '${item.id}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded transition hover:bg-red-100"><i class="fas fa-trash" aria-hidden="true"></i></button>
@@ -2232,16 +2239,11 @@
                 return html;
             };
 
-            const rBody = document.getElementById('empHistoryReports'); 
-            if(rBody) rBody.innerHTML = genRows('reports');
-            
-            const qBody = document.getElementById('empHistoryQuotes'); 
-            if(qBody) qBody.innerHTML = genRows('quotes');
-            
-            const tBody = document.getElementById('empHistoryThirdParty'); 
-            if(tBody) tBody.innerHTML = genRows('thirdParty');
+            const rBody = document.getElementById('empHistoryReports'); if(rBody) rBody.innerHTML = genRows('reports');
+            const qBody = document.getElementById('empHistoryQuotes'); if(qBody) qBody.innerHTML = genRows('quotes');
+            const tBody = document.getElementById('empHistoryThirdParty'); if(tBody) tBody.innerHTML = genRows('thirdParty');
         };
-
+        
         window.renderFuncReportForm = function() {
             return `
             <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-4 sm:p-5 mb-6 animate-fade-in">
@@ -2733,6 +2735,7 @@
                 const ceiName = cei ? cei.name : item.ceiId;
                 
                 let extraCols = "";
+                let convertBtn = ""; // Novo botão para Admin
                 let teamBadge = item.userRole === 'func_cftv' 
                     ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-blue-600">CFTV</span>'
                     : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-slate-600">Geral</span>';
@@ -2744,6 +2747,10 @@
                     let badgeColor = item.status === 'Aprovado' ? 'bg-green-600' : (item.status === 'Rejeitado' ? 'bg-red-600' : 'bg-amber-500');
                     let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white ' + badgeColor + '">' + (item.status || 'Pendente') + '</span>';
                     
+                    if (item.status === 'Aprovado') {
+                        convertBtn = '<button type="button" onclick="window.convertQuoteToReport(\'' + item.id + '\')" class="text-emerald-600 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 p-1.5 rounded transition mr-1" title="Transformar em Serviço Realizado"><i class="fas fa-share"></i></button>';
+                    }
+                    
                     extraCols = '<td class="px-3 py-2 text-sm text-center">' + window.formatMoney(item.totalPrice || 0) + '</td>' +
                                 '<td class="px-3 py-2 text-sm text-center">' + statusBadge + '</td>' +
                                 '<td class="px-3 py-2 text-sm text-center">' + teamBadge + '</td>';
@@ -2754,7 +2761,8 @@
 
                 html += '<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">' +
                     '<td class="px-3 py-2 text-center w-10"><input type="checkbox" class="row-checkbox" value="' + item.id + '"></td>' +
-                    '<td class="px-3 py-2 text-left space-x-2 whitespace-nowrap w-32">' +
+                    '<td class="px-3 py-2 text-left space-x-1 whitespace-nowrap w-32 sm:w-40">' +
+                        convertBtn +
                         '<button type="button" onclick="window.viewRecord(\'' + type + '\', \'' + item.id + '\')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded transition"><i class="fas fa-eye"></i></button>' +
                         '<button type="button" onclick="window.editFuncRecord(\'' + type + '\', \'' + item.id + '\')" class="text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-900/30 p-1.5 rounded transition"><i class="fas fa-edit"></i></button>' +
                         '<button type="button" onclick="window.deleteFuncRecord(\'' + type + '\', \'' + item.id + '\')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded transition"><i class="fas fa-trash"></i></button>' +
@@ -3059,6 +3067,58 @@
             }
         };
 
+        window.convertQuoteToReport = function(id) {
+            const quote = window.localData.quotes.find(function(q) { return String(q.id) === String(id); });
+            if(!quote) return window.showToast("Orçamento não encontrado.", "error");
+
+            if (quote.status !== 'Aprovado') return window.showToast("Apenas orçamentos aprovados podem virar serviço.", "error");
+
+            // Muda para a aba de Registrar Manutenção
+            window.activeTab = 'func-reports';
+            window.editingItemId = null; // Garante que será salvo como um NOVO serviço, e não substituirá o orçamento
+            window.renderActiveTab();
+
+            // Aguarda a tela renderizar e preenche os dados
+            setTimeout(function() {
+                const elCei = document.getElementById('ceiSelectRep');
+                if(elCei) elCei.value = quote.ceiId || "";
+
+                const elWork = document.getElementById('workDoneRep');
+                if(elWork) elWork.value = quote.workDone || "";
+
+                const elObs = document.getElementById('obsRep');
+                if(elObs) {
+                    let quoteRef = "Originado do Orçamento #" + String(quote.id).slice(-6);
+                    elObs.value = quote.obs ? (quoteRef + "\n" + quote.obs) : quoteRef;
+                }
+
+                // Transfere os materiais
+                const matContainer = document.getElementById('materialsContainer');
+                if(matContainer) {
+                    matContainer.innerHTML = '';
+                    window.materialCount = 0;
+
+                    if(quote.materials && Array.isArray(quote.materials) && quote.materials.length > 0) {
+                        quote.materials.forEach(function(mat) {
+                            window.addMaterialRow('materialsContainer', false);
+                            const row = matContainer.lastElementChild;
+                            if(row) {
+                                const nEl = row.querySelector('.mat-name'); if(nEl) nEl.value = mat.name || '';
+                                const bEl = row.querySelector('.mat-brand'); if(bEl) bEl.value = mat.brand || '';
+                                const qEl = row.querySelector('.mat-qtd'); if(qEl) qEl.value = mat.qtd || 1;
+                                const pEl = row.querySelector('.mat-price'); if(pEl) pEl.value = mat.price || '';
+                            }
+                        });
+                    } else {
+                        matContainer.innerHTML = '<p class="text-xs text-slate-400 italic text-center">Nenhum material listado.</p>';
+                    }
+                }
+                
+                window.showToast("Orçamento copiado! Preencha a data e hora para concluir.");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 150);
+        };
+        
         window.saveRecord = async function(e, type) {
             e.preventDefault();
             
